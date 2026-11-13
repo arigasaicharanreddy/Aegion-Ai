@@ -1,0 +1,99 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --font-display: 'Manrope', system-ui, sans-serif;
+    --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+    /* Default Aegion AI Platform Dark Obsidian Glass Tokens */
+    --aegion-platform-bg: #09090C;
+    --aegion-platform-surface: rgba(20, 21, 27, 0.78);
+    --aegion-platform-surface-solid: #14151B;
+    --aegion-platform-cement: #1E2029;
+    --aegion-platform-border: rgba(255, 255, 255, 0.08);
+    --aegion-platform-border-strong: rgba(255, 255, 255, 0.14);
+    --aegion-platform-text: #F3F4F6;
+    --aegion-platform-text-muted: #9CA3AF;
+    --aegion-platform-accent: #7C3AED;
+    --aegion-platform-accent-soft: rgba(124, 58, 237, 0.14);
+
+    /* Generated Preview App Dynamic Theme Tokens (default: Aurora HR / Cloud Midnight) */
+    --preview-bg: #0B0D1A;
+    --preview-surface: #171B30;
+    --preview-surface-elevated: #1E2440;
+    --preview-border: rgba(255, 255, 255, 0.1);
+    --preview-text: #F8FAFC;
+    --preview-text-muted: #94A3B8;
+    --preview-accent: #818CF8;
+    --preview-accent-fg: #09090C;
+    --preview-shadow: 0 12px 32px rgba(0, 0, 0, 0.32);
+    --preview-glass-opacity: 0.76;
+    --preview-blur: 14px;
+    --preview-radius: 12px;
+    --preview-font-display: 'Manrope', system-ui, sans-serif;
+    --preview-font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+
+  html {
+    font-family: var(--font-body);
+    background-color: var(--aegion-platform-bg);
+    color: var(--aegion-platform-text);
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+  }
+
+  code, pre, .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+.aegion-glass {
+  background: var(--aegion-platform-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--aegion-platform-border);
+  box-shadow: 0 12px 36px -12px rgba(0, 0, 0, 0.55);
+}
+
+.aegion-glass-subtle {
+  background: rgba(24, 25, 32, 0.58);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--aegion-platform-border);
+}
+
+.preview-glass-surface {
+  background-color: color-mix(in srgb, var(--preview-surface) calc(var(--preview-glass-opacity) * 100%), transparent);
+  backdrop-filter: blur(var(--preview-blur));
+  -webkit-backdrop-filter: blur(var(--preview-blur));
+  border: 1px solid var(--preview-border);
+  box-shadow: var(--preview-shadow);
+  border-radius: var(--preview-radius);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom subtle scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.24);
+}

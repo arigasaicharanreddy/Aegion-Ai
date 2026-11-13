@@ -1,0 +1,685 @@
+{
+  "users": [
+    {
+      "id": "usr-super-admin-charan",
+      "name": "Charan Ariga",
+      "email": "arigasaicharan@gmail.com",
+      "role": "super_admin",
+      "status": "active",
+      "passwordHash": "scrypt$1cacf4d431eae40f43b0ffaa2680c700$233f63fcdee3341a19a5a1195212bbadba67b7ce24dc583d9475089dc6fb2d51164d5e411d9035da90ab12caf7d09aced182d6737007377ac8a131fa1c305efb",
+      "mustChangePassword": true,
+      "mfaEnabled": false,
+      "authProvider": "password",
+      "workspaceId": "ws-aegion-core",
+      "workspaceName": "Aegion Core Studio",
+      "createdAt": "2026-11-13T01:08:34.558Z",
+      "updatedAt": "2026-11-13T01:08:34.558Z",
+      "lastLoginAt": "2026-11-13T01:18:27.474Z"
+    },
+    {
+      "id": "usr-meera-approved",
+      "name": "Meera Nair",
+      "email": "meera.nair@vanguard.io",
+      "role": "builder",
+      "status": "active",
+      "mustChangePassword": false,
+      "mfaEnabled": false,
+      "authProvider": "google",
+      "workspaceId": "ws-vanguard",
+      "workspaceName": "Vanguard People Ops",
+      "createdAt": "2026-11-08T09:15:00.000Z",
+      "updatedAt": "2026-11-09T11:30:00.000Z",
+      "lastLoginAt": "2026-11-13T01:17:50.410Z",
+      "registrationId": "REG-2026-1001"
+    },
+    {
+      "id": "usr-1794532707484",
+      "name": "Dev Test User",
+      "email": "devtest+1794532707369@example.com",
+      "role": "builder",
+      "status": "approved_pending_activation",
+      "mustChangePassword": false,
+      "mfaEnabled": false,
+      "authProvider": "password",
+      "workspaceId": "ws-reg-2026-4144",
+      "workspaceName": "Aegion Dev Co",
+      "registrationId": "REG-2026-4144",
+      "createdAt": "2026-11-13T01:18:27.484Z",
+      "updatedAt": "2026-11-13T01:18:27.484Z"
+    }
+  ],
+  "sessions": [
+    {
+      "tokenHash": "30cda4e380e7a3be6cd7dc112de5e43776616cbe6348db34c5ed12c0896a1ced",
+      "userId": "usr-meera-approved",
+      "email": "meera.nair@vanguard.io",
+      "role": "builder",
+      "isDevPreview": true,
+      "createdAt": "2026-11-13T01:17:50.489Z",
+      "expiresAt": "2026-11-13T13:17:50.489Z"
+    },
+    {
+      "tokenHash": "bee5f7c3822f880a3ef4b86da366890b2e8c379be3eed520591e969fc2123b60",
+      "userId": "usr-super-admin-charan",
+      "email": "arigasaicharan@gmail.com",
+      "role": "super_admin",
+      "isDevPreview": true,
+      "createdAt": "2026-11-13T01:17:50.996Z",
+      "expiresAt": "2026-11-13T13:17:50.996Z"
+    },
+    {
+      "tokenHash": "3d783e0a98db3626ce9a9b52252e539176709be47c148db02d4861405cb1d5f6",
+      "userId": "usr-super-admin-charan",
+      "email": "arigasaicharan@gmail.com",
+      "role": "super_admin",
+      "isDevPreview": true,
+      "createdAt": "2026-11-13T01:18:27.476Z",
+      "expiresAt": "2026-11-13T13:18:27.476Z"
+    }
+  ],
+  "oneTimeTokens": [
+    {
+      "tokenHash": "f115ed532508d85ced4fae2c3b53d933cdbd69598363b7d7568acffea36c1b72",
+      "userId": "usr-1794532707484",
+      "email": "devtest+1794532707369@example.com",
+      "registrationId": "REG-2026-4144",
+      "purpose": "activation",
+      "expiresAt": "2026-11-14T01:18:27.484Z"
+    }
+  ],
+  "registrations": [
+    {
+      "id": "REG-2026-4144",
+      "submissionDate": "2026-11-13T01:18:27.448Z",
+      "authProvider": "email",
+      "fullName": "Dev Test User",
+      "email": "devtest+1794532707369@example.com",
+      "phone": "+1 555 010 9999",
+      "country": "United States",
+      "companyName": "Aegion Dev Co",
+      "companyWebsite": "https://example.com",
+      "jobTitle": "Staff Engineer",
+      "applicationTypes": [
+        "SaaS Application"
+      ],
+      "projectName": "Dev Preview Portal",
+      "projectDescription": "Testing non-blocking free dev registration submission flow.",
+      "businessIndustry": "Software",
+      "expectedUsers": "100 - 500",
+      "requiredModules": [
+        "RBAC Auth"
+      ],
+      "preferredBackendLanguage": "Python",
+      "preferredFrontendFramework": "React",
+      "preferredDatabase": "PostgreSQL",
+      "expectedComplexity": "Moderate",
+      "preferredDeployment": "Docker / Cloud Run",
+      "themeOption": "Yes, use Aegion Glassmorphism themes",
+      "themeModePreference": "dark",
+      "selectedThemeId": "hrms-aurora-hr",
+      "customAccentColor": "#6366F1",
+      "typographyPreference": "Inter",
+      "projectDeadline": "Q3 2026",
+      "additionalFeatures": "Audit trail",
+      "integrationRequirements": "None",
+      "additionalComments": "Free dev smoke test",
+      "acceptedTerms": true,
+      "acceptedPrivacy": true,
+      "consentRegistrationNotifications": true,
+      "consentMarketing": false,
+      "status": "Approved",
+      "sheetsSynced": false,
+      "approvalDate": "2026-11-13T01:18:27.484Z",
+      "approvedBy": "arigasaicharan@gmail.com",
+      "adminComments": "Verified non-blocking free dev approval"
+    },
+    {
+      "id": "REG-2026-9337",
+      "submissionDate": "2026-11-13T01:18:11.748Z",
+      "authProvider": "email",
+      "fullName": "Dev Test User",
+      "email": "devtest+1794532691674@example.com",
+      "phone": "+1 555 010 9999",
+      "country": "United States",
+      "companyName": "Aegion Dev Co",
+      "companyWebsite": "https://example.com",
+      "jobTitle": "Staff Engineer",
+      "applicationTypes": [
+        "SaaS Application"
+      ],
+      "projectName": "Dev Preview Portal",
+      "projectDescription": "Testing non-blocking free dev registration submission flow.",
+      "businessIndustry": "Software",
+      "expectedUsers": "100 - 500",
+      "requiredModules": [
+        "RBAC Auth"
+      ],
+      "preferredBackendLanguage": "Python",
+      "preferredFrontendFramework": "React",
+      "preferredDatabase": "PostgreSQL",
+      "expectedComplexity": "Moderate",
+      "preferredDeployment": "Docker / Cloud Run",
+      "themeOption": "Yes, use Aegion Glassmorphism themes",
+      "themeModePreference": "dark",
+      "selectedThemeId": "hrms-aurora-hr",
+      "customAccentColor": "#6366F1",
+      "typographyPreference": "Inter",
+      "projectDeadline": "Q3 2026",
+      "additionalFeatures": "Audit trail",
+      "integrationRequirements": "None",
+      "additionalComments": "Free dev smoke test",
+      "acceptedTerms": true,
+      "acceptedPrivacy": true,
+      "consentRegistrationNotifications": true,
+      "consentMarketing": false,
+      "status": "Pending Approval",
+      "sheetsSynced": false
+    },
+    {
+      "id": "REG-2026-1001",
+      "submissionDate": "2026-11-08T09:15:00.000Z",
+      "authProvider": "google",
+      "fullName": "Meera Nair",
+      "email": "meera.nair@vanguard.io",
+      "phone": "+91 98450 22190",
+      "country": "India",
+      "companyName": "Vanguard People Systems",
+      "companyWebsite": "https://vanguard.io",
+      "jobTitle": "VP of Engineering",
+      "applicationTypes": [
+        "HRMS",
+        "SaaS Applications"
+      ],
+      "projectName": "Vanguard People HRMS",
+      "projectDescription": "Multi-branch employee attendance, payroll ledger, and leave workflow suite.",
+      "businessIndustry": "Enterprise Software",
+      "expectedUsers": "500 - 2,500",
+      "requiredModules": [
+        "Employee Directory",
+        "Payroll Engine",
+        "Leave & Attendance",
+        "RBAC"
+      ],
+      "preferredBackendLanguage": "Java",
+      "preferredFrontendFramework": "React + TypeScript",
+      "preferredDatabase": "PostgreSQL",
+      "expectedComplexity": "Enterprise Multi-Tenant",
+      "preferredDeployment": "Google Cloud Run",
+      "themeOption": "Yes, use Aegion Glassmorphism themes",
+      "themeModePreference": "dark",
+      "selectedThemeId": "hrms-aurora-hr",
+      "customAccentColor": "#818CF8",
+      "typographyPreference": "Manrope + Plus Jakarta Sans",
+      "projectDeadline": "2026-12-20",
+      "additionalFeatures": "SSO integration with corporate Google Workspace.",
+      "integrationRequirements": "Slack webhooks & PostgreSQL read replicas.",
+      "additionalComments": "Need Java Spring Boot 3.4 scaffold export.",
+      "acceptedTerms": true,
+      "acceptedPrivacy": true,
+      "consentRegistrationNotifications": true,
+      "consentMarketing": false,
+      "status": "Approved",
+      "approvalDate": "2026-11-08T12:40:00.000Z",
+      "approvedBy": "arigasaicharan@gmail.com",
+      "adminComments": "Approved for Enterprise HRMS workspace onboarding.",
+      "sheetsSynced": false
+    },
+    {
+      "id": "REG-2026-1002",
+      "submissionDate": "2026-11-11T16:05:00.000Z",
+      "authProvider": "email",
+      "fullName": "Rohan Kulkarni",
+      "email": "rohan@medipulse.health",
+      "phone": "+1 415 890 3412",
+      "country": "United States",
+      "companyName": "MediPulse Pharmacy Network",
+      "companyWebsite": "https://medipulse.health",
+      "jobTitle": "Product Director",
+      "applicationTypes": [
+        "Healthcare Store Management",
+        "Multi-Store Management"
+      ],
+      "projectName": "MediPulse Rx Hub",
+      "projectDescription": "Clinical inventory batch tracking, expiry alerts, and branch POS ledger.",
+      "businessIndustry": "Healthcare & Pharmacy",
+      "expectedUsers": "150 - 500",
+      "requiredModules": [
+        "Batch & Expiry",
+        "Prescription Compliance",
+        "Store Transfers",
+        "POS Billing"
+      ],
+      "preferredBackendLanguage": "Python",
+      "preferredFrontendFramework": "React + TypeScript",
+      "preferredDatabase": "PostgreSQL",
+      "expectedComplexity": "Enterprise Multi-Tenant",
+      "preferredDeployment": "AWS ECS / Docker",
+      "themeOption": "Yes, use Aegion Glassmorphism themes",
+      "themeModePreference": "light",
+      "selectedThemeId": "hc-aqua-clinical",
+      "customAccentColor": "#0EA5E9",
+      "typographyPreference": "Manrope + Plus Jakarta Sans",
+      "projectDeadline": "2027-01-15",
+      "additionalFeatures": "HIPAA audit export and barcode scanner hooks.",
+      "integrationRequirements": "HL7 FHIR gateway + Stripe billing.",
+      "additionalComments": "Awaiting architecture review.",
+      "acceptedTerms": true,
+      "acceptedPrivacy": true,
+      "consentRegistrationNotifications": true,
+      "consentMarketing": true,
+      "status": "Pending Approval",
+      "sheetsSynced": false
+    },
+    {
+      "id": "REG-2026-1003",
+      "submissionDate": "2026-11-12T07:30:00.000Z",
+      "authProvider": "email",
+      "fullName": "Elena Vance",
+      "email": "elena@nordicretail.eu",
+      "phone": "+46 70 441 8892",
+      "country": "Sweden",
+      "companyName": "Nordic Retail Collective",
+      "companyWebsite": "https://nordicretail.eu",
+      "jobTitle": "CTO",
+      "applicationTypes": [
+        "E-Commerce",
+        "Multi-Store Management"
+      ],
+      "projectName": "Nordic Omnichannel Storefront",
+      "projectDescription": "Headless storefront with warehouse inventory sync across 18 European boutiques.",
+      "businessIndustry": "Retail & E-Commerce",
+      "expectedUsers": "5,000+",
+      "requiredModules": [
+        "Catalog & Variants",
+        "Checkout & Tax",
+        "Warehouse Routing",
+        "Analytics"
+      ],
+      "preferredBackendLanguage": "Go",
+      "preferredFrontendFramework": "Next.js + TypeScript",
+      "preferredDatabase": "PostgreSQL",
+      "expectedComplexity": "Moderate",
+      "preferredDeployment": "Kubernetes",
+      "themeOption": "I want to customize my theme",
+      "themeModePreference": "dark",
+      "selectedThemeId": "ec-velvet-noir",
+      "customAccentColor": "#F59E0B",
+      "typographyPreference": "Manrope + JetBrains Mono",
+      "projectDeadline": "2027-02-01",
+      "additionalFeatures": "Multi-currency VAT calculation.",
+      "integrationRequirements": "Adyen payments + ERP webhook stream.",
+      "additionalComments": "Prefer Go Gin backend output.",
+      "acceptedTerms": true,
+      "acceptedPrivacy": true,
+      "consentRegistrationNotifications": true,
+      "consentMarketing": false,
+      "status": "Pending Approval",
+      "sheetsSynced": false
+    }
+  ],
+  "approvalHistory": [
+    {
+      "id": "APR-3473",
+      "registrationId": "REG-2026-4144",
+      "email": "devtest+1794532707369@example.com",
+      "previousStatus": "Pending Approval",
+      "newStatus": "Approved",
+      "action": "APPROVE",
+      "adminId": "arigasaicharan@gmail.com",
+      "timestamp": "2026-11-13T01:18:27.484Z",
+      "comments": "Verified non-blocking free dev approval"
+    },
+    {
+      "id": "APR-2816",
+      "registrationId": "REG-2026-4144",
+      "email": "devtest+1794532707369@example.com",
+      "previousStatus": "Submitted",
+      "newStatus": "Pending Approval",
+      "action": "SUBMIT",
+      "adminId": "system",
+      "timestamp": "2026-11-13T01:18:27.448Z",
+      "comments": "Customer registration submitted and queued for Super Admin review."
+    },
+    {
+      "id": "APR-1780",
+      "registrationId": "REG-2026-9337",
+      "email": "devtest+1794532691674@example.com",
+      "previousStatus": "Submitted",
+      "newStatus": "Pending Approval",
+      "action": "SUBMIT",
+      "adminId": "system",
+      "timestamp": "2026-11-13T01:18:11.748Z",
+      "comments": "Customer registration submitted and queued for Super Admin review."
+    },
+    {
+      "id": "APR-9001",
+      "registrationId": "REG-2026-1001",
+      "email": "meera.nair@vanguard.io",
+      "previousStatus": "Submitted",
+      "newStatus": "Pending Approval",
+      "action": "SUBMIT",
+      "adminId": "system",
+      "timestamp": "2026-11-08T09:15:00.000Z",
+      "comments": "Customer registration submitted via Google Sign-Up."
+    },
+    {
+      "id": "APR-9002",
+      "registrationId": "REG-2026-1001",
+      "email": "meera.nair@vanguard.io",
+      "previousStatus": "Pending Approval",
+      "newStatus": "Approved",
+      "action": "APPROVE",
+      "adminId": "arigasaicharan@gmail.com",
+      "timestamp": "2026-11-08T12:40:00.000Z",
+      "comments": "Approved for Enterprise HRMS workspace onboarding."
+    },
+    {
+      "id": "APR-9003",
+      "registrationId": "REG-2026-1002",
+      "email": "rohan@medipulse.health",
+      "previousStatus": "Submitted",
+      "newStatus": "Pending Approval",
+      "action": "SUBMIT",
+      "adminId": "system",
+      "timestamp": "2026-11-11T16:05:00.000Z",
+      "comments": "Multi-step registration submitted."
+    },
+    {
+      "id": "APR-9004",
+      "registrationId": "REG-2026-1003",
+      "email": "elena@nordicretail.eu",
+      "previousStatus": "Submitted",
+      "newStatus": "Pending Approval",
+      "action": "SUBMIT",
+      "adminId": "system",
+      "timestamp": "2026-11-12T07:30:00.000Z",
+      "comments": "Multi-step registration submitted."
+    }
+  ],
+  "notificationLogs": [
+    {
+      "registrationId": "REG-2026-4144",
+      "channel": "WhatsApp",
+      "recipient": "+1 555 010 9999",
+      "template": "Registration Approved",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "WhatsApp Business Cloud API credentials or phone number not configured.",
+      "id": "NTF-81205",
+      "sentTimestamp": "2026-11-13T01:18:27.486Z"
+    },
+    {
+      "registrationId": "REG-2026-4144",
+      "channel": "Email",
+      "recipient": "devtest+1794532707369@example.com",
+      "template": "Registration Approved",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "Email optional in free dev mode (connect Google OAuth or configure SMTP/Resend in production).",
+      "id": "NTF-51111",
+      "sentTimestamp": "2026-11-13T01:18:27.485Z"
+    },
+    {
+      "registrationId": "REG-2026-4144",
+      "channel": "WhatsApp",
+      "recipient": "+1 555 010 9999",
+      "template": "Registration Received",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "WhatsApp Business Cloud API credentials or phone number not configured.",
+      "id": "NTF-90451",
+      "sentTimestamp": "2026-11-13T01:18:27.451Z"
+    },
+    {
+      "registrationId": "REG-2026-4144",
+      "channel": "Email",
+      "recipient": "devtest+1794532707369@example.com",
+      "template": "Registration Received",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "Email optional in free dev mode (connect Google OAuth or configure SMTP/Resend in production).",
+      "id": "NTF-95225",
+      "sentTimestamp": "2026-11-13T01:18:27.450Z"
+    },
+    {
+      "registrationId": "REG-2026-4144",
+      "channel": "Email",
+      "recipient": "arigasaicharan@gmail.com",
+      "template": "New Registration Alert",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "Email optional in free dev mode (connect Google OAuth or configure SMTP/Resend in production).",
+      "id": "NTF-62430",
+      "sentTimestamp": "2026-11-13T01:18:27.449Z"
+    },
+    {
+      "registrationId": "REG-2026-4144",
+      "channel": "System",
+      "recipient": "arigasaicharan@gmail.com",
+      "template": "New Registration Alert",
+      "status": "Sent",
+      "id": "NTF-63587",
+      "sentTimestamp": "2026-11-13T01:18:27.449Z"
+    },
+    {
+      "registrationId": "REG-2026-9337",
+      "channel": "WhatsApp",
+      "recipient": "+1 555 010 9999",
+      "template": "Registration Received",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "WhatsApp Business Cloud API credentials or phone number not configured.",
+      "id": "NTF-12621",
+      "sentTimestamp": "2026-11-13T01:18:11.753Z"
+    },
+    {
+      "registrationId": "REG-2026-9337",
+      "channel": "Email",
+      "recipient": "devtest+1794532691674@example.com",
+      "template": "Registration Received",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "Email optional in free dev mode (connect Google OAuth or configure SMTP/Resend in production).",
+      "id": "NTF-59923",
+      "sentTimestamp": "2026-11-13T01:18:11.752Z"
+    },
+    {
+      "registrationId": "REG-2026-9337",
+      "channel": "Email",
+      "recipient": "arigasaicharan@gmail.com",
+      "template": "New Registration Alert",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "Email optional in free dev mode (connect Google OAuth or configure SMTP/Resend in production).",
+      "id": "NTF-79821",
+      "sentTimestamp": "2026-11-13T01:18:11.751Z"
+    },
+    {
+      "registrationId": "REG-2026-9337",
+      "channel": "System",
+      "recipient": "arigasaicharan@gmail.com",
+      "template": "New Registration Alert",
+      "status": "Sent",
+      "id": "NTF-66767",
+      "sentTimestamp": "2026-11-13T01:18:11.750Z"
+    },
+    {
+      "registrationId": "REG-2026-7462",
+      "channel": "WhatsApp",
+      "recipient": "+14155550101",
+      "template": "Registration Received",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "WhatsApp Business Cloud API credentials or phone number not configured.",
+      "id": "NTF-27019",
+      "sentTimestamp": "2026-11-13T01:08:38.463Z"
+    },
+    {
+      "registrationId": "REG-2026-7462",
+      "channel": "Email",
+      "recipient": "arigasaicharan@gmail.com",
+      "template": "New Registration Alert",
+      "status": "Queued",
+      "id": "NTF-91479",
+      "sentTimestamp": "2026-11-13T01:08:38.462Z"
+    },
+    {
+      "registrationId": "REG-2026-7462",
+      "channel": "System",
+      "recipient": "arigasaicharan@gmail.com",
+      "template": "New Registration Alert",
+      "status": "Sent",
+      "id": "NTF-87878",
+      "sentTimestamp": "2026-11-13T01:08:38.461Z"
+    },
+    {
+      "id": "NTF-5001",
+      "registrationId": "REG-2026-1001",
+      "channel": "Email",
+      "recipient": "meera.nair@vanguard.io",
+      "template": "Registration Approved",
+      "status": "Sent",
+      "sentTimestamp": "2026-11-08T12:40:05.000Z"
+    },
+    {
+      "id": "NTF-5002",
+      "registrationId": "REG-2026-1002",
+      "channel": "System",
+      "recipient": "arigasaicharan@gmail.com",
+      "template": "New Registration Alert",
+      "status": "Sent",
+      "sentTimestamp": "2026-11-11T16:05:02.000Z"
+    }
+  ],
+  "notificationConfig": {
+    "emailProvider": "Gmail API",
+    "senderEmail": "arigasaicharan@gmail.com",
+    "senderName": "Aegion AI Onboarding",
+    "emailEnabled": true,
+    "whatsappEnabled": false,
+    "whatsappBusinessAccountId": "",
+    "whatsappPhoneNumberId": "",
+    "whatsappAccessTokenConfigured": false,
+    "whatsappWebhookVerifyTokenConfigured": false,
+    "notifyAdminOnNewRegistration": true,
+    "notifyUserOnReceived": true,
+    "notifyUserOnApproval": true,
+    "sheetsSpreadsheetId": "",
+    "sheetsSpreadsheetUrl": ""
+  },
+  "whatsappSecrets": {
+    "accessToken": "",
+    "webhookVerifyToken": "",
+    "appSecret": ""
+  },
+  "emailSecrets": {
+    "smtpHost": "",
+    "smtpPort": 587,
+    "smtpUser": "",
+    "smtpPass": "",
+    "resendApiKey": "",
+    "sendgridApiKey": ""
+  },
+  "auditLogs": [
+    {
+      "id": "AUD-7524",
+      "timestamp": "2026-11-13T01:18:27.484Z",
+      "actorEmail": "arigasaicharan@gmail.com",
+      "actorRole": "super_admin",
+      "action": "APPROVE_REGISTRATION",
+      "target": "REG-2026-4144 (devtest+1794532707369@example.com)",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-2194",
+      "timestamp": "2026-11-13T01:18:27.474Z",
+      "actorEmail": "arigasaicharan@gmail.com",
+      "actorRole": "super_admin",
+      "action": "DEV_PREVIEW_SESSION",
+      "target": "Free Dev Mode (super_admin)",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-9196",
+      "timestamp": "2026-11-13T01:18:27.448Z",
+      "actorEmail": "devtest+1794532707369@example.com",
+      "actorRole": "guest",
+      "action": "SUBMIT_REGISTRATION",
+      "target": "REG-2026-4144 (Dev Preview Portal)",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-2953",
+      "timestamp": "2026-11-13T01:18:11.748Z",
+      "actorEmail": "devtest+1794532691674@example.com",
+      "actorRole": "guest",
+      "action": "SUBMIT_REGISTRATION",
+      "target": "REG-2026-9337 (Dev Preview Portal)",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-7993",
+      "timestamp": "2026-11-13T01:17:51.159Z",
+      "actorEmail": "meera.nair@vanguard.io",
+      "actorRole": "builder",
+      "action": "ADMIN_ACCESS_DENIED",
+      "target": "/api/v1/admin/overview",
+      "outcome": "Denied"
+    },
+    {
+      "id": "AUD-7116",
+      "timestamp": "2026-11-13T01:17:50.962Z",
+      "actorEmail": "arigasaicharan@gmail.com",
+      "actorRole": "super_admin",
+      "action": "DEV_PREVIEW_SESSION",
+      "target": "Free Dev Mode (super_admin)",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-4660",
+      "timestamp": "2026-11-13T01:17:50.410Z",
+      "actorEmail": "meera.nair@vanguard.io",
+      "actorRole": "builder",
+      "action": "DEV_PREVIEW_SESSION",
+      "target": "Free Dev Mode (builder)",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-1041",
+      "timestamp": "2026-11-08T12:40:00.000Z",
+      "actorEmail": "arigasaicharan@gmail.com",
+      "actorRole": "super_admin",
+      "action": "APPROVE_REGISTRATION",
+      "target": "REG-2026-1001 (meera.nair@vanguard.io)",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-1042",
+      "timestamp": "2026-11-11T16:05:00.000Z",
+      "actorEmail": "rohan@medipulse.health",
+      "actorRole": "guest",
+      "action": "SUBMIT_REGISTRATION",
+      "target": "REG-2026-1002 (MediPulse Rx Hub)",
+      "outcome": "Allowed"
+    }
+  ],
+  "supportTickets": [
+    {
+      "id": "TKT-2041",
+      "subject": "Custom Spring Boot OAuth2 resource server rule in Prompt Registry",
+      "category": "Code Generation",
+      "priority": "High",
+      "status": "In Review",
+      "message": "Need Keycloak tenant claim extraction added to the Java Backend Adapter pack.",
+      "userEmail": "meera.nair@vanguard.io",
+      "createdAt": "2026-11-10T11:30:00.000Z"
+    },
+    {
+      "id": "TKT-2044",
+      "subject": "Multi-store inventory reconciliation webhook retry interval",
+      "category": "Architecture",
+      "priority": "Standard",
+      "status": "Open",
+      "message": "Looking for exponential backoff defaults in generated Celery tasks.",
+      "userEmail": "arigasaicharan@gmail.com",
+      "createdAt": "2026-11-11T08:15:00.000Z"
+    }
+  ],
+  "aiStats": {
+    "applicationsGenerated": 15,
+    "failedGenerations": 1,
+    "tokensConsumed": 185400,
+    "activeProjects": 6
+  }
+}

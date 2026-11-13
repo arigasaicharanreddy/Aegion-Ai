@@ -1,0 +1,1124 @@
+Charan, now your Aegion AI requirements are much clearer. You're building a Python-powered Agentic AI Application Builder, but the chatbot must be capable of generating applications in multiple programming languages, not just Python.
+
+The platform will have two distinct capabilities:
+
+- Aegion Platform: Built using Python, FastAPI, LangGraph, LangChain, and RAG.
+- Aegion AI Code Generation Engine: Generates applications in Python, Java, JavaScript, TypeScript, PHP, Go, C#, Ruby, and other languages according to the user's requirements.
+
+For the UI, I recommend making Glassmorphism the default design system, with 5 light themes and 5 dark themes for each application category. Users can select a theme, customize it, or describe their own UI in chat.
+
+I'll also adapt the development approach to Google AI Studio.
+
+# 1. Important: Google AI Studio architecture
+
+Important technical decision
+
+Google AI Studio Build mode currently generates web applications with a React frontend and a Node.js server-side runtime. It can generate code, preview applications, sync with GitHub, export ZIP files, and deploy to Cloud Run. It does not natively provide the Python FastAPI server runtime that you're asking for.&#x20;
+
+[image](https://www.google.com/s2/favicons?domain=https://ai.google.dev\&sz=32)
+
+Google AI+1
+
+
+
+So, I recommend this approach:
+
+[AI Builder Portal (RDE) - Remote Dev Environments on Your Infrastructure - Qovery](https://images.openai.com/static-rsc-4/eangr-7Xx7uPx7hnN4N2QkBNzyYiSNV0dvMd7YAZht2Rg20Cut5md1P5wxCwqU_ZtWhbp13dY-wR23n5998uAUXjfMweWwbajw1o7Pr1qm0fhF-kj4nr1UW7fKS9iZPbOJNZrkV-o0JmGHJFs-8578XXvvyvoZmm-9d9Ot75X_I?purpose=inline)
+
+[Glassmorphism designs, themes, templates and downloadable graphic elements on Dribbble](https://images.openai.com/static-rsc-4/iOJcsWcbIBEGE9394PbOv9fgMhAAMHWUtg7zr4SdYfEFgb6AkdiO_eF3BHCA8pGOe8pdlBNH9XfxyTylbwj284dC6CEx3nJ5kuH6tRYXslzpL40Df0z1qi6m9C4GqQKifk__Z4k2A5U1A6pCWewGPLetlvdNIu_GOOqygfk9c2A?purpose=inline)
+
+[Vaaxi Billing - Smart Billing & POS Software for Growing Businesses](https://images.openai.com/static-rsc-4/cEojIvNECmx1nhd3Z2g86eM_33ZrJmxQ1RRlPs3wTeiMkaZ9Q8g3Hy7Il5OMtEJZF6Q307jUNQ61IBDMSEC9T9A66L9KCorQig_1s0iDdRXzyc6pwnHhXKy_habrfnisRUNP0z-muN5MjljCjcS7gzLoEKl0ftqMxZ0pgnwMTsY?purpose=inline)
+
+13
+
+- Use Google AI Studio to build the frontend and iterate on the product UI.
+- Generate your Python FastAPI backend as a separate service.
+- Keep LangGraph, LangChain, RAG, prompt management, and code-generation logic in Python.
+- Connect React frontend to FastAPI through REST APIs and WebSockets/SSE.
+- Use GitHub to maintain and sync source code.
+- Deploy the Python backend separately, for example, on Cloud Run using a Python container.
+
+This keeps your main Aegion backend Python-based while still using Google AI Studio for fast UI development.
+
+# 2. Aegion's multi-language code-generation engine
+
+The chatbot should not be "trained" separately from scratch for every programming language. Instead, use a strong coding model with language-specific prompt packs, documentation retrieval, code-generation tools, and validation.
+
+Language Selection Engine
+
+Python / FastAPI
+
+Java / Spring Boot
+
+JavaScript / Node.js
+
+TypeScript / NestJS
+
+PHP / Laravel
+
+Go / Gin
+
+C# / .NET
+
+Ruby / Rails
+
+C++ / Qt or services
+
+Kotlin / Android
+
+Swift / iOS
+
+Rust / Axum
+
+Additional languages can be supported through language-specific prompt packs and build adapters.
+
+## How the user specifies the language
+
+Example conversation:
+
+User:\
+"Build an HRMS application with employee management, attendance, payroll, and leave management. Use Java Spring Boot."
+
+Aegion AI:
+
+- Application: HRMS
+- Backend language: Java
+- Backend framework: Spring Boot
+- Frontend: React
+- Database: PostgreSQL
+- UI: Glassmorphism
+- Theme: HRMS Aurora Light
+- Authentication: JWT
+- Modules: Employee, Attendance, Payroll, Leave
+
+The system should use the Java HRMS prompt pack, not the Python FastAPI HRMS prompt pack.
+
+If the user says:
+
+"Build it using PHP Laravel with Vue."
+
+The engine switches to the Laravel and Vue prompt packs.
+
+If no language is specified, use the default:
+
+- Backend: Python + FastAPI.
+- Frontend: React + TypeScript.
+- Database: PostgreSQL.
+- UI: Default Glassmorphism theme.
+
+The programming language of the generated application must not be restricted by the programming language of Aegion itself.
+
+# 3. Aegion Glass UI Theme Library
+
+This is the design system I recommend for your application builder.
+
+Each application template will have its own distinct visual identity. Users can choose any theme or ask the chatbot to design a completely custom UI.
+
+## HRMS — 5 Light Themes
+
+[Glassmorphism designs, themes, templates and downloadable graphic elements on Dribbble](https://images.openai.com/static-rsc-4/iOJcsWcbIBEGE9394PbOv9fgMhAAMHWUtg7zr4SdYfEFgb6AkdiO_eF3BHCA8pGOe8pdlBNH9XfxyTylbwj284dC6CEx3nJ5kuH6tRYXslzpL40Df0z1qi6m9C4GqQKifk__Z4k2A5U1A6pCWewGPLetlvdNIu_GOOqygfk9c2A?purpose=inline)
+
+1\. Pearl Workforce
+
+\#F5F8FC · #FFFFFF · #2563EB
+
+Professional corporate HR
+
+[HR Recruitment B2B SaaS Dashboard by Rajib Nath on Dribbble](https://images.openai.com/static-rsc-4/yolsTr6Z20frKUz6DVMTOECqZM2-v5VbNcLyERLR2LYvwt90k3xX4Gnl9jQB968xQmbVeMIyK5Y-B_D9V1NsggHVpSj8OarU6tuul94uwnsxfKGFBOthpf3O606E9ySKohAwVgjNKdtnB-XKo_Qry8NPbibzvA064Hk6Eon14-Y?purpose=inline)
+
+2\. Sage People
+
+\#F3F8F4 · #FFFFFF · #15803D
+
+Calm employee management
+
+[AuraOS Hub – Modern HR & Productivity Dashboard UI (Figma) by Hamza Akhtar on Dribbble](https://images.openai.com/static-rsc-4/9o71ft04ItY6F_wCbJ9rJxUt2bXO8CgFjjchHywXFhZO3EeB7MBHGUbeN8onFF4zSEBboR19BiX23eDnSI3yuLO3WhBn-wiUZsRE4nY7cGUViap7_Jck4698DLm1X0tmcBJfa2M_atSQJGbxlP6Yyt9UfdYxRChefQbos9isklQ?purpose=inline)
+
+3\. Aurora HR
+
+\#F7F5FF · #FFFFFF · #7C3AED
+
+AI-first workforce platform
+
+[Talenta - Dashboard Human Resource Management by Taufiq ✦ for Hatypo Studio on Dribbble](https://images.openai.com/static-rsc-4/H4olLRPnBlpaWxkTP1yM6eyet9pzv5MONkwBsXXwz3YBn2akXlramNGqj_sW9Nwrk-Gx_RGd1vefidxrEZC51VS_4JBBRoqmgTueGujqw0_cldp1cAPUOKJdSF_WJHUHuxLSJfPI3_voT7pvwgdPaAWgh6mwQ7BKKF2TAr91j8Y?purpose=inline)
+
+4\. Ivory Executive
+
+\#FAF7F2 · #FFFFFF · #B45309
+
+Premium payroll management
+
+[AuraOS Hub – Modern HR & Productivity Dashboard UI (Figma) by Hamza Akhtar on Dribbble](https://images.openai.com/static-rsc-4/rAyC1uujyjz5NxcMh8MbQK0RhjjzCzDegor3irLEv5RLiIcQB-3b6yAHfhmqYwMp16HPxPUWIsWSb-xQ5y9iv67o9AhCcICmnqaSfgwUtkoDt4lc9gtxz3Vu2fcC4Tq3iCF-L5rCQr2iAn0F3TSTBHPDwTFikxgOaoFSPTcbjOY?purpose=inline)
+
+5\. Arctic People
+
+\#F0FAFC · #FFFFFF · #0891B2
+
+Modern data-driven HR
+
+## HRMS — 5 Dark Themes
+
+[Zaryz Solutions LLP](https://images.openai.com/static-rsc-4/NM54AuerGufe_dwMvcsBFmU8RVKnBM4rGK5_jAv5w3d0ILBz0GQLaOUQQlSDmCYb_M_UqGnjTXgs1kJMNLNNEUw9SPRx4wKsLa9PJl0tjIQVpfjnp9CJkrL3UKz3qRL-Agqzki83UqLJvAhRqs8XDELSJ0x2-TjfIfzBtVohkWE?purpose=inline)
+
+1\. Midnight Workforce
+
+\#0B1220 · #151F30 · #60A5FA
+
+[Marsel Tech Labs | We Architect Intelligence - AI, SaaS & Mobile App Development](https://images.openai.com/static-rsc-4/LDR82S4sHzlKWnDtcEf9_CPxDSr8-6HxAll8FmfR-md_qT8ZVzNvOj3Snpl-Y7SHxa4SC-kzs8ZTFIWA5hsxCdHNXST4AMwsW-YkBF9q5NMXgVTmYsW0TqQW5alu4SeiFmT_f7a5OmiI4u6zUlNRVBCz_67CzNZ1za7qSpFBpDs?purpose=inline)
+
+2\. Emerald People
+
+\#0B1512 · #14231D · #34D399
+
+[Solutions | Verso Altima India](https://images.openai.com/static-rsc-4/lGWs6edScFbzp5uGnZ3Gvm2gWlg-SNqAS-VdbjlAo5CXjZqNKQRO7gq61DwHp7WBE4jeGOQSBSBQcdAVTFzByyphD-VpPu_sDDZ-VDPdTFGeZOKLjzqqGwxmtEfXy3adwL1IrCFH6GB2hC_vRQf7vNjtl5m7gBL5qJNMYVDsC3Y?purpose=inline)
+
+3\. Nebula HR
+
+\#110D1D · #211833 · #A78BFA
+
+[HR Payroll Management Dashboard UI Design :: Behance](https://images.openai.com/static-rsc-4/x3AlhE6RzIEXaIwNj8S4J8MZT3uXlBL56uRr-UKCD1cJ2dkA-XVcMANM5w-vrJCzA3xEViF0-_2oBeegnSyjDbKdC1ORm4WH09ULXYogEg9JvYub8xZrhgRaPOF8Pv8jUcmRX9q9Y4-e_6CQUwanXczbgSQ8XusEq5cF14Z5xdE?purpose=inline)
+
+4\. Obsidian Executive
+
+\#121212 · #222222 · #FBBF24
+
+[HR Fusion - HR Management Dashboard by MindInventory UI/UX for MindInventory on Dribbble](https://images.openai.com/static-rsc-4/lgvuCtJMP5guAGCEnhqd6uuGnPs3YfbmSO79Z8t3gryc56n-pkmsd3sct3hkMLEHO3kUZo-x1V5pLZ5e2Yw-mdLuclstj3g4LHxoQbi4NUspDCnqypfjZ2efBsPGh1BTP9Hi8j2EBzS78iUa2HOgcfHWYpqsl6VFO5Yilq9X0Ms?purpose=inline)
+
+5\. Arctic Night
+
+\#07151B · #102630 · #22D3EE
+
+## E-Commerce — 5 Light Themes
+
+[E-commerce Admin Dashboard - Glassmorphism UI by Md Jasim Islam → 💌 Hire Now on Dribbble](https://images.openai.com/static-rsc-4/0gHR1kq_cLzC-vvS8voa6PS4DqP5EwmJrsWmeLQrxplfdHx5y8yTzjwVa_JJkLYgUd_nyne5vXNhVlG4XbA7kE2pAGWiRn5Z7V6z7dG50jeC93nuHQ_CHqAo45VLzvpbItJFWnwyDSi5vNWqtjIn5lLOcOvm3wKJy3rFdG-0dYU?purpose=inline)
+
+1\. Commerce Pearl
+
+\#F5F8FC · #FFFFFF · #2563EB
+
+[Online Shop Dashboard Exploration by Happy Milliarta for Odama on Dribbble](https://images.openai.com/static-rsc-4/EX-0T222n7Q_dADV96cchP0YZvWhHtR14TR6U8rai15_5sfsmNTgDGGu1JmZhzvnTdpwUrFELDK3FfoEWTwr7ycmrIa87zUwxybtaaZpMhBxOXHqFbtyAbj7CqUqULOetFj2L-yuxY8bFSkiMEjoI4TSQiGNMt_3v0BBf8tnffw?purpose=inline)
+
+2\. Coral Market
+
+\#FFF7F2 · #FFFFFF · #EA580C
+
+[Browse thousands of Glassmorphism Shop images for design inspiration | Dribbble](https://images.openai.com/static-rsc-4/L6MbnFiHMThjcoZsGEqrLUHHTo4NgIPogM3NyaE2Qe4DiLOxt2PWuy407gwK135fRXR-CzGwJlrEr5Fc6jqHo7b5C5S9FYRZ38oD0EV0tuOdHNqYr33nF7BIUBQPqcHPs1y84XMiXZsacN3AKB3hJywxcQeSylu0KYRF5gfhrZo?purpose=inline)
+
+3\. Lavender Retail
+
+\#F7F5FF · #FFFFFF · #7C3AED
+
+[CRM Dashboard - Managency by Asif Howlader on Dribbble](https://images.openai.com/static-rsc-4/tnxCto9fwPQ0KJZS3zSIse8XADg516w3HvZNbyH-wvX82K-Te5yleLIaHEkeuQ-R3EnMKsh0rDYnTCarSafyXQeZl7ij5HugKXm7jUjBnfqd56bOtxyc8YHJ9zCrZZHNuElx1UO0Q7xf2W9X_d8o-45ne_k9jd6fj70O3UEJfkI?purpose=inline)
+
+4\. Mint Commerce
+
+\#F0FBF6 · #FFFFFF · #059669
+
+[Perfume And Cosmetics E-Commerce Web UX & UI Case Study :: Behance](https://images.openai.com/static-rsc-4/_F0eDrDrvRPs3IAud-6y66liqG36q3tefIDy7pzeFQNRX9-yQaLbareppIbsH1sIz4VTsl5AsLo5SLD5o0eXnjWUHPOG7ToGVn0KpmHkxTzsy6JgIXDZDsUW3WcxUo6SxPJNVmBNF8u4E1uIVQIvmI6m2rt-Ya8qY8HLRV1ofHM?purpose=inline)
+
+5\. Luxe Boutique
+
+\#FFF5F7 · #FFFFFF · #BE185D
+
+## E-Commerce — 5 Dark Themes
+
+[REINPIA | Reingeniería de Procesos con Inteligencia Artificial](https://images.openai.com/static-rsc-4/lDCzmQ5XORjKBixKw5Qh1A8cgjrdgUZZzN1kxbC_6Agy1saCc6HqKPjF_nHBPysNPFCGXcs6hAf7hsSdq3r_pkehdDkoY87IuBxEs7TFKqpHQjauxC8HVt51_IqG20SmsR6QRx3E7WM2Wx1eEvq89qREka6_sLMgO0O7GVXdWBE?purpose=inline)
+
+1\. Midnight Market
+
+\#0B1220 · #151F30 · #60A5FA
+
+[Ecommerce Dashboard by Farhan zarei on Dribbble](https://images.openai.com/static-rsc-4/84K4_fAEPHzwVX1FL8dVz1W0uEX2pidOhBlpiCrrQZHImQ8cLzQEvsylcsbvpwsD7p13ZDyAmiyRdL5IFb66XuYk4UUc5uzl9sa8jVSIONQMJZps-5iC9M8cMDfhIFJwfzQq2wmTxI0auUhcTRONuxN9TeIcYoEWMZArmCwQt8U?purpose=inline)
+
+2\. Ember Commerce
+
+\#1A100B · #2A1B13 · #FB923C
+
+[Ecomerce dashboard UI - Glassmorphism by Heyun Le on Dribbble](https://images.openai.com/static-rsc-4/gRSaVjy-UH55myrZxItycnW-g9elN2O2BpFoMuN04ur80EBgdDM2ekHKWBhlA754BMUlUpj-jvAtpb9TBiKFccIJ_O_Xsdrm7elozPdxx1O4-zzDGy3odzxDxaDevOAOxy-W6f4JqmUUdOFEQ60fCUJWEAYqMx4AoA4maUefOUY?purpose=inline)
+
+3\. Violet Retail
+
+\#140E21 · #241836 · #C4B5FD
+
+[RetailPro POS Dashboard by Mostafa Kamal on Dribbble](https://images.openai.com/static-rsc-4/RstsEth7sQ-0G3lwLIx2_lskjdKQdTALWcCVW-PREbbt9MooxFHqQplHfe7FAbX94AYhTZ2Mev4Eq_BDKOCnwjEXEFko0uaCyE2l-CRyOwvO3evfC077JyEPjKR4euUckSI_GDwOQeppobCbSDOVuK4ZbtOG5fzjfuHzlJgvMos?purpose=inline)
+
+4\. Emerald Market
+
+\#071710 · #13271C · #34D399
+
+[KRMR Solutions | Enterprise AI & Custom Software Development Agency](https://images.openai.com/static-rsc-4/5N-vPgljc14xPmCZhm2c5WM0KhIOvj2dQlFGTgSj-2gRPe0rhcEIg6ErtCfWQbcfAYvnYn8o5g4HemdyOqC6lUwBzRLNqw8s_y4j6qdfFVUsmxIBgN8yxT1bv2DvGsTZouSSBmeJAa1ZQGp-axfRRFkmPb-q8I_ndZMmnVWX-U4?purpose=inline)
+
+5\. Rose Noir
+
+\#1B0D15 · #2B1722 · #F9A8D4
+
+## Multi-Store — 5 Light Themes
+
+[Kolabo POS - Aplikasi Kasir / POS Premium Tanpa Drama  |          Kolabo POS](https://images.openai.com/static-rsc-4/nZcp8HY76E862eDyZMgQHanbNY_JA2qCesZ86YEiWV-hdi4jwr_I27RSFVHXzrCmYpriYHFYsz7fqFLZfmiU2XGINPlb60sl6QhCTrCTDgOMWyU4MHwzHXGJJn4RRUE71YEhl-BBki2a1xY3UYqZLfUcyDTaEFzr_41oUQEL5Fk?purpose=inline)
+
+1\. Atlas Stores
+
+\#F4F7FD · #FFFFFF · #1D4ED8
+
+[Averra — Retail analytics dashboard by K&Z Design on Dribbble](https://images.openai.com/static-rsc-4/wP7jxqIKPUMsum8HzssLq6pux1eXOnOSwoBgKVCI4nFbI8H66P3jO9wzTmAr2fZkcCibXpkykuX_3OLXLA2CnXRWrbRBdmXJiU_vpkivrSpE3PakTV-PAcDViUI-cfXVkqMOL_atO54dIzCPEKc16tYDLC8NqZGZVZLwOMsu2K4?purpose=inline)
+
+2\. Ocean Network
+
+\#F0FAF9 · #FFFFFF · #0F766E
+
+[AI-Powered Inventory & Sales Dashboard by wincasoft for Wincasoft Official on Dribbble](https://images.openai.com/static-rsc-4/bGBolqyUk6Tb9xLP59C5zxPe-k-MW_sncQXUOcGGCItr2LZ4wy9Szqnr9F1D9fucSxrMX0g0GIcz4YAq4UOZ6cTdXKIsUiuR_B1wwiKS_sp_wG5P7pFXNgjLg2sDufco51URXXxSSLYneoqtRJXImxX1gP_jYd-DAZ9TACG9iyE?purpose=inline)
+
+3\. Sage Retail
+
+\#F7FAF0 · #FFFFFF · #4D7C0F
+
+[Dashboard | Admin Panel for Branchie Flower Shop Network by Sofiia on Dribbble](https://images.openai.com/static-rsc-4/FJ8_DYSy6Ka7w07mfwJuE_CxEuAn5DfyOfisc5b8nhGqMSETrAAqha2ptPe7VvLDkwo2cgaFRV2QtfP1Q6hrc7dWraGb459mXXoVW5UkJmOzsn5gNUQU_Iamg_DJZwpL1Qs9eNFxKeFXnWz-x-LM9RDghXLdaJsVpD6jSqhO6rk?purpose=inline)
+
+4\. Prism Network
+
+\#F8F5FF · #FFFFFF · #6D28D9
+
+[Lustra Jewelry Shop Management Dashboard by Munna Hossain on Dribbble](https://images.openai.com/static-rsc-4/4mbzXnebx1Fm8AopGeDHtmhXAdKIz6ZljAs3rsYFEDYMKTrlD3JzMiwl0B7i6Smo9rsshPnI0TuoBtYRCQuXnLWb3keev3c3tIhi8ZTgsM5zMbrqVYcuWfGmMKleiPGnNk6GYWID7cGHlVI9oAsBiycB0Y_6FdtkevJSOEjvQFk?purpose=inline)
+
+5\. Sandstone Retail
+
+\#FAF7F1 · #FFFFFF · #92400E
+
+## Multi-Store — 5 Dark Themes
+
+[Retail ERP & POS for Multi-Store Chains | Vizion Tools](https://images.openai.com/static-rsc-4/HW3RhSCs6LIdbWzrkkrG0Lxgp3wWyzaNBeJe1X6p6aeqbG4pXOeZdLwCZT_rMEK9SOOcv7tEj3SJ2QypiREEU-SRUFvHRtRFRCuQRMKIzQv-EXlfbKOgOYHOiuRBI_0STV1hABTXSgtGzWgvkYbTthtPx8XxhYQqkHdvFXqf26o?purpose=inline)
+
+1\. Atlas Night
+
+\#0B1020 · #171F33 · #93C5FD
+
+[RetailPro POS Dashboard by Mostafa Kamal on Dribbble](https://images.openai.com/static-rsc-4/vDKU5tphrTrtGt3UUl3FvBfasAegFHkRZtAQ3fV59XDioLnLlthuHzjmJuKHQu0dV90hJ5-bLJi3H0tCKoacq4Zk41RwMRVJf37ZGjZO7_LYXzpV0A_ZnxaeHN6SA2o2vtFkexzgfSbs4GBz3xtLovNotfXXRrhwLS7cksJAkTY?purpose=inline)
+
+2\. Ocean Deep
+
+\#071918 · #122A29 · #2DD4BF
+
+[RetailPro POS Dashboard by Mostafa Kamal on Dribbble](https://images.openai.com/static-rsc-4/HlLCA3WMIqqA-JDNcZcG08FWP1RzZ35sS8ol6nrFTGI_ZDX02QXUcoOssgIJh3Ut3ntolzKo-4AGshGf5qSQVlMlcSKq8RnXSDsNH0P_UhT2Ak0MnPAW0RrG78ot8q2GaQBMKmgl4yKSPh-8b20sgJ7mDGf1icF8VT7vkQMIfdM?purpose=inline)
+
+3\. Forest Grid
+
+\#10170B · #202A15 · #A3E635
+
+[Inventory Management System - Imperium | Imperium](https://images.openai.com/static-rsc-4/OMmc8SHM6ixWnAgLup_1yUE0V0REWStJgRZCe3EMVerB9fAFY1hPQJszxJ9rWvPoRnIJI5ywm9XK3r5fV81tYtaN4GXTNVkxZRHkrA6zAg36PiGp8DyN-ZuodsvQ_FdpM3dQKhM3psK3m6g0cln2Kt2a5De-9lN_W5INUsBqo6A?purpose=inline)
+
+4\. Prism Dark
+
+\#120D20 · #211833 · #A78BFA
+
+[Pos designs, themes, templates and downloadable graphic elements on Dribbble](https://images.openai.com/static-rsc-4/cO22b5ZuPPpK-ACvmewu447fy3VfBHffpwoVBg9knDMIdCxFu6j2c4d1NVByZb7_gLmGFgA02L4QXxyfHfU1OfM6arTHuDbzHAUqWDSr28PaBfpjqve_UwEFIAsUdmbz1H_CJKKltCQtaLOxJ_zKm_TlSWlYEFAsFkIIYXfD_O4?purpose=inline)
+
+5\. Bronze Network
+
+\#17110C · #2B2117 · #D6A56D
+
+## SaaS — 5 Light Themes
+
+[Browse thousands of Glassmorphism Dashboard UI images for design inspiration | Dribbble](https://images.openai.com/static-rsc-4/eHuoB4xzyAfKbIbNhYTYaW6j0L0VfifiKj1z8OqSsKmckWvklcq0s2Ntv7cAQ6ks6ict25VgHVjs8B44rE4fk5lB3iQsXe74pABeHCtOSW99wiE5FU8yQVX5Z2lnuxI_7FAfbmz3nnmgYNVjy83_WYlx3Rt-eYKOLUzTA630sZs?purpose=inline)
+
+1\. Cloud Indigo
+
+\#F5F6FF · #FFFFFF · #4F46E5
+
+[User Activation & Growth Analytics Platform Dashboard by Saddam Hossan on Dribbble](https://images.openai.com/static-rsc-4/0aG-3jiG01UP1I981vEO__wWj3T4Js3C-_OKATB_3j7slpAx2P76orI4gpPQTEmo12sjisTAcsRQfEui9WC81NJFF9chj9fnQ0x8fYuhu3lTniEe2TqO74fhkMa_HQpc5-0O2GQPD5bSKUVvNtO4I0LLdB3XgJ2UrJDcKzwWErY?purpose=inline)
+
+2\. Mint Cloud
+
+\#F0FBF6 · #FFFFFF · #059669
+
+[SaaS Analytics Dashboard UI Design for AI Platform by Visenor on Dribbble](https://images.openai.com/static-rsc-4/dHau2EMVKCjJV6gGc8DCckwAbrB3rIE_0xCqQA4JX_FMgj-1ErFc3-xfvj6Mz7SYvO7XUVmuvp4lebGM2S0SjeaZ3XP3kK3QYZTXFhMFbx39jUznmLWE6tNqZXcndo2vYsgys43I5cITyVXrQD5u9q3pCiU6qZm2dYKCXUqH4pY?purpose=inline)
+
+3\. AI Aurora
+
+\#FAF5FF · #FFFFFF · #9333EA
+
+[Nexora— Modern SaaS Analytics Dashboard by Ovi Khan on Dribbble](https://images.openai.com/static-rsc-4/4o95aW4fp8YwFdIRcUQAHPP1W5rJcdVdx7uizhfJxWhjWbndvLN8I__LFpQ9y90KGRMvOB-TBHto20POzJbg9Nbc3vHN311DL1dHdrwKb0b8pQwVJg9HvbFqOIO7fn_ebwF2KncU6QvwzXf1HQBvUhLYTs6Th9rKIn3wxa96dSk?purpose=inline)
+
+4\. Sky Enterprise
+
+\#F0F9FF · #FFFFFF · #0284C7
+
+[10 essential UI principles for effective interfaces](https://images.openai.com/static-rsc-4/2NFOdHDdsM5Ax8kD8qd7p_PrWxJs2YoYyRsmXKXh6qEOgBLrU0Zp9UuwU0BRHK_lUSlKdN8u6qbgLJzwhKbYyWxwYdcwb5_eKzTEs8FCFt1SaiadxDXq7KtMhA7QiZViJB5sifRhFa6flb6ghKPU6UNSHvQaWkz0n0VvfGD_ypk?purpose=inline)
+
+5\. Quartz SaaS
+
+\#F8FAFC · #FFFFFF · #475569
+
+## SaaS — 5 Dark Themes
+
+[Aether Analytics — Glassmorphism SaaS Dashboard by Agam Singh Sahni on Dribbble](https://images.openai.com/static-rsc-4/RUzONLFUCVeUiEwgcKAHcHlzLxHBxd7vZvnbTEefE_5VDuM4w4JPuOAsO0xv0HIKzihLVYhXFtMkkkPq5wQYNqRjaWYxE3D14tKmsTD1H0IlIzvWLP63T797Dv3N5LQ_VGyMBTD3Qu7DgsYaveUg17wROYDUP_PaxR5FldQC9e0?purpose=inline)
+
+1\. Cloud Midnight
+
+\#0B0D1A · #171B30 · #818CF8
+
+[George Tavadze | Full Stack Developer](https://images.openai.com/static-rsc-4/Dyn6mwrso-z9L-EA_FcftcnorfCSQBSMyhaQALd_0z5LQME3UBw3DVrMHBlUHud5VV_huQOyvwTe0Ja899ju0m6-URvgaT6Y3a9ONrPSwweHPmvx65VYw6yYEq5rHV_DTHrqvEpU9P-a7x2PjReJeyb-Ly7E7Bt-ghRBOiEtJNM?purpose=inline)
+
+2\. Mint Matrix
+
+\#071712 · #14271F · #6EE7B7
+
+[AI Insights & Performance Tracking Dashboard by MaMuN AhAmEd ✪ on Dribbble](https://images.openai.com/static-rsc-4/f-mbR0s3IN9qw_kTveGJW-808CufaEs_27yU8yEP6ljdAC4GICO_pj1dJPTL5KcooHuFhXSSRdTHrJrXDPy_GdiZqbpRkkmd5JsGAmX_5conQD8FQbJa0DO8Kd5qwr3yrlWAWJPBySWWKLChUU21eJcLn66_-_Bd5OP6GfCmnSw?purpose=inline)
+
+3\. Aurora AI
+
+\#12091E · #251536 · #D8B4FE
+
+[BlueCore Dashboard UI–Powering Productivity at the Core. (Figma) by Hamza Akhtar on Dribbble](https://images.openai.com/static-rsc-4/x49xa31Yx1KQclGL1mCr3f-htCtSTxfYrzQcu4TxZJPNcUJwjsm5Qb11OZ49Oy9eSy-h7qZytGYs_ZSeY8sd1JAwWsBWvyghm4_UBlrF-K3n2Dqmpab-3swyslwLfc_9s9tZE8aLrvEGHe1KI0D7wH3ZxK5GFYTy-Ai0oW_xWtk?purpose=inline)
+
+4\. Sky Ops
+
+\#07131D · #142535 · #38BDF8
+
+[SaaS Analytics Dashboard, Dark Glassmorphism UI by DesignShare on Dribbble](https://images.openai.com/static-rsc-4/TukUP9tffC6PR_ON_uwT9iUCanf7kNQFVIHAl_fL1YXM7-hGypaqtJelf9ngAL_5mYM57XSV32vDL86TZDjHC956lYss4lMggI1Z-lUA3VR9JFEl6gvSxWde761e1X9Sc6bzbJ2AxpmC4oATstqlki6v4BgI4malWTKf96hx3pI?purpose=inline)
+
+5\. Quartz Night
+
+\#0F1115 · #1B2027 · #CBD5E1
+
+## Healthcare Store — 5 Light Themes
+
+[PharmaCore ERP-Smart Pharmacy Management Dashboard UI/UX Design by AgamiSoft UX Studio on Dribbble](https://images.openai.com/static-rsc-4/i37pURJoZNRqPXwNGIUx_PaZJ3wNzWa1iuhz9LHYhi5xVTbHzWh_oaqDp3I1DhuxIFNw65RZDAeW3kCUokz2zUnktLpIihqmbS8VoV8_9_7PA9wswlInaSml2IIrsuVA83p__ngoA090A_u_i3H7Fm417z0sOv5RvEywoZJr6D0?purpose=inline)
+
+1\. Medical Pearl
+
+\#F5F9FF · #FFFFFF · #2563EB
+
+[MCare- Pharmacy Management System by Koru UX Design on Dribbble](https://images.openai.com/static-rsc-4/TvauZHo7u9gXGphyd6n2w6aXbxRzMg2ymMcJXk4GgNIBWM1pe_kRUIhjolzVhOyFuLSCOQPehH7vCKV5QmM8vgFyyoUBxNhNLMFWATveWKtqe1Q3UaGjNV1CLZCJKfHmesmZNCwYkGULyB82OJtzVs181QT1jBh88D0ySILiX2E?purpose=inline)
+
+2\. Vital Green
+
+\#F2FAF4 · #FFFFFF · #15803D
+
+[CareNest | Healthcare Dashboard Design by Orbix Studio on Muzli](https://images.openai.com/static-rsc-4/deev7FlpCtFOIpF51DIa5jSMITPJ0wuT17zHDyDN_bihpSV4pOXMh-CELDKi4S_kDqCWhz7tEYVsnjhLrhFilSS1oDMnBZc5FLTkW6tIlRvh7jd-C9PZMtqyXNIqnN673BDTd30YQpwBTD_qLU_w1COM8eeHMchZ2JwcS9ERhw4?purpose=inline)
+
+3\. Aqua Care
+
+\#F0FAFA · #FFFFFF · #0D9488
+
+[ERP Admin Panel Dashboard UI – CareOps by Phenomenon Product for Phenomenon Studio on Dribbble](https://images.openai.com/static-rsc-4/13FPonKZTNdGc3n3mgjTU3aM4zihXMHHO_DI21eppnbpwxYDYOdNrCK1nica1o-I_kHBSAlj-x4iV-Gog4BqrGWiiqXr4Uu8KnT0sWPex27ITl36tOlUxrbzCoII1GbITPZlpWJGuHJThGb4E1GKBuwk0SQO0wf0-1pScjGVJ6E?purpose=inline)
+
+4\. Lavender Health
+
+\#F8F5FF · #FFFFFF · #7C3AED
+
+[Medicine Inventory UI – Pharmacy Dashboard Product Overview by Sk Ashik on Dribbble](https://images.openai.com/static-rsc-4/ypfv56Len202A8vF7MPCeqWawvN1b-BuHePFMAQ2-aumKMUQU2vEPWsZL7cvKHAEWr6F0uEES0brXCAccf76EFJlOgwyxHZBFw84Mj_4-KmFOb8Q5xyIYP753gYxJFY1pW4tvuPak9RjUvwOdiUkPIH_rn_9Piy-n77gCKMhgjM?purpose=inline)
+
+5\. Fresh Care
+
+\#F1FAF7 · #FFFFFF · #0F766E
+
+## Healthcare Store — 5 Dark Themes
+
+[Jmanny Solutions - SaaS Development, Data Analytics & Design](https://images.openai.com/static-rsc-4/lmlILyb7S0IptWJi-znA56hK5l5Dy-ovkWDezLZo6lqFnSWksEX1FzT__4p8x2ZyPNx6bul8g4lZ5aJP8o2jf66eTNtwE2-w0-VpCf1OqXd5D9D9ZjGng9wLcA7iDXSvbVA-CUh-i-yAL1lnEqpesi7CfBxJGDb-f2_bKBNivgM?purpose=inline)
+
+1\. Medical Midnight
+
+\#0B1220 · #152033 · #60A5FA
+
+[Aura Health by Adeel Raza on Dribbble](https://images.openai.com/static-rsc-4/iLm3LSt4EO5u_zHhe4Ao_LwoO7YBSvxh-pMnGHASKsrAm-huvfXDiuW4W79lwoOgLJ0ynbpno7lBpvOvfUfDo6swlXkg6I30mBC2lMv6S8xFRenAe-UY1pNhFuP50C9uCJiLPZG7ztnWmSUkIMsXhWgGGGtzvZvbXyUlETn7UM8?purpose=inline)
+
+2\. Vital Night
+
+\#0A1710 · #17271C · #4ADE80
+
+[Pharmacy Management Admin Dashboard UI Design by Opedia Studio on Dribbble](https://images.openai.com/static-rsc-4/Md4Jr8GMASFVFrMW1r7exrVZGIThVs4pChDNhCAWo4o_JYO_gv9nSI0q_ZiqKCcZQISdkh0OuW28wTpYofS3B7EQvIX_6rsYbvQ1R7p1GNk3YfskX6gAOBjKbDqLdyfL7sBzPYoW68aPa6Jffx4k8oipW-ccwzc20OVBCvjhdBw?purpose=inline)
+
+3\. Aqua Clinical
+
+\#071918 · #122B2A · #2DD4BF
+
+[Розробка CRM для медичних центрів та клінік](https://images.openai.com/static-rsc-4/yy-RAzhxP9E2mNoPOLttKBf43j2Z62yri8P9fANgdUQ6x9S6lne0cA_XweMWFvCiemJKlOtitN_hjISZA4N35gnursjl4gY6pdjCw11uSH3881izWI2Szn8Tys-SmDJUhnv08e0KpvD9ri6Og-xXiIVUEqpBrMbFknWqeypD4qE?purpose=inline)
+
+4\. Lavender Night
+
+\#130D20 · #241834 · #C4B5FD
+
+[MediCore – Healthcare Admin Dashboard UI by Rixlab on Dribbble](https://images.openai.com/static-rsc-4/KIRUQXr8zrRKrZupHKubPaN1m1s1jVdzFnRtb37wkl7JRaNLCJiEu_gCGlfaoa1WMfdCIIgzXA6lwdk4pOWyJ1ioIzAKHr-DKk54Wbw10K54piNx3QU9OJy9D4gIZDNyzl_qXpGo-pNYx3xkdwhG2z7Lr9KmFGj42OlZu5tg63Y?purpose=inline)
+
+5\. Fresh Night
+
+\#081714 · #152823 · #5EEAD4
+
+These 50 presets are your initial theme catalog. Each should have configurable tokens for background, surface, border, text, accent, shadow, and glass opacity, rather than hardcoded colors inside every component.
+
+# 4. Google AI Studio — Master Build Prompt
+
+Copy this prompt into Google AI Studio → Build mode. This is your initial foundation prompt. Build the platform incrementally afterward.
+
+# PROJECT: AEGION AI — AGENTIC FULL-STACK APPLICATION BUILDER
+
+## ROLE
+
+Act as a Senior Product Architect, UI/UX Designer, Python Full-Stack Developer, AI Engineer, LangGraph Agent Architect, RAG Engineer, Database Architect, and Security Engineer.
+
+Build Aegion AI as a premium, professional, modular application development platform.
+
+Do not build a simple chatbot demo.
+
+Build a scalable platform architecture that can evolve into a complete agentic AI application builder.
+
+## 1. PRODUCT OBJECTIVE
+
+Create an AI application builder where users can describe business applications through a conversational chatbot.
+
+Supported application templates:
+
+1. HRMS.
+2. E-Commerce.
+3. Multi-Store Management.
+4. SaaS Applications.
+5. Healthcare Store Management.
+6. Custom Business Applications.
+
+The AI must understand requirements, create an application specification, select the appropriate prompt packs, generate code, validate changes, and maintain project history.
+
+Users must be able to:
+
+- Create projects.
+- Select templates.
+- Chat with the AI.
+- Generate application specifications.
+- View generated modules.
+- Preview generated applications.
+- Update applications through chat.
+- Choose UI themes.
+- Customize themes.
+- Download ZIP files.
+- Clone projects.
+- Share read-only previews.
+- Invite collaborators.
+- View project versions.
+- Roll back approved changes.
+- Contact Aegion support.
+
+## 2. TECHNOLOGY ARCHITECTURE
+
+Aegion's main backend must be Python.
+
+Backend:
+
+- Python.
+- FastAPI.
+- LangChain.
+- LangGraph.
+- RAG.
+- PostgreSQL.
+- SQLAlchemy.
+- Alembic.
+- Redis.
+- pgvector.
+- Docker.
+
+Frontend:
+
+- React.
+- TypeScript.
+- Tailwind CSS.
+- Reusable component architecture.
+- Responsive UI.
+- Accessible components.
+
+AI:
+
+- Gemini API integration.
+- Model provider abstraction.
+- LangGraph orchestration.
+- Language-specific prompt packs.
+- RAG-based retrieval.
+- Structured outputs.
+- Tool calling.
+
+IMPORTANT:
+
+Google AI Studio Build mode currently uses a React frontend and Node.js server-side runtime for web apps.
+
+Use AI Studio to build and refine the frontend.
+
+Keep the Python FastAPI backend as a separately deployable service.
+
+Create clear frontend API interfaces and a Python backend scaffold.
+
+Do not silently replace the Python backend with Node.js.
+
+Do not pretend that FastAPI is running inside the AI Studio Node.js runtime.
+
+## 3. UI/UX DESIGN
+
+Design a premium enterprise SaaS interface for Aegion AI.
+
+Default design:
+
+- Dark glassmorphism.
+- Black background.
+- Charcoal grey.
+- Cement grey.
+- Subtle violet accent.
+- Premium typography.
+- Soft shadows.
+- Controlled blur.
+- Thin borders.
+- Spacious layout.
+
+Use Inter and Manrope.
+
+The interface must be visually polished and professional.
+
+Avoid:
+
+- Excessive neon.
+- Excessive blur.
+- Cartoon-like interfaces.
+- Overcrowded dashboards.
+- Generic template designs.
+- Unnecessary gradients.
+- Excessive rounded cards.
+
+## 4. THEME ENGINE
+
+Implement a reusable theme engine.
+
+Each application category must have:
+
+- Five light themes.
+- Five dark themes.
+- A theme preview.
+- Theme selection.
+- Theme customization.
+- Custom accent colors.
+- Custom backgrounds.
+- Custom typography.
+- Custom border radius.
+- Light/dark mode switching.
+
+Application-specific themes:
+
+HRMS:\
+Pearl Workforce, Sage People, Aurora HR, Ivory Executive, Arctic People, Midnight Workforce, Emerald People, Nebula HR, Obsidian Executive, Arctic Night.
+
+E-Commerce:\
+Commerce Pearl, Coral Market, Lavender Retail, Mint Commerce, Luxe Boutique, Midnight Market, Ember Commerce, Violet Retail, Emerald Market, Rose Noir.
+
+Multi-Store:\
+Atlas Stores, Ocean Network, Sage Retail, Prism Network, Sandstone Retail, Atlas Night, Ocean Deep, Forest Grid, Prism Dark, Bronze Network.
+
+SaaS:\
+Cloud Indigo, Mint Cloud, AI Aurora, Sky Enterprise, Quartz SaaS, Cloud Midnight, Mint Matrix, Aurora AI, Sky Ops, Quartz Night.
+
+Healthcare Store:\
+Medical Pearl, Vital Green, Aqua Care, Lavender Health, Fresh Care, Medical Midnight, Vital Night, Aqua Clinical, Lavender Night, Fresh Night.
+
+Each theme must use configurable CSS variables or design tokens.
+
+Never hardcode the theme color inside individual components.
+
+## 5. APPLICATION BUILDER UI
+
+Create the following pages:
+
+### Landing Page
+
+- Premium hero section.
+- Aegion AI branding.
+- Application builder introduction.
+- Template showcase.
+- Feature showcase.
+- AI capabilities.
+- CTA to create application.
+- Responsive navigation.
+
+### Authentication
+
+- Signup.
+- Login.
+- Forgot password.
+- Workspace creation.
+
+### Main Workspace
+
+Layout:
+
+- Left sidebar.
+- Main chatbot workspace.
+- Right project preview panel.
+
+Sidebar:
+
+- Dashboard.
+- Projects.
+- Templates.
+- Prompt Library.
+- Theme Library.
+- Deployments.
+- Usage.
+- Settings.
+- Support.
+
+Chat interface:
+
+- Message history.
+- User messages.
+- AI responses.
+- Streaming response interface.
+- Prompt suggestions.
+- Application type selector.
+- Programming language selector.
+- Theme selector.
+- File attachment interface.
+- Change approval interface.
+- Generation progress.
+
+Preview interface:
+
+- Live preview area.
+- Desktop preview.
+- Tablet preview.
+- Mobile preview.
+- Open preview.
+- Refresh preview.
+
+### Project Dashboard
+
+Display:
+
+- Project name.
+- Application type.
+- Project version.
+- Selected programming language.
+- Selected theme.
+- Generation status.
+- Module list.
+- Recent changes.
+- Prompt history.
+- Export options.
+- Sharing options.
+
+### Super Admin Dashboard
+
+Display:
+
+- Users.
+- Projects.
+- Templates.
+- Prompt Registry.
+- Prompt versions.
+- AI model configuration.
+- Usage analytics.
+- Support tickets.
+- Platform settings.
+
+## 6. PROMPT REGISTRY
+
+Create a Prompt Registry UI.
+
+Prompt layers:
+
+- Platform Core Prompts.
+- Security Prompts.
+- Application Template Prompts.
+- Module Prompts.
+- Language Prompts.
+- Project Prompts.
+- Change Prompts.
+- Testing Prompts.
+- Deployment Prompts.
+
+Each prompt must support:
+
+- Prompt ID.
+- Name.
+- Category.
+- Language.
+- Application type.
+- Module.
+- Version.
+- Status.
+- Author.
+- Change description.
+- Approval history.
+
+Regular users must not have access to protected platform prompt editing.
+
+Implement the authorization rules in the backend.
+
+## 7. MULTI-LANGUAGE CODE GENERATION
+
+Support:
+
+- Python.
+- Java.
+- JavaScript.
+- TypeScript.
+- PHP.
+- Go.
+- C#.
+- Ruby.
+- Kotlin.
+- Swift.
+- Rust.
+- C++.
+
+The user's specified language must be respected.
+
+If the user does not specify a language, use Python + FastAPI.
+
+For each language, create:
+
+- Language prompt pack.
+- Framework prompt pack.
+- Architecture prompt pack.
+- Coding standards.
+- Database integration prompt.
+- Security prompt.
+- Testing prompt.
+- Build configuration prompt.
+
+Do not claim the model is trained from scratch on all programming languages.
+
+Use a coding-capable LLM, retrieval, structured prompts, tools, and validation.
+
+## 8. PROJECT MEMORY
+
+Create project memory containing:
+
+- Project specification.
+- Application category.
+- Programming language.
+- Framework.
+- Modules.
+- User roles.
+- Business rules.
+- Database schema.
+- API definitions.
+- UI configuration.
+- Theme.
+- Accepted changes.
+- Prompt history.
+- Project version.
+
+Each user change must be stored.
+
+The chatbot must retrieve relevant project context before updating an application.
+
+## 9. AGENTIC CHATBOT
+
+Prepare an architecture for these agents:
+
+- Intent Agent.
+- Requirement Analysis Agent.
+- Architect Agent.
+- UI/UX Agent.
+- Database Agent.
+- Backend Agent.
+- Frontend Agent.
+- Security Agent.
+- Testing Agent.
+- Update Agent.
+- Export Agent.
+
+The Python backend must orchestrate these agents using LangGraph.
+
+The frontend should communicate through clearly defined APIs.
+
+## 10. SECURITY
+
+Implement the UI and API contracts for:
+
+- Authentication.
+- RBAC.
+- Project ownership.
+- Protected prompt access.
+- Tenant isolation.
+- Secure project sharing.
+- Export permission checks.
+- Support tickets.
+- Audit logs.
+
+Never expose API keys in frontend code.
+
+Never expose protected system prompts to ordinary users.
+
+Never execute generated code directly inside the main Aegion server.
+
+Generated applications must eventually run inside isolated environments.
+
+## 11. DEVELOPMENT INSTRUCTIONS
+
+Build the application incrementally.
+
+First create:
+
+- Landing page.
+- Authentication UI.
+- Workspace layout.
+- Chat interface.
+- Theme engine.
+- Template selector.
+- Project dashboard.
+- Prompt Registry UI.
+- Super Admin UI.
+
+Create reusable components.
+
+Use realistic sample data only for frontend previews.
+
+Do not present mock data as real AI-generated application results.
+
+Create explicit API adapter interfaces for the Python backend.
+
+Create a separate backend scaffold with FastAPI, LangGraph, LangChain, PostgreSQL, and RAG architecture.
+
+The generated frontend must be usable, responsive, and visually polished.
+
+After each phase:
+
+- Run the available frontend checks.
+- Fix errors.
+- Preserve existing features.
+- Verify navigation.
+- Verify theme switching.
+- Verify responsive layouts.
+- Verify all buttons and controls perform their intended actions.
+
+Do not stop at a static landing page.
+
+Build a complete, modular foundation for Aegion AI.
+
+# 5. Phase 1 — File-by-file implementation roadmap
+
+Start here
+
+Your first milestone should be Aegion Core: a functional workspace, chatbot interface, project management, theme engine, and prompt registry.
+
+## Frontend file structure
+
+```
+
+aegion-frontend/
+├── src/
+│   ├── app/
+│   │   ├── App.tsx
+│   │   ├── routes.tsx
+│   │   └── providers.tsx
+│   │
+│   ├── components/
+│   │   ├── layout/
+│   │   │   ├── AppSidebar.tsx
+│   │   │   ├── AppHeader.tsx
+│   │   │   ├── WorkspaceLayout.tsx
+│   │   │   └── PreviewPanel.tsx
+│   │   │
+│   │   ├── chatbot/
+│   │   │   ├── ChatWindow.tsx
+│   │   │   ├── ChatInput.tsx
+│   │   │   ├── MessageBubble.tsx
+│   │   │   ├── AgentProgress.tsx
+│   │   │   └── ApprovalPanel.tsx
+│   │   │
+│   │   ├── themes/
+│   │   │   ├── ThemeSelector.tsx
+│   │   │   ├── ThemePreview.tsx
+│   │   │   └── ThemeCustomizer.tsx
+│   │   │
+│   │   └── common/
+│   │       ├── GlassCard.tsx
+│   │       ├── DataTable.tsx
+│   │       ├── Modal.tsx
+│   │       └── Button.tsx
+│   │
+│   ├── pages/
+│   │   ├── LandingPage.tsx
+│   │   ├── LoginPage.tsx
+│   │   ├── SignupPage.tsx
+│   │   ├── DashboardPage.tsx
+│   │   ├── ProjectsPage.tsx
+│   │   ├── BuilderPage.tsx
+│   │   ├── TemplatesPage.tsx
+│   │   ├── PromptLibraryPage.tsx
+│   │   ├── ThemeLibraryPage.tsx
+│   │   └── AdminPage.tsx
+│   │
+│   ├── services/
+│   │   ├── apiClient.ts
+│   │   ├── projectService.ts
+│   │   ├── chatService.ts
+│   │   ├── promptService.ts
+│   │   └── themeService.ts
+│   │
+│   ├── config/
+│   │   └── appConfig.ts
+│   │
+│   ├── themes/
+│   │   ├── themeTokens.ts
+│   │   ├── hrmsThemes.ts
+│   │   ├── ecommerceThemes.ts
+│   │   ├── multistoreThemes.ts
+│   │   ├── saasThemes.ts
+│   │   └── healthcareThemes.ts
+│   │
+│   ├── types/
+│   │   ├── project.ts
+│   │   ├── prompt.ts
+│   │   ├── chat.ts
+│   │   └── theme.ts
+│   │
+│   └── styles/
+│       ├── globals.css
+│       └── glassmorphism.css
+│
+└── package.json
+
+```
+
+## Python backend file structure
+
+```
+
+aegion-backend/
+├── app/
+│   ├── main.py
+│   │
+│   ├── api/v1/
+│   │   ├── auth.py
+│   │   ├── projects.py
+│   │   ├── chat.py
+│   │   ├── prompts.py
+│   │   ├── templates.py
+│   │   ├── themes.py
+│   │   ├── exports.py
+│   │   └── admin.py
+│   │
+│   ├── core/
+│   │   ├── config.py
+│   │   ├── security.py
+│   │   ├── permissions.py
+│   │   └── logging.py
+│   │
+│   ├── agents/
+│   │   ├── intent_agent.py
+│   │   ├── requirement_agent.py
+│   │   ├── architect_agent.py
+│   │   ├── uiux_agent.py
+│   │   ├── code_agent.py
+│   │   ├── security_agent.py
+│   │   └── testing_agent.py
+│   │
+│   ├── graph/
+│   │   ├── state.py
+│   │   ├── nodes.py
+│   │   ├── edges.py
+│   │   └── workflow.py
+│   │
+│   ├── prompts/
+│   │   ├── registry.py
+│   │   ├── core/
+│   │   ├── languages/
+│   │   └── templates/
+│   │
+│   ├── rag/
+│   │   ├── ingestion.py
+│   │   ├── retrieval.py
+│   │   ├── embeddings.py
+│   │   └── vector_store.py
+│   │
+│   ├── models/
+│   ├── schemas/
+│   ├── services/
+│   ├── repositories/
+│   └── db/
+│       ├── session.py
+│       └── base.py
+│
+├── alembic/
+├── tests/
+├── requirements.txt
+├── Dockerfile
+├── docker-compose.yml
+└── .env.example
+
+```
+
+## 6. The exact build sequence in Google AI Studio
+
+Do not paste every feature into one prompt. Use these prompts in order, continuing within the same project.
+
+Step 1
+
+Build the visual foundation
+
+Create the Aegion AI landing page, sidebar, top navigation, workspace layout, and dark glassmorphism design system. Use black, charcoal grey, cement grey, and violet accents. Create responsive layouts. Do not implement backend logic yet.
+
+Step 2
+
+Build the theme engine
+
+Implement the 50 theme presets across HRMS, E-Commerce, Multi-Store, SaaS, and Healthcare Store. Add a theme gallery with light/dark filters, preview cards, and a theme customizer. Use CSS variables and persistent theme configuration.
+
+Step 3
+
+Build the chatbot workspace
+
+Create a conversational AI workspace with message history, prompt input, application selector, programming language selector, theme selector, and live preview panel. Build the UI for streaming responses and agent progress.
+
+Step 4
+
+Build the project management UI
+
+Implement project creation, project list, project details, modules, version history, clone, share, download, and settings screens. Connect these to a typed API adapter.
+
+Step 5
+
+Build the Prompt Registry UI
+
+Create the Super Admin prompt management dashboard. Implement prompt browsing, prompt version comparison, draft editing, approval status, and application template management. Enforce permission-aware UI while keeping backend authorization authoritative.
+
+Step 6
+
+Generate the FastAPI backend scaffold
+
+Export or sync the project to GitHub. Generate the Python backend as a separate service with FastAPI, PostgreSQL, SQLAlchemy, LangGraph, LangChain, and RAG. Add authentication, project APIs, prompt registry APIs, and chat APIs.
+
+Step 7
+
+Connect the frontend and backend
+
+Replace mock project and chat data with real FastAPI endpoints. Implement authentication, project creation, chat sessions, prompt retrieval, and persistence. Verify the full flow.
+
+Google AI Studio supports GitHub sync and ZIP export, so you can move the generated code to VS Code for the Python backend work.&#x20;
+
+[image](https://www.google.com/s2/favicons?domain=https://ai.google.dev\&sz=32)
+
+Google AI+1
+
+
+
+## 7. My recommendation for your first working version
+
+Build these features first:
+
+| Feature                        | MVP priority |
+| ------------------------------ | ------------ |
+| Premium Aegion UI              | P0           |
+| Glass theme engine             | P0           |
+| Signup / Login                 | P0           |
+| Project workspace              | P0           |
+| AI chatbot interface           | P0           |
+| Prompt Registry                | P0           |
+| HRMS template                  | P0           |
+| FastAPI backend                | P0           |
+| LangGraph workflow             | P0           |
+| PostgreSQL project memory      | P0           |
+| RAG retrieval                  | P1           |
+| ZIP export                     | P1           |
+| Clone / Share                  | P1           |
+| Other templates                | P2           |
+| Multi-language code generation | P2           |
+| Production deployment sandbox  | P2           |
+
+One final architecture decision: don't make the theme engine part of the AI's code-generation logic. Keep themes as reusable design tokens. That way, if a user changes the HRMS theme from Pearl Workforce to Nebula HR, the system changes the UI appearance without rewriting payroll, attendance, or employee-management logic.
+
+This is the cleanest way to make Aegion AI scalable.
