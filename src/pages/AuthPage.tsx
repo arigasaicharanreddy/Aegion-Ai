@@ -1,11 +1,24 @@
-import React, { useState } from 'react';
-import { ArrowLeft, ShieldCheck, Clock, ArrowRight } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  Clock,
+  Eye,
+  EyeOff,
+  KeyRound,
+  ShieldAlert,
+  ShieldCheck,
+  UserPlus,
+} from 'lucide-react';
 import { useAegion } from '../context/AegionContext';
 import { apiClient } from '../services/apiClient';
 import { signInWithGooglePopup } from '../services/googleAuth';
 import { Button } from '../components/common/Button';
+import { ThemeAmbientBackdrop } from '../components/theme-3d/ThemeAmbientBackdrop';
+import { QuickThemeSwitcher } from '../components/platform-themes/QuickThemeSwitcher';
 
-export const AuthPage: React.FC<{ initialMode?: 'login' | 'forgot-password' }> = ({
+export const AuthPage: React.FC<{ initialMode?: 'login' | 'forgot-password' | 'reset-password' }> = ({
   initialMode = 'login',
 }) => {
   const {
@@ -13,50 +26,119 @@ export const AuthPage: React.FC<{ initialMode?: 'login' | 'forgot-password' }> =
     setAuthenticatedUser,
     setPendingStatusInfo,
     setGooglePrefill,
-    runtimeMode,
-    enterFreeDevPreview,
+    setAdminPortalEmailPrefill,
+    resetToken,
+    setResetToken,
     notify,
   } = useAegion();
 
-  const [mode, setMode] = useState<'login' | 'forgot-password'>(initialMode);
+  const [mode, setMode] = useState<'login' | 'forgot-password' | 'reset-password'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [manualResetToken, setManualResetToken] = useState(resetToken || '');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [blockedStatus, setBlockedStatus] = useState<{
+    status: string;
+    message: string;
+    isRejected: boolean;
+  } | null>(null);
   const [resetMessage, setResetMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
+
+  useEffect(() => {
+    if (resetToken) {
+      setManualResetToken(resetToken);
+      setMode('reset-password');
+    }
+  }, [resetToken]);
+
+  const passwordRules = useMemo(
+    () => [
+      { label: 'At least 12 characters', ok: newPassword.length >= 12 },
+      { label: 'Uppercase letter (A-Z)', ok: /[A-Z]/.test(newPassword) },
+      { label: 'Lowercase letter (a-z)', ok: /[a-z]/.test(newPassword) },
+      { label: 'Number (0-9)', ok: /[0-9]/.test(newPassword) },
+      { label: 'Special symbol (!@#$...)', ok: /[^A-Za-z0-9]/.test(newPassword) },
+    ],
+    [newPassword]
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+    setBlockedStatus(null);
     setResetMessage(null);
     setLoading(true);
 
     try {
       if (mode === 'forgot-password') {
-        const res = await apiClient.requestPasswordReset(email);
+        const res = await apiClient.requestPasswordReset(email.trim());
         setResetMessage(res.message);
-        notify('Password reset instructions queued', 'success');
+        notify('Password reset instructions sent if the account is active.', 'success');
+      } else if (mode === 'reset-password') {
+        if (newPassword !== confirmPassword) {
+          setErrorMessage('New password and confirmation do not match.');
+          setLoading(false);
+          return;
+        }
+        if (passwordRules.some((r) => !r.ok)) {
+          setErrorMessage('Please satisfy all strong password requirements.');
+          setLoading(false);
+          return;
+        }
+        await apiClient.resetUserPassword(manualResetToken.trim(), newPassword);
+        window.history.replaceState({}, '', window.location.pathname);
+        setResetToken(null);
+        setNewPassword('');
+        setConfirmPassword('');
+        setMode('login');
+        setResetMessage('Your password has been updated. Please sign in with your new password.');
+        notify('Password reset completed.', 'success');
       } else {
-        const res = await apiClient.builderLogin(email, password);
+        const res = await apiClient.builderLogin(email.trim(), password);
         setAuthenticatedUser(res.user, 'dashboard');
         notify(`Welcome back, ${res.user.name}`, 'success');
       }
     } catch (err) {
-      const error = err as Error & { payload?: { useAdminPortal?: boolean; registrationStatus?: string; registrationId?: string } };
+      const error = err as Error & {
+        payload?: {
+          useAdminPortal?: boolean;
+          registrationStatus?: string;
+          registrationId?: string;
+          needsRegistration?: boolean;
+        };
+      };
       if (error.payload?.useAdminPortal) {
-        notify('Super Admin accounts sign in through the dedicated Admin Portal.', 'info');
+        setAdminPortalEmailPrefill(email.trim());
+        notify('Super Admin accounts sign in through the dedicated Super Admin Portal.', 'info');
         navigate('admin-login');
         return;
       }
       if (error.payload?.registrationStatus) {
+        const regStatus = error.payload.registrationStatus;
         setPendingStatusInfo({
           email,
-          status: error.payload.registrationStatus,
+          status: regStatus,
           registrationId: error.payload.registrationId,
         });
+        setBlockedStatus({
+          status: regStatus,
+          message: error.message,
+          isRejected: regStatus === 'Rejected' || regStatus === 'Suspended',
+        });
+      } else {
+        setErrorMessage(error.message || 'Authentication failed.');
       }
-      setErrorMessage(error.message || 'Authentication failed.');
     } finally {
       setLoading(false);
     }
@@ -64,26 +146,37 @@ export const AuthPage: React.FC<{ initialMode?: 'login' | 'forgot-password' }> =
 
   const handleGoogleContinue = async () => {
     setErrorMessage(null);
+    setBlockedStatus(null);
     setGoogleLoading(true);
     try {
       const googleRes = await signInWithGooglePopup();
       const exchanged = await apiClient.googleAuthExchange(googleRes.idToken, 'builder');
 
       if (exchanged.status === 'authenticated' && exchanged.user) {
-        setAuthenticatedUser(exchanged.user, exchanged.user.role === 'super_admin' ? 'admin' : 'dashboard');
+        setAuthenticatedUser(
+          exchanged.user,
+          exchanged.user.role === 'super_admin' ? 'admin' : 'dashboard'
+        );
         notify(`Signed in with Google as ${exchanged.user.email}`, 'success');
       } else if (exchanged.status === 'pending_approval') {
+        const regStatus = exchanged.registrationStatus || 'Pending Approval';
         setPendingStatusInfo({
           email: exchanged.email,
           fullName: exchanged.name,
-          status: exchanged.registrationStatus || 'Pending Approval',
+          status: regStatus,
           registrationId: exchanged.registrationId,
           adminComments: exchanged.adminComments,
         });
-        navigate('pending-approval');
+        setBlockedStatus({
+          status: regStatus,
+          message:
+            exchanged.message ||
+            'Your Aegion AI workspace access request is currently under review. You will receive an email notification once your request has been approved.',
+          isRejected: regStatus === 'Rejected' || regStatus === 'Suspended',
+        });
       } else if (exchanged.status === 'needs_registration' && exchanged.profile) {
         setGooglePrefill(exchanged.profile);
-        notify('Google verified. Complete your project registration for Super Admin approval.', 'info');
+        notify('Complete the 6-step registration request before signing in to your workspace.', 'info');
         navigate('register');
       }
     } catch (err) {
@@ -94,38 +187,124 @@ export const AuthPage: React.FC<{ initialMode?: 'login' | 'forgot-password' }> =
   };
 
   return (
-    <div className="min-h-screen bg-[#09090C] text-[#F3F4F6] flex flex-col justify-center items-center p-6">
-      <div className="w-full max-w-md space-y-5">
-        <div className="flex items-center justify-between">
+    <div className="relative min-h-screen bg-[var(--aegion-platform-bg)] text-[var(--aegion-platform-text)] flex flex-col justify-center items-center p-6 transition-colors duration-300">
+      <ThemeAmbientBackdrop variant="public" />
+
+      <div className="relative z-10 w-full max-w-md space-y-5">
+        <div className="flex items-center justify-between gap-2">
           <button
             type="button"
             onClick={() => navigate('landing')}
-            className="inline-flex items-center gap-2 text-xs text-[#9CA3AF] hover:text-white cursor-pointer"
+            className="inline-flex items-center gap-2 text-xs text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)] cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Back to Aegion AI</span>
           </button>
-          <button
-            type="button"
-            onClick={() => navigate('admin-login')}
-            className="inline-flex items-center gap-1.5 text-xs text-[#A78BFA] hover:text-white cursor-pointer"
-          >
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Super Admin Portal</span>
-          </button>
+
+          <div className="flex items-center gap-2">
+            <QuickThemeSwitcher compact />
+            <button
+              type="button"
+              onClick={() => navigate('admin-login')}
+              className="inline-flex items-center gap-1.5 text-xs text-[var(--aegion-platform-accent)] hover:underline cursor-pointer"
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Super Admin Portal</span>
+            </button>
+          </div>
         </div>
 
-        <div className="aegion-glass rounded-xl p-6 sm:p-8 space-y-6">
+        <div className="aegion-glass p-6 sm:p-8 space-y-6">
           <div className="space-y-1.5">
-            <h1 className="text-2xl font-bold text-white font-display">
-              {mode === 'login' ? 'Sign in to Aegion AI' : 'Reset workspace password'}
+            <h1 className="text-2xl font-bold text-[var(--aegion-platform-text)] font-display">
+              {mode === 'login'
+                ? 'Sign in to Aegion AI'
+                : mode === 'forgot-password'
+                ? 'Forgot password'
+                : 'Set a new password'}
             </h1>
-            <p className="text-xs text-[#9CA3AF]">
+            <p className="text-xs text-[var(--aegion-platform-text-muted)]">
               {mode === 'forgot-password'
-                ? 'Enter your approved workspace email to receive a single-use reset link.'
-                : 'Approved builder accounts can access the multi-language AI Studio and project memory.'}
+                ? 'Enter your activated workspace email to receive a single-use password reset link.'
+                : mode === 'reset-password'
+                ? 'Create a new strong password for your Aegion AI workspace account.'
+                : 'Sign in with Google or your activated workspace email and password.'}
             </p>
           </div>
+
+          {mode === 'login' && (
+            <div className="p-3.5 aegion-btn-shape bg-[var(--aegion-platform-accent-soft)] border border-[var(--aegion-platform-border-strong)] space-y-2">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[var(--aegion-platform-text)]">
+                <UserPlus className="w-3.5 h-3.5 text-[var(--aegion-platform-accent)]" />
+                <span>New Users: Request Workspace Access</span>
+              </div>
+              <p className="text-[11px] text-[var(--aegion-platform-text-secondary)] leading-relaxed">
+                New users must click Request Workspace Access and complete the six-step registration.
+                Workspace sign-in unlocks after Super Admin approval and account activation.
+              </p>
+              <div className="flex flex-wrap items-center gap-3 pt-0.5 text-[11px]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setGooglePrefill(null);
+                    navigate('register');
+                  }}
+                  className="inline-flex items-center gap-1 font-semibold text-[var(--aegion-platform-accent)] hover:underline cursor-pointer"
+                >
+                  <span>Request Workspace Access</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate('pending-approval')}
+                  className="text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)] underline cursor-pointer"
+                >
+                  Check Approval Status
+                </button>
+              </div>
+            </div>
+          )}
+
+          {blockedStatus && (
+            <div
+              className={`p-4 aegion-btn-shape border text-xs space-y-3 ${
+                blockedStatus.isRejected
+                  ? 'bg-red-500/10 border-red-500/30 text-red-500 dark:text-red-200'
+                  : 'bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-100'
+              }`}
+            >
+              <div className="flex items-start gap-2.5">
+                {blockedStatus.isRejected ? (
+                  <ShieldAlert className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                ) : (
+                  <Clock className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                )}
+                <div className="space-y-1">
+                  <div className="font-semibold">Access Status: {blockedStatus.status}</div>
+                  <p className="leading-relaxed opacity-95">{blockedStatus.message}</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => navigate('pending-approval')}
+                  className="inline-flex items-center gap-1 font-medium underline cursor-pointer"
+                >
+                  <span>Check Approval Status</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+                {blockedStatus.isRejected && (
+                  <button
+                    type="button"
+                    onClick={() => navigate('landing')}
+                    className="underline cursor-pointer"
+                  >
+                    Contact Aegion AI Support
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
           {mode === 'login' && (
             <>
@@ -133,7 +312,7 @@ export const AuthPage: React.FC<{ initialMode?: 'login' | 'forgot-password' }> =
                 type="button"
                 disabled={googleLoading}
                 onClick={handleGoogleContinue}
-                className="w-full flex items-center justify-center gap-3 bg-white text-[#1F1F1F] hover:bg-[#F3F4F6] disabled:opacity-60 font-medium text-sm px-4 py-2.5 rounded-lg border border-[#747775]/40 transition-colors cursor-pointer"
+                className="w-full flex items-center justify-center gap-3 bg-white text-[#1F1F1F] hover:bg-[#F3F4F6] disabled:opacity-60 font-medium text-sm px-4 py-2.5 aegion-btn-shape border border-[#747775]/40 transition-colors cursor-pointer"
               >
                 <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
                   <path
@@ -156,127 +335,205 @@ export const AuthPage: React.FC<{ initialMode?: 'login' | 'forgot-password' }> =
                 <span>{googleLoading ? 'Verifying with Google...' : 'Continue with Google'}</span>
               </button>
 
-              <div className="flex items-center gap-3 text-[11px] text-[#6B7280]">
-                <div className="flex-1 h-px bg-white/10" />
-                <span>or sign in with approved credentials</span>
-                <div className="flex-1 h-px bg-white/10" />
+              <div className="flex items-center gap-3 text-[11px] text-[var(--aegion-platform-text-muted)]">
+                <div className="flex-1 h-px bg-[var(--aegion-platform-border)]" />
+                <span>or login with email and password</span>
+                <div className="flex-1 h-px bg-[var(--aegion-platform-border)]" />
               </div>
             </>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <label className="block space-y-1.5">
-              <span className="text-xs font-medium text-[#D1D5DB]">Work Email</span>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@company.com"
-                className="w-full bg-[#181922] border border-white/10 rounded-lg px-3.5 py-2 text-sm text-white placeholder:text-[#6B7280] focus:outline-none focus:border-[#8B5CF6]"
-              />
-            </label>
-
-            {mode !== 'forgot-password' && (
+            {mode !== 'reset-password' && (
               <label className="block space-y-1.5">
-                <span className="text-xs font-medium text-[#D1D5DB]">Password</span>
+                <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                  Work Email
+                </span>
                 <input
-                  type="password"
+                  type="email"
                   required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your activated password"
-                  className="w-full bg-[#181922] border border-white/10 rounded-lg px-3.5 py-2 text-sm text-white placeholder:text-[#6B7280] focus:outline-none focus:border-[#8B5CF6]"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@company.com"
+                  className="w-full bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] aegion-btn-shape px-3.5 py-2 text-sm text-[var(--aegion-platform-text)] placeholder:text-[var(--aegion-platform-text-muted)] focus:outline-none focus:border-[var(--aegion-platform-accent)]"
                 />
               </label>
             )}
 
+            {mode === 'login' && (
+              <label className="block space-y-1.5">
+                <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                  Password
+                </span>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="w-full bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] aegion-btn-shape pl-3.5 pr-10 py-2 text-sm text-[var(--aegion-platform-text)] placeholder:text-[var(--aegion-platform-text-muted)] focus:outline-none focus:border-[var(--aegion-platform-accent)]"
+                  />
+                  <button
+                    type="button"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)] cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </label>
+            )}
+
+            {mode === 'reset-password' && (
+              <>
+                {!resetToken && (
+                  <label className="block space-y-1.5">
+                    <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                      Reset Token
+                    </span>
+                    <input
+                      type="text"
+                      required
+                      value={manualResetToken}
+                      onChange={(e) => setManualResetToken(e.target.value)}
+                      className="w-full bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] aegion-btn-shape px-3.5 py-2 text-xs font-mono text-[var(--aegion-platform-text)]"
+                    />
+                  </label>
+                )}
+
+                <label className="block space-y-1.5">
+                  <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                    New Password
+                  </span>
+                  <input
+                    type="password"
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] aegion-btn-shape px-3.5 py-2 text-sm text-[var(--aegion-platform-text)] focus:outline-none focus:border-[var(--aegion-platform-accent)]"
+                  />
+                </label>
+
+                <label className="block space-y-1.5">
+                  <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                    Confirm New Password
+                  </span>
+                  <input
+                    type="password"
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] aegion-btn-shape px-3.5 py-2 text-sm text-[var(--aegion-platform-text)] focus:outline-none focus:border-[var(--aegion-platform-accent)]"
+                  />
+                </label>
+
+                <div className="p-3 aegion-btn-shape bg-[var(--aegion-platform-bg-alt)] border border-[var(--aegion-platform-border)] space-y-1">
+                  {passwordRules.map((r) => (
+                    <div
+                      key={r.label}
+                      className={`flex items-center gap-2 text-xs ${
+                        r.ok ? 'text-emerald-500' : 'text-[var(--aegion-platform-text-muted)]'
+                      }`}
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                      <span>{r.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
             {errorMessage && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/25 text-xs text-red-300 space-y-2">
+              <div className="p-3 aegion-btn-shape bg-red-500/10 border border-red-500/25 text-xs text-red-500 dark:text-red-300 space-y-2">
                 <div>{errorMessage}</div>
                 <button
                   type="button"
                   onClick={() => navigate('pending-approval')}
-                  className="inline-flex items-center gap-1 text-white underline cursor-pointer"
+                  className="inline-flex items-center gap-1 underline cursor-pointer"
                 >
                   <Clock className="w-3 h-3" />
-                  <span>Check registration approval status</span>
+                  <span>Check Approval Status</span>
                 </button>
               </div>
             )}
 
             {resetMessage && (
-              <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-xs text-emerald-300">
+              <div className="p-3 aegion-btn-shape bg-emerald-500/10 border border-emerald-500/25 text-xs text-emerald-500 dark:text-emerald-300">
                 {resetMessage}
               </div>
             )}
 
             <Button type="submit" className="w-full" size="lg" disabled={loading}>
-              {loading
-                ? 'Verifying...'
-                : mode === 'login'
-                ? 'Sign In to Workspace'
-                : 'Send Reset Link'}
+              {mode === 'reset-password' && <KeyRound className="w-4 h-4" />}
+              <span>
+                {loading
+                  ? 'Verifying...'
+                  : mode === 'login'
+                  ? 'Login with Email and Password'
+                  : mode === 'forgot-password'
+                  ? 'Send Reset Link'
+                  : 'Reset Password'}
+              </span>
             </Button>
           </form>
 
-          {mode === 'login' && runtimeMode.freeDevMode && (
-            <Button
-              type="button"
-              variant="secondary"
-              className="w-full"
-              onClick={() => enterFreeDevPreview('builder', 'dashboard')}
-            >
-              Continue in Free Dev Mode (Builder Preview)
-            </Button>
-          )}
-
-          <div className="pt-4 border-t border-white/10 space-y-3 text-xs">
-            <div className="flex items-center justify-between gap-2 text-[#9CA3AF]">
+          <div className="pt-4 border-t border-[var(--aegion-platform-border)] space-y-3 text-xs">
+            <div className="flex items-center justify-between gap-2 text-[var(--aegion-platform-text-muted)]">
               <button
                 type="button"
                 onClick={() => {
                   setGooglePrefill(null);
                   navigate('register');
                 }}
-                className="inline-flex items-center gap-1 text-[#A78BFA] hover:text-white font-medium cursor-pointer"
+                className="inline-flex items-center gap-1 text-[var(--aegion-platform-accent)] hover:underline font-medium cursor-pointer"
               >
-                <span>New organization? Request Access</span>
+                <span>Request Workspace Access</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
 
-              {mode !== 'forgot-password' ? (
+              {mode === 'login' ? (
                 <button
                   type="button"
                   onClick={() => {
                     setErrorMessage(null);
+                    setBlockedStatus(null);
                     setMode('forgot-password');
                   }}
-                  className="hover:text-white cursor-pointer"
+                  className="hover:text-[var(--aegion-platform-text)] cursor-pointer"
                 >
-                  Forgot password?
+                  Forgot Password?
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={() => {
                     setErrorMessage(null);
+                    setBlockedStatus(null);
                     setMode('login');
                   }}
-                  className="hover:text-white cursor-pointer"
+                  className="hover:text-[var(--aegion-platform-text)] cursor-pointer"
                 >
-                  Back to sign in
+                  Back to Sign In
                 </button>
               )}
             </div>
 
-            <div className="flex items-center justify-between text-[#6B7280]">
+            <div className="flex items-center justify-between text-[var(--aegion-platform-text-muted)]">
               <button
                 type="button"
                 onClick={() => navigate('pending-approval')}
-                className="hover:text-[#D1D5DB] cursor-pointer"
+                className="hover:text-[var(--aegion-platform-text)] cursor-pointer"
               >
-                Track pending registration status
+                Check Approval Status
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('activate')}
+                className="hover:text-[var(--aegion-platform-text)] cursor-pointer"
+              >
+                Account Activation
               </button>
             </div>
           </div>

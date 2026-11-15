@@ -1,7 +1,6 @@
 import { AgentExecutionStep, ChangeProposal, ChatAttachment } from '../types/chat';
 import { ProjectMemory } from '../types/project';
 import { apiClient } from './apiClient';
-import { mockDevApi } from '../config/mockDevApi';
 
 export interface StreamChatParams {
   message: string;
@@ -20,11 +19,6 @@ export interface StreamChatParams {
 }
 
 export async function streamAgentChat(params: StreamChatParams): Promise<void> {
-  if (apiClient.isMockMode()) {
-    await mockDevApi.streamMockAgentChat(params);
-    return;
-  }
-
   let response: Response;
   try {
     response = await fetch(apiClient.getEndpoint('/api/v1/chat/stream'), {
@@ -45,13 +39,8 @@ export async function streamAgentChat(params: StreamChatParams): Promise<void> {
         attachments: params.attachments || [],
       }),
     });
-  } catch {
-    await mockDevApi.streamMockAgentChat(params);
-    return;
-  }
-
-  if (response.status >= 500 || response.status === 404) {
-    await mockDevApi.streamMockAgentChat(params);
+  } catch (err) {
+    params.onError(err instanceof Error ? err.message : 'Unable to reach chat gateway.');
     return;
   }
 

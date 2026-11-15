@@ -18,5 +18,5 @@ export const PageTransition: React.FC<{ children: React.ReactNode; routeKey: str
 );
 
 export const SkeletonBlock: React.FC<{ className?: string }> = ({ className = 'h-20 w-full' }) => (
-  <div className={`animate-pulse rounded-xl bg-white/[0.05] border border-white/10 ${className}`} />
+  <div className={`aegion-shimmer rounded-xl border border-[var(--aegion-platform-border)] ${className}`} />
 );

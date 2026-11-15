@@ -8,18 +8,76 @@ import {
   resolveSessionUser,
   type AuthenticatedRequest,
 } from '../middleware/auth';
+import { createRateLimiter } from '../security/crypto';
 
 export const agentRouter = Router();
 
 const PYTHON_API_URL = process.env.AEGION_PYTHON_API_URL?.trim() || '';
 
+const assistantRateLimiter = createRateLimiter({
+  windowMs: 60_000,
+  maxRequests: 25,
+  keyPrefix: 'assistant',
+});
+
 function createAiClient() {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) return null;
   return new GoogleGenAI({
     apiKey,
     httpOptions: { headers: { 'User-Agent': 'aistudio-build' } },
   });
+}
+
+function buildAssistantSystemInstruction(projectContext?: {
+  name?: string;
+  category?: string;
+  language?: string;
+  framework?: string;
+  modules?: string[];
+  specification?: string;
+}) {
+  const ctxBlock = projectContext?.name
+    ? `\n\nActive User Workspace Project Context:
+- Project Name: ${projectContext.name}
+- Category: ${projectContext.category || 'General'}
+- Target Stack: ${projectContext.language || 'Default'} (${projectContext.framework || 'Standard'})
+- Active Modules: ${(projectContext.modules || []).join(', ') || 'None yet'}
+- Specification Summary: ${(projectContext.specification || '').slice(0, 400)}`
+    : '';
+
+  return `You are the Aegion AI Assistant, a clear, practical product and application architecture advisor for Aegion AI.
+Explain what Aegion AI does, how businesses transform requirements into intelligent scalable applications, its 6 industry solution categories (HRMS, E-Commerce, Multi-Store Management, SaaS Products, Healthcare & Pharmacy Store Systems, Custom Business Operations Software), its 50 light and dark customizable themes, and how onboarding works:
+- New users complete the 6-step Request Workspace Access registration and await Super Admin approval.
+- Approved users activate their account via a single-use link, then sign in with Google or Email and Password.
+- Visitors can reach the team via the Contact Us inquiry form on the home page.
+- Never reveal or mention server secrets, passwords, API keys, or internal environment configuration.${ctxBlock}
+Keep responses helpful, accurate, and concise.`;
+}
+
+function buildAssistantContents(
+  messages: Array<{ role?: string; content?: string }>,
+  latestMessage: string
+): string {
+  const historyText = messages
+    .slice(-10)
+    .map((m) => `${m.role === 'assistant' ? 'Assistant' : 'User'}: ${String(m.content || '').slice(0, 800)}`)
+    .join('\n');
+
+  return historyText
+    ? `Conversation history:\n${historyText}\n\nLatest User Question:\n${latestMessage}`
+    : latestMessage;
+}
+
+function formatGeminiError(err: unknown): { status: number; message: string } {
+  const raw = err instanceof Error ? err.message : String(err || 'Unable to reach Gemini AI service.');
+  if (raw.includes('429') || raw.toLowerCase().includes('quota') || raw.toLowerCase().includes('rate limit')) {
+    return { status: 429, message: 'AI assistant rate limit reached. Please wait a moment and try again.' };
+  }
+  if (raw.includes('401') || raw.includes('403') || raw.toLowerCase().includes('api key')) {
+    return { status: 502, message: 'Server AI credentials could not be verified. Contact the workspace administrator.' };
+  }
+  return { status: 502, message: 'AI assistant service encountered an upstream error. Please try again shortly.' };
 }
 
 async function collectBackendScaffold(dir: string, baseDir: string): Promise<{ path: string; content: string }[]> {
@@ -40,20 +98,15 @@ async function collectBackendScaffold(dir: string, baseDir: string): Promise<{ p
   return results;
 }
 
-function isFreeDevMode(): boolean {
-  return process.env.NODE_ENV !== 'production' && process.env.AEGION_FREE_DEV_MODE !== 'false';
-}
-
 agentRouter.get('/health', async (_req, res) => {
   res.json({
     status: 'ok',
     frontendRuntime: 'react-vite',
     gatewayRuntime: 'node-express',
-    freeDevMode: isFreeDevMode(),
     pythonBackendConfigured: Boolean(PYTHON_API_URL),
     pythonBackendUrl: PYTHON_API_URL || null,
     geminiConfigured: Boolean(process.env.GEMINI_API_KEY?.trim()),
-    aiModel: process.env.GEMINI_API_KEY?.trim() ? 'gemini-4-hydrogen' : 'free-dev-mock-orchestrator',
+    aiModel: 'gemini-4-hydrogen',
     timestamp: new Date().toISOString(),
   });
 });
@@ -73,13 +126,19 @@ agentRouter.get('/runtime/mode', async (_req, res) => {
       (db.notificationConfig.whatsappPhoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID)
   );
   res.json({
-    freeDevMode: isFreeDevMode(),
     nodeEnv: process.env.NODE_ENV || 'development',
     pythonBackendConfigured: Boolean(PYTHON_API_URL),
     geminiConfigured: Boolean(process.env.GEMINI_API_KEY?.trim()),
     emailConfigured,
     whatsappConfigured,
-    superAdminSecretProvided: Boolean(process.env.AEGION_SUPER_ADMIN_INITIAL_PASSWORD?.trim()),
+    superAdminConfigured: db.users.some((u) => u.role === 'super_admin' && Boolean(u.passwordHash)),
+  });
+});
+
+agentRouter.get('/platform-themes/config', async (_req, res) => {
+  const db = await loadDb();
+  res.json({
+    config: db.platformThemeConfig,
   });
 });
 
@@ -125,6 +184,106 @@ agentRouter.post('/prompts/authorize', async (req, res) => {
   }
 
   return res.json({ allowed: true, role });
+});
+
+agentRouter.post('/assistant/chat', assistantRateLimiter, async (req, res) => {
+  try {
+    const rawMessages = Array.isArray(req.body?.messages) ? req.body.messages : [];
+    const latestMessage =
+      typeof req.body?.message === 'string'
+        ? req.body.message.trim()
+        : typeof rawMessages[rawMessages.length - 1]?.content === 'string'
+        ? rawMessages[rawMessages.length - 1].content.trim()
+        : '';
+
+    if (!latestMessage) {
+      return res.status(400).json({ error: 'Message is required.' });
+    }
+
+    const ai = createAiClient();
+    if (!ai) {
+      return res.status(503).json({
+        error: 'Chatbot AI service is not configured on the server.',
+      });
+    }
+
+    const { user } = await resolveSessionUser(req);
+    const projectContext = user?.status === 'active' ? req.body?.projectContext : undefined;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-4-hydrogen',
+      contents: buildAssistantContents(rawMessages, latestMessage),
+      config: {
+        systemInstruction: buildAssistantSystemInstruction(projectContext),
+      },
+    });
+
+    const reply = (response.text || '').trim() || 'How can I help you explore Aegion AI today?';
+    return res.json({
+      reply,
+      model: 'gemini-4-hydrogen',
+    });
+  } catch (err) {
+    const formatted = formatGeminiError(err);
+    return res.status(formatted.status).json({ error: formatted.message });
+  }
+});
+
+agentRouter.post('/assistant/stream', assistantRateLimiter, async (req, res) => {
+  const rawMessages = Array.isArray(req.body?.messages) ? req.body.messages : [];
+  const latestMessage =
+    typeof req.body?.message === 'string'
+      ? req.body.message.trim()
+      : typeof rawMessages[rawMessages.length - 1]?.content === 'string'
+      ? rawMessages[rawMessages.length - 1].content.trim()
+      : '';
+
+  if (!latestMessage) {
+    return res.status(400).json({ error: 'Message is required.' });
+  }
+
+  const ai = createAiClient();
+  if (!ai) {
+    return res.status(503).json({
+      error: 'Chatbot AI service is not configured on the server.',
+    });
+  }
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  const sendEvent = (event: string, data: unknown) => {
+    res.write(`event: ${event}\n`);
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
+  };
+
+  try {
+    const { user } = await resolveSessionUser(req);
+    const projectContext = user?.status === 'active' ? req.body?.projectContext : undefined;
+
+    const stream = await ai.models.generateContentStream({
+      model: 'gemini-4-hydrogen',
+      contents: buildAssistantContents(rawMessages, latestMessage),
+      config: {
+        systemInstruction: buildAssistantSystemInstruction(projectContext),
+      },
+    });
+
+    for await (const chunk of stream) {
+      const text = chunk.text || '';
+      if (text) {
+        sendEvent('token', { text });
+      }
+    }
+
+    sendEvent('done', { model: 'gemini-4-hydrogen' });
+    return res.end();
+  } catch (err) {
+    const formatted = formatGeminiError(err);
+    sendEvent('error', { message: formatted.message, status: formatted.status });
+    return res.end();
+  }
 });
 
 agentRouter.post('/chat/stream', requireApprovedBuilder, async (req: AuthenticatedRequest, res) => {
@@ -178,95 +337,8 @@ agentRouter.post('/chat/stream', requireApprovedBuilder, async (req: Authenticat
 
     const ai = createAiClient();
     if (!ai) {
-      if (isFreeDevMode()) {
-        const mockSteps = [
-          { id: 'intent', detail: `Resolving target language (${language}) & domain (${category})` },
-          { id: 'requirement', detail: 'Extracting modules, roles, and business rules' },
-          { id: 'architect', detail: 'Selecting layered prompt packs and Project Memory context' },
-          { id: 'uiux', detail: `Binding decoupled Glass UI tokens (${themeName})` },
-          { id: 'database', detail: 'Designing PostgreSQL normalized tables & constraints' },
-          { id: 'backend', detail: `Synthesizing ${language} / ${framework} controllers & services` },
-          { id: 'frontend', detail: 'Generating tokenized React + TypeScript views' },
-          { id: 'security', detail: 'Validating JWT/RBAC, tenant isolation & input guards' },
-          { id: 'testing', detail: 'Generating contract and RBAC integration tests' },
-        ];
-        for (const s of mockSteps) {
-          sendEvent('agent_step', { id: s.id, status: 'running', detail: s.detail });
-          sendEvent('agent_step', { id: s.id, status: 'completed', detail: s.detail });
-        }
-
-        const reply = `Synthesized ${category} application architecture in ${language} (${framework}) bound to decoupled Glass UI theme "${themeName}" (Free Dev Mode deterministic generator — add GEMINI_API_KEY on the server for live Gemini synthesis).`;
-        for (const word of reply.split(/(\s+)/)) {
-          sendEvent('token', { text: word });
-        }
-
-        sendEvent('proposal', {
-          id: `prop-dev-${Date.now()}`,
-          summary: `${category} architecture update (${language} / ${framework})`,
-          detectedCategory: category,
-          detectedLanguage: language,
-          detectedFramework: framework,
-          detectedFrontend: 'React + TypeScript',
-          database: 'PostgreSQL',
-          authMethod: 'JWT + RBAC',
-          recommendedThemeId: themeId,
-          modules: ['Auth & RBAC', 'Core Domain Service', 'Audit Ledger', 'Decoupled Glass UI'],
-          userRoles: ['super_admin', 'workspace_admin', 'standard_user'],
-          businessRules: [
-            'Enforce tenant isolation and RBAC verification on every mutating endpoint.',
-            'Keep UI appearance strictly bound to CSS custom properties independent of backend logic.',
-          ],
-          databaseSchema: [
-            {
-              name: 'workspace_records',
-              columns: [
-                { name: 'id', type: 'UUID', constraints: 'PRIMARY KEY' },
-                { name: 'tenant_id', type: 'UUID', constraints: 'NOT NULL, INDEX' },
-                { name: 'title', type: 'VARCHAR(160)', constraints: 'NOT NULL' },
-                { name: 'status', type: 'VARCHAR(32)', constraints: 'NOT NULL DEFAULT active' },
-              ],
-            },
-          ],
-          apiDefinitions: [
-            { method: 'GET', path: '/api/v1/records', summary: 'List tenant-scoped records', authRequired: true },
-            { method: 'POST', path: '/api/v1/records', summary: 'Create validated domain record', authRequired: true },
-          ],
-          files: [
-            {
-              path: `backend/main.${language === 'Python' ? 'py' : language === 'Go' ? 'go' : 'ts'}`,
-              language,
-              summary: `Entry router for ${category} (${framework})`,
-              content: `// Generated in Free Dev Mode for ${category} (${language} / ${framework})\n// Request: ${message.slice(0, 140)}\nexport const serviceSpec = {\n  category: "${category}",\n  language: "${language}",\n  framework: "${framework}",\n  themeId: "${themeId}",\n};\n`,
-            },
-            {
-              path: 'database/001_schema.sql',
-              language: 'SQL',
-              summary: 'Normalized PostgreSQL table migration',
-              content:
-                'CREATE TABLE IF NOT EXISTS workspace_records (\n  id UUID PRIMARY KEY,\n  tenant_id UUID NOT NULL,\n  title VARCHAR(160) NOT NULL,\n  status VARCHAR(32) NOT NULL DEFAULT \'active\',\n  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\n);\n',
-            },
-            {
-              path: 'frontend/ThemeTokenSurface.tsx',
-              language: 'TypeScript',
-              summary: 'Decoupled CSS variable UI container',
-              content:
-                'export function ThemeTokenSurface({ title }: { title: string }) {\n  return (\n    <section style={{ background: "var(--app-surface)", borderColor: "var(--app-border)", color: "var(--app-text)" }}>\n      <h2>{title}</h2>\n    </section>\n  );\n}\n',
-            },
-          ],
-          securityChecklist: [
-            'Server-side RBAC enforcement on all admin and export endpoints',
-            'Zero hardcoded credentials or theme hex tokens in domain services',
-          ],
-          status: 'pending',
-        });
-
-        sendEvent('done', { model: 'free-dev-mock-orchestrator' });
-        return res.end();
-      }
-
       sendEvent('error', {
-        message:
-          'GEMINI_API_KEY is not configured in environment secrets. Add it in Settings > Secrets to run live agentic generation.',
+        message: 'GEMINI_API_KEY is not configured on the server.',
       });
       return res.end();
     }
@@ -297,11 +369,11 @@ agentRouter.post('/chat/stream', requireApprovedBuilder, async (req: Authenticat
         : '';
 
     const systemInstruction = `You are Aegion AI's Agentic Full-Stack Application Architect & Multi-Language Code Generation Engine.
-Aegion Platform itself runs on a Python FastAPI + LangGraph + RAG architecture, while the applications you generate can target ANY requested programming language (Python/FastAPI, Java/Spring Boot, JavaScript/Node.js, TypeScript/NestJS, PHP/Laravel, Go/Gin, C#/.NET, Ruby/Rails, Kotlin, Swift, Rust/Axum, C++).
+Generate clean layered code in ANY requested programming language (Python/FastAPI, Java/Spring Boot, JavaScript/Node.js, TypeScript/NestJS, PHP/Laravel, Go/Gin, C#/.NET, Ruby/Rails, Kotlin, Swift, Rust/Axum, C++).
 
 CRITICAL RULES:
-1. If the user's message explicitly specifies a backend programming language or framework, override the defaults and generate code in that exact language and framework.
-2. If no language is specified in the prompt, use the workspace-selected language (${language} / ${framework}) or default to Python + FastAPI.
+1. If the user's message explicitly specifies a backend programming language or framework, override defaults and generate code in that exact language and framework.
+2. If no language is specified in the prompt, use ${language} / ${framework}.
 3. Keep the Glass UI theme decoupled as CSS design tokens (--app-bg, --app-surface, --app-accent). Never hardcode theme hex colors inside business logic or backend code.
 4. Respect existing Project Memory when updating an application.
 5. Produce concise, production-grade code files (3 to 5 realistic files covering backend controller/router, domain model/service, database SQL migration, and frontend tokenized component or test file).`;
@@ -448,13 +520,13 @@ ${message}`;
     });
 
     sendEvent('done', { model: 'gemini-4-hydrogen' });
-    res.end();
+    return res.end();
   } catch (err) {
     const db = await loadDb();
     db.aiStats.failedGenerations += 1;
     await persistDb(db);
-    const errorMessage = err instanceof Error ? err.message : 'Agent pipeline execution failed.';
-    sendEvent('error', { message: errorMessage });
-    res.end();
+    const formatted = formatGeminiError(err);
+    sendEvent('error', { message: formatted.message });
+    return res.end();
   }
 });

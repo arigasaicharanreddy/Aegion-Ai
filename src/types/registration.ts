@@ -1,11 +1,10 @@
-import { AppCategory, ProgrammingLanguage } from './project';
-import { ThemeMode } from './theme';
+import type { AppCategory, ProgrammingLanguage } from './project';
 
 export type RegistrationStatus =
   | 'Pending Approval'
-  | 'Info Requested'
   | 'Approved'
   | 'Rejected'
+  | 'Info Requested'
   | 'Suspended';
 
 export type ThemePreferenceOption =
@@ -18,9 +17,9 @@ export type ThemePreferenceOption =
 export interface CustomerRegistration {
   id: string;
   submissionDate: string;
-  authProvider: 'email' | 'google';
+  authProvider: 'google' | 'email';
 
-  // Step 1: Personal Info
+  // Step 1: Personal & Organization Info
   fullName: string;
   email: string;
   phone: string;
@@ -29,10 +28,10 @@ export interface CustomerRegistration {
   companyWebsite: string;
   jobTitle: string;
 
-  // Step 2: Project Requirements
+  // Step 2: Application Types
   applicationTypes: AppCategory[];
 
-  // Step 3: Business Requirements
+  // Step 3: Business & Stack Requirements
   projectName: string;
   projectDescription: string;
   businessIndustry: string;
@@ -46,30 +45,31 @@ export interface CustomerRegistration {
 
   // Step 4: UI/UX Preferences
   themeOption: ThemePreferenceOption;
-  themeModePreference: ThemeMode;
+  themeModePreference: 'light' | 'dark';
   selectedThemeId: string;
   customAccentColor: string;
   typographyPreference: string;
   uiReferenceFileName?: string;
 
-  // Step 5: Additional Information
+  // Step 5: Additional Info
   projectDeadline: string;
   additionalFeatures: string;
   integrationRequirements: string;
   additionalComments: string;
 
-  // Step 6: Consent
+  // Step 6: Legal & Consent
   acceptedTerms: boolean;
   acceptedPrivacy: boolean;
   consentRegistrationNotifications: boolean;
   consentMarketing: boolean;
 
-  // Approval State
+  // Admin & Sync Metadata
   status: RegistrationStatus;
+  accountStatus?: string;
   approvalDate?: string;
   approvedBy?: string;
   adminComments?: string;
-  sheetsSynced?: boolean;
+  sheetsSynced: boolean;
   sheetsSyncError?: string;
 }
 
@@ -91,7 +91,7 @@ export interface NotificationLogRecord {
   channel: 'Email' | 'WhatsApp' | 'System';
   recipient: string;
   template: string;
-  status: 'Sent' | 'Queued' | 'Skipped (Unconfigured)' | 'Failed';
+  status: 'Sent' | 'Queued' | 'Failed' | 'Skipped (Unconfigured)';
   sentTimestamp: string;
   failureReason?: string;
 }
@@ -111,5 +111,34 @@ export interface NotificationChannelConfig {
   notifyUserOnApproval: boolean;
   sheetsSpreadsheetId: string;
   sheetsSpreadsheetUrl: string;
+  contactSpreadsheetId?: string;
+  contactSpreadsheetUrl?: string;
   lastSheetsSyncAt?: string;
+}
+
+export type ContactCategory =
+  | 'General Inquiry'
+  | 'Business Partnership'
+  | 'Product Information'
+  | 'Technical Support'
+  | 'Workspace Access'
+  | 'Other';
+
+export type ContactInquiryStatus = 'New' | 'In Review' | 'Resolved';
+
+export interface ContactInquiry {
+  id: string;
+  submittedAt: string;
+  fullName: string;
+  email: string;
+  company: string;
+  phone?: string;
+  subject: string;
+  category: ContactCategory;
+  message: string;
+  status: ContactInquiryStatus;
+  adminNotes: string;
+  responseDate?: string;
+  emailNotificationStatus: 'Sent' | 'Queued' | 'Failed' | 'Skipped (Unconfigured)';
+  sheetsSynced: boolean;
 }

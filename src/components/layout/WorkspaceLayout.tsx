@@ -6,6 +6,7 @@ import { Button } from '../common/Button';
 import { useAegion } from '../../context/AegionContext';
 import { APPLICATION_TEMPLATES, SUPPORTED_LANGUAGES } from '../../config/appConfig';
 import { AppCategory, ProgrammingLanguage } from '../../types/project';
+import { ThemeAmbientBackdrop } from '../theme-3d/ThemeAmbientBackdrop';
 
 interface WorkspaceLayoutProps {
   children: React.ReactNode;
@@ -37,20 +38,24 @@ export const WorkspaceLayout: React.FC<WorkspaceLayoutProps> = ({ children }) =>
   };
 
   return (
-    <div className="h-screen w-full flex overflow-hidden bg-[#09090C] text-[#F3F4F6]">
-      <AppSidebar
-        collapsed={collapsed}
-        onToggleCollapse={() => setCollapsed((c) => !c)}
-        mobileOpen={mobileOpen}
-        onCloseMobile={() => setMobileOpen(false)}
-      />
+    <div className="relative h-screen w-full flex overflow-hidden bg-[var(--aegion-platform-bg)] text-[var(--aegion-platform-text)] transition-colors duration-300">
+      <ThemeAmbientBackdrop variant="workspace" />
 
-      <div className="flex-1 flex flex-col min-w-0 min-h-0">
-        <AppHeader
-          onOpenMobileMenu={() => setMobileOpen(true)}
-          onOpenNewProject={() => setNewProjectOpen(true)}
+      <div className="relative z-10 flex w-full h-full overflow-hidden">
+        <AppSidebar
+          collapsed={collapsed}
+          onToggleCollapse={() => setCollapsed((c) => !c)}
+          mobileOpen={mobileOpen}
+          onCloseMobile={() => setMobileOpen(false)}
         />
-        <main className="flex-1 min-h-0 overflow-y-auto">{children}</main>
+
+        <div className="flex-1 flex flex-col min-w-0 min-h-0">
+          <AppHeader
+            onOpenMobileMenu={() => setMobileOpen(true)}
+            onOpenNewProject={() => setNewProjectOpen(true)}
+          />
+          <main className="flex-1 min-h-0 overflow-y-auto">{children}</main>
+        </div>
       </div>
 
       <Modal
@@ -61,24 +66,28 @@ export const WorkspaceLayout: React.FC<WorkspaceLayoutProps> = ({ children }) =>
       >
         <form onSubmit={handleCreate} className="space-y-4">
           <label className="block space-y-1.5">
-            <span className="text-xs font-medium text-[#D1D5DB]">Project Name</span>
+            <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+              Project Name
+            </span>
             <input
               type="text"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Horizon Workforce HRMS"
-              className="w-full bg-[#1C1E26] border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-[#6B7280] focus:outline-none focus:border-[#8B5CF6]"
+              className="w-full bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] aegion-btn-shape px-3 py-2 text-sm text-[var(--aegion-platform-text)] placeholder:text-[var(--aegion-platform-text-muted)] focus:outline-none focus:border-[var(--aegion-platform-accent)]"
             />
           </label>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block space-y-1.5">
-              <span className="text-xs font-medium text-[#D1D5DB]">Application Category</span>
+              <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                Application Category
+              </span>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as AppCategory)}
-                className="w-full bg-[#1C1E26] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#8B5CF6]"
+                className="w-full bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] aegion-btn-shape px-3 py-2 text-sm text-[var(--aegion-platform-text)] focus:outline-none focus:border-[var(--aegion-platform-accent)]"
               >
                 {APPLICATION_TEMPLATES.map((t) => (
                   <option key={t.id} value={t.category}>
@@ -89,11 +98,13 @@ export const WorkspaceLayout: React.FC<WorkspaceLayoutProps> = ({ children }) =>
             </label>
 
             <label className="block space-y-1.5">
-              <span className="text-xs font-medium text-[#D1D5DB]">Target Backend Language</span>
+              <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                Target Backend Language
+              </span>
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as ProgrammingLanguage)}
-                className="w-full bg-[#1C1E26] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#8B5CF6]"
+                className="w-full bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] aegion-btn-shape px-3 py-2 text-sm text-[var(--aegion-platform-text)] focus:outline-none focus:border-[var(--aegion-platform-accent)]"
               >
                 {SUPPORTED_LANGUAGES.map((l) => (
                   <option key={l.language} value={l.language}>
@@ -105,13 +116,15 @@ export const WorkspaceLayout: React.FC<WorkspaceLayoutProps> = ({ children }) =>
           </div>
 
           <label className="block space-y-1.5">
-            <span className="text-xs font-medium text-[#D1D5DB]">Business Requirements Summary</span>
+            <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+              Business Requirements Summary
+            </span>
             <textarea
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Optional initial domain notes, user roles, or compliance rules..."
-              className="w-full bg-[#1C1E26] border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-[#6B7280] focus:outline-none focus:border-[#8B5CF6]"
+              className="w-full bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] aegion-btn-shape px-3 py-2 text-sm text-[var(--aegion-platform-text)] placeholder:text-[var(--aegion-platform-text-muted)] focus:outline-none focus:border-[var(--aegion-platform-accent)]"
             />
           </label>
 

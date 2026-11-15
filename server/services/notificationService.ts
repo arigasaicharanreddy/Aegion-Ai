@@ -1,6 +1,5 @@
-import { loadDb, persistDb, type AegionDatabaseState } from '../data/database';
+import { getActiveSuperAdminEmail, loadDb, persistDb, type AegionDatabaseState } from '../data/database';
 import type { CustomerRegistration, NotificationLogRecord } from '../../src/types/registration';
-import { SUPER_ADMIN_EMAIL } from '../security/bootstrap';
 
 export type EmailEventTemplate =
   | 'New Registration Alert'
@@ -9,6 +8,10 @@ export type EmailEventTemplate =
   | 'Registration Rejected'
   | 'Account Activated'
   | 'Password Reset'
+  | 'Admin Password Recovery'
+  | 'Email Verification'
+  | 'Contact Inquiry Received'
+  | 'Contact Inquiry Acknowledgment'
   | 'Additional Information Requested';
 
 interface DispatchEmailArgs {
@@ -29,6 +32,15 @@ interface DispatchWhatsAppArgs {
 }
 
 const recentDispatchKeys = new Set<string>();
+
+export function isEmailDeliveryConfigured(db: AegionDatabaseState, googleAccessToken?: string): boolean {
+  const cfg = db.notificationConfig;
+  if (!cfg.emailEnabled) return false;
+  if (cfg.emailProvider === 'Gmail API') return Boolean(googleAccessToken);
+  if (cfg.emailProvider === 'Resend') return Boolean(db.emailSecrets.resendApiKey || process.env.RESEND_API_KEY);
+  if (cfg.emailProvider === 'SendGrid') return Boolean(db.emailSecrets.sendgridApiKey || process.env.SENDGRID_API_KEY);
+  return Boolean(db.emailSecrets.smtpHost || process.env.SMTP_HOST);
+}
 
 function encodeBase64Url(str: string): string {
   return Buffer.from(str, 'utf-8')
@@ -82,8 +94,6 @@ export async function dispatchEmailNotification(args: DispatchEmailArgs): Promis
   recentDispatchKeys.add(dedupeKey);
   setTimeout(() => recentDispatchKeys.delete(dedupeKey), 15_000);
 
-  const isFreeDevMode = process.env.NODE_ENV !== 'production' && process.env.AEGION_FREE_DEV_MODE !== 'false';
-
   if (!cfg.emailEnabled) {
     recordNotificationLog(db, {
       registrationId: args.registrationId,
@@ -91,7 +101,7 @@ export async function dispatchEmailNotification(args: DispatchEmailArgs): Promis
       recipient: args.recipient,
       template: args.template,
       status: 'Skipped (Unconfigured)',
-      failureReason: 'Email notifications are disabled.',
+      failureReason: 'Email notifications are disabled in Super Admin configuration.',
     });
     await persistDb(db);
     return 'Skipped (Unconfigured)';
@@ -130,18 +140,14 @@ export async function dispatchEmailNotification(args: DispatchEmailArgs): Promis
           failureReason = `Gmail API ${res.status}: ${text.slice(0, 180)}`;
         }
       } else {
-        status = isFreeDevMode ? 'Skipped (Unconfigured)' : 'Queued';
-        if (isFreeDevMode) {
-          failureReason = 'Email optional in free dev mode (connect Google OAuth or configure SMTP/Resend in production).';
-        }
+        status = 'Skipped (Unconfigured)';
+        failureReason = 'Email delivery requires Google Workspace OAuth authorization or a configured Resend/SendGrid/SMTP provider.';
       }
     } else if (cfg.emailProvider === 'Resend') {
       const apiKey = db.emailSecrets.resendApiKey || process.env.RESEND_API_KEY || '';
       if (!apiKey) {
         status = 'Skipped (Unconfigured)';
-        failureReason = isFreeDevMode
-          ? 'Email optional in free dev mode (RESEND_API_KEY not set).'
-          : 'RESEND_API_KEY is not configured.';
+        failureReason = 'RESEND_API_KEY is not configured.';
       } else {
         const res = await fetchWithRetry('https://api.resend.com/emails', {
           method: 'POST',
@@ -163,9 +169,7 @@ export async function dispatchEmailNotification(args: DispatchEmailArgs): Promis
       const apiKey = db.emailSecrets.sendgridApiKey || process.env.SENDGRID_API_KEY || '';
       if (!apiKey) {
         status = 'Skipped (Unconfigured)';
-        failureReason = isFreeDevMode
-          ? 'Email optional in free dev mode (SENDGRID_API_KEY not set).'
-          : 'SENDGRID_API_KEY is not configured.';
+        failureReason = 'SENDGRID_API_KEY is not configured.';
       } else {
         const res = await fetchWithRetry('https://api.sendgrid.com/v3/mail/send', {
           method: 'POST',
@@ -187,9 +191,7 @@ export async function dispatchEmailNotification(args: DispatchEmailArgs): Promis
       const hasSmtp = Boolean(db.emailSecrets.smtpHost || process.env.SMTP_HOST);
       status = hasSmtp ? 'Sent' : 'Skipped (Unconfigured)';
       if (!hasSmtp) {
-        failureReason = isFreeDevMode
-          ? `Email optional in free dev mode (${cfg.emailProvider} not configured).`
-          : `${cfg.emailProvider} host credentials are not configured.`;
+        failureReason = `${cfg.emailProvider} credentials are not configured on the server.`;
       }
     }
   } catch (err) {
@@ -292,12 +294,13 @@ export async function dispatchWhatsAppNotification(
 export async function notifyOnRegistrationSubmitted(reg: CustomerRegistration): Promise<void> {
   const db = await loadDb();
   const cfg = db.notificationConfig;
+  const adminEmail = getActiveSuperAdminEmail(db);
 
   if (cfg.notifyAdminOnNewRegistration) {
     recordNotificationLog(db, {
       registrationId: reg.id,
       channel: 'System',
-      recipient: SUPER_ADMIN_EMAIL,
+      recipient: adminEmail,
       template: 'New Registration Alert',
       status: 'Sent',
     });
@@ -305,10 +308,10 @@ export async function notifyOnRegistrationSubmitted(reg: CustomerRegistration): 
 
     await dispatchEmailNotification({
       registrationId: reg.id,
-      recipient: SUPER_ADMIN_EMAIL,
+      recipient: adminEmail,
       template: 'New Registration Alert',
-      subject: `[Aegion AI] New Registration: ${reg.projectName} (${reg.fullName})`,
-      htmlBody: `<p>New registration <strong>${reg.id}</strong> submitted by ${reg.fullName} (${reg.email}) from ${reg.companyName}.</p><p>Applications: ${reg.applicationTypes.join(', ')} | Preferred Stack: ${reg.preferredBackendLanguage} / ${reg.preferredFrontendFramework}</p>`,
+      subject: `[Aegion AI] New Workspace Access Request: ${reg.projectName} (${reg.fullName})`,
+      htmlBody: `<p>New workspace access registration <strong>${reg.id}</strong> submitted by ${reg.fullName} (${reg.email}) from ${reg.companyName}.</p><p>Applications: ${reg.applicationTypes.join(', ')}</p>`,
     });
 
     if (process.env.AEGION_ADMIN_WHATSAPP_NUMBER) {
@@ -316,7 +319,7 @@ export async function notifyOnRegistrationSubmitted(reg: CustomerRegistration): 
         registrationId: reg.id,
         phone: process.env.AEGION_ADMIN_WHATSAPP_NUMBER,
         templateName: 'New Registration Alert',
-        messageBody: `Aegion AI: New registration ${reg.id} from ${reg.fullName} (${reg.companyName}) for ${reg.applicationTypes.join(', ')}.`,
+        messageBody: `Aegion AI: New registration ${reg.id} from ${reg.fullName} (${reg.companyName}).`,
         optedIn: true,
       });
     }
@@ -327,15 +330,15 @@ export async function notifyOnRegistrationSubmitted(reg: CustomerRegistration): 
       registrationId: reg.id,
       recipient: reg.email,
       template: 'Registration Received',
-      subject: `Aegion AI — Registration ${reg.id} Received (Pending Approval)`,
-      htmlBody: `<p>Hello ${reg.fullName},</p><p>Your registration for <strong>${reg.projectName}</strong> has been received with ID <code>${reg.id}</code> and is currently <strong>Pending Approval</strong> by the Aegion Super Admin.</p><p>Once approved, you will receive a single-use activation link to access the Application Builder.</p>`,
+      subject: `Aegion AI — Workspace Access Request ${reg.id} Received`,
+      htmlBody: `<p>Hello ${reg.fullName},</p><p>Your workspace access request for <strong>${reg.projectName}</strong> has been received with ID <code>${reg.id}</code> and is currently <strong>Pending Approval</strong>.</p><p>Once approved by our administration team, you will receive a single-use activation link to access Aegion AI.</p>`,
     });
 
     await dispatchWhatsAppNotification({
       registrationId: reg.id,
       phone: reg.phone,
       templateName: 'Registration Received',
-      messageBody: `Hi ${reg.fullName}, your Aegion AI registration (${reg.id}) for ${reg.projectName} is pending Super Admin approval.`,
+      messageBody: `Hi ${reg.fullName}, your Aegion AI workspace request (${reg.id}) is pending approval.`,
       optedIn: reg.consentRegistrationNotifications,
     });
   }
@@ -355,8 +358,8 @@ export async function notifyOnRegistrationDecision(params: {
       registrationId: reg.id,
       recipient: reg.email,
       template: 'Registration Approved',
-      subject: `Aegion AI — Registration Approved! Activate Your Builder Account`,
-      htmlBody: `<p>Hello ${reg.fullName},</p><p>Your Aegion AI registration (<strong>${reg.id}</strong>) for <strong>${reg.projectName}</strong> has been approved.</p><p>Click the single-use activation link below within 24 hours to activate your account and create your password:</p><p><a href="${activationUrl}">${activationUrl}</a></p>${comments ? `<p>Admin note: ${comments}</p>` : ''}`,
+      subject: `Aegion AI — Workspace Access Approved! Activate Your Account`,
+      htmlBody: `<p>Hello ${reg.fullName},</p><p>Your Aegion AI workspace request (<strong>${reg.id}</strong>) for <strong>${reg.projectName}</strong> has been approved.</p><p>Click the single-use activation link below within 24 hours to activate your account and create your password:</p><p><a href="${activationUrl}">${activationUrl}</a></p>${comments ? `<p>Admin note: ${comments}</p>` : ''}`,
       googleAccessToken,
     });
 
@@ -364,7 +367,7 @@ export async function notifyOnRegistrationDecision(params: {
       registrationId: reg.id,
       phone: reg.phone,
       templateName: 'Registration Approved',
-      messageBody: `Hi ${reg.fullName}, your Aegion AI account for ${reg.projectName} is approved! Activate within 24h: ${activationUrl}`,
+      messageBody: `Hi ${reg.fullName}, your Aegion AI account is approved! Activate within 24h: ${activationUrl}`,
       optedIn: reg.consentRegistrationNotifications,
     });
   } else if (action === 'REJECT') {
@@ -372,8 +375,8 @@ export async function notifyOnRegistrationDecision(params: {
       registrationId: reg.id,
       recipient: reg.email,
       template: 'Registration Rejected',
-      subject: `Aegion AI — Update on Registration ${reg.id}`,
-      htmlBody: `<p>Hello ${reg.fullName},</p><p>Your registration (${reg.id}) was not approved at this time.</p><p>Reason: ${comments || 'Requirements did not pass onboarding verification.'}</p>`,
+      subject: `Aegion AI — Update on Request ${reg.id}`,
+      htmlBody: `<p>Hello ${reg.fullName},</p><p>Your workspace access request (${reg.id}) was not approved. Please contact Aegion AI support if you require further information.</p>${comments ? `<p>Notes: ${comments}</p>` : ''}`,
       googleAccessToken,
     });
   } else if (action === 'REQUEST_INFO') {
@@ -382,7 +385,7 @@ export async function notifyOnRegistrationDecision(params: {
       recipient: reg.email,
       template: 'Additional Information Requested',
       subject: `Aegion AI — Additional Details Needed for ${reg.id}`,
-      htmlBody: `<p>Hello ${reg.fullName},</p><p>Our review team requested additional information regarding your project <strong>${reg.projectName}</strong>:</p><p>${comments || 'Please reply with additional module specifications.'}</p>`,
+      htmlBody: `<p>Hello ${reg.fullName},</p><p>Our review team requested additional information regarding your project <strong>${reg.projectName}</strong>:</p><p>${comments || 'Please reply with additional workflow details.'}</p>`,
       googleAccessToken,
     });
   }

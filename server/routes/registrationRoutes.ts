@@ -59,9 +59,9 @@ registrationRouter.post('/', regRateLimiter, async (req, res) => {
   );
   if (existingActive) {
     return res.status(409).json({
-      error: `A registration (${existingActive.id}) already exists for this email with status "${existingActive.status}".`,
+      error: `A registration (${existingActive.id}) already exists for this email with status "${existingActive.accountStatus || existingActive.status}".`,
       registrationId: existingActive.id,
-      status: existingActive.status,
+      status: existingActive.accountStatus || existingActive.status,
     });
   }
 
@@ -105,6 +105,7 @@ registrationRouter.post('/', regRateLimiter, async (req, res) => {
     consentRegistrationNotifications: true,
     consentMarketing: Boolean(body.consentMarketing),
     status: 'Pending Approval',
+    accountStatus: 'Pending Approval',
     sheetsSynced: false,
   };
 
@@ -124,12 +125,11 @@ registrationRouter.post('/', regRateLimiter, async (req, res) => {
   appendAuditLog(db, normalizedEmail, 'guest', 'SUBMIT_REGISTRATION', `${regId} (${registration.projectName})`, 'Allowed');
   await persistDb(db);
 
-  // Fire Email + WhatsApp notifications in background-safe manner
   await notifyOnRegistrationSubmitted(registration);
 
   return res.status(201).json({
     registrationId: registration.id,
-    status: registration.status,
+    status: 'Pending Approval',
     submissionDate: registration.submissionDate,
     projectName: registration.projectName,
     email: registration.email,
@@ -153,11 +153,25 @@ registrationRouter.get('/status', async (req, res) => {
     return res.status(404).json({ error: 'No matching registration request found.' });
   }
 
+  const linkedUser = db.users.find(
+    (u) => u.email.toLowerCase() === reg.email.toLowerCase() || u.registrationId === reg.id
+  );
+  const displayStatus =
+    reg.status === 'Rejected'
+      ? 'Rejected'
+      : reg.status === 'Suspended' || linkedUser?.status === 'suspended'
+      ? 'Suspended'
+      : linkedUser?.status === 'active'
+      ? 'Active'
+      : reg.status === 'Approved'
+      ? 'Approved — Awaiting Activation'
+      : reg.status;
+
   return res.json({
     registrationId: reg.id,
     projectName: reg.projectName,
     fullName: reg.fullName,
-    status: reg.status,
+    status: displayStatus,
     submissionDate: reg.submissionDate,
     approvalDate: reg.approvalDate,
     adminComments: reg.adminComments,

@@ -141,14 +141,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ onOpenThemePicker }) => 
       <div className="flex-1 overflow-y-auto p-5 space-y-5">
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto py-12">
-            <h3 className="text-lg font-semibold text-white font-display">
+            <h3 className="text-lg font-semibold text-[var(--aegion-platform-text)] font-display">
               {activeProject.name}
             </h3>
-            <p className="text-sm text-[#9CA3AF] mt-2 leading-relaxed">
+            <p className="text-sm text-[var(--aegion-platform-text-muted)] mt-2 leading-relaxed">
               Describe the modules, user roles, business rules, or target programming language.
               Aegion orchestrates architecture, database schemas, and tokenized Glass UI views.
             </p>
-            <div className="mt-4 text-xs text-[#9CA3AF]">
+            <div className="mt-4 text-xs text-[var(--aegion-platform-text-muted)]">
               Active Stack: {activeProject.language} ({activeProject.framework}) · {activeProject.category}
             </div>
           </div>

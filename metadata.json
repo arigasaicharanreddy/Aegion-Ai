@@ -1,6 +1,6 @@
 {
   "name": "Aegion AI",
-  "description": "Agentic full-stack application builder powered by a Python FastAPI, LangGraph, and RAG architecture with multi-language code generation and a 50-theme Glass UI engine.",
+  "description": "Aegion AI helps businesses turn ideas into intelligent, scalable software applications with AI-guided workflow creation, customizable visual themes, and enterprise access governance.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

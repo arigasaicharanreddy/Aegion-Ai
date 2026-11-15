@@ -1,19 +1,35 @@
-import type { UserAccount, UserRole } from '../types/auth';
+import type {
+  PlatformThemeGovernanceConfig,
+  PlatformThemePreference,
+  UserAccount,
+  UserPreferences,
+  UserRole,
+} from '../types/auth';
 import type { AuditLogEntry, SupportTicket } from '../types/project';
 import type {
   ApprovalHistoryRecord,
+  ContactCategory,
+  ContactInquiry,
+  ContactInquiryStatus,
   CustomerRegistration,
   NotificationChannelConfig,
   NotificationLogRecord,
 } from '../types/registration';
 import { getGoogleAccessToken } from './googleAuth';
-import { mockDevApi, type RuntimeModeStatus } from '../config/mockDevApi';
+
+export interface RuntimeModeStatus {
+  nodeEnv: string;
+  pythonBackendConfigured: boolean;
+  geminiConfigured: boolean;
+  emailConfigured: boolean;
+  whatsappConfigured: boolean;
+  superAdminConfigured: boolean;
+}
 
 export interface BackendHealthStatus {
   status: string;
   frontendRuntime: string;
   gatewayRuntime: string;
-  freeDevMode?: boolean;
   pythonBackendConfigured: boolean;
   pythonBackendUrl: string | null;
   geminiConfigured?: boolean;
@@ -26,6 +42,9 @@ export interface AdminOverviewPayload {
     totalRegistrations: number;
     pendingApprovals: number;
     approvedUsers: number;
+    activeUsers: number;
+    rejectedRegistrations: number;
+    contactInquiriesCount: number;
     activeProjects: number;
     applicationsGenerated: number;
     failedGenerations: number;
@@ -33,30 +52,69 @@ export interface AdminOverviewPayload {
     notificationDeliveryRate: number;
     recentActivitiesCount: number;
   };
+  emailConfigured: boolean;
+  whatsappConfigured: boolean;
   registrations: CustomerRegistration[];
+  contactInquiries: ContactInquiry[];
   approvalHistory: ApprovalHistoryRecord[];
   notificationLogs: NotificationLogRecord[];
   users: UserAccount[];
   auditLogs: AuditLogEntry[];
   supportTickets: SupportTicket[];
   notificationConfig: NotificationChannelConfig;
+  platformThemeConfig?: PlatformThemeGovernanceConfig;
 }
+
+export interface AssistantProjectContext {
+  name?: string;
+  category?: string;
+  language?: string;
+  framework?: string;
+  modules?: string[];
+  specification?: string;
+}
+
+export interface ProfileUpdatePayload {
+  name: string;
+  workspaceName?: string;
+  phone?: string;
+  companyName?: string;
+  jobTitle?: string;
+  country?: string;
+  avatarUrl?: string;
+  preferences?: UserPreferences;
+}
+
+const SESSION_TOKEN_STORAGE_KEY = 'aegion_session_token_v1';
 
 class AegionApiClient {
   private baseUrl: string;
   private sessionToken: string | null = null;
-  private useMockFallback = false;
 
   constructor() {
     this.baseUrl = (import.meta.env?.VITE_AEGION_API_URL as string | undefined) || '';
-  }
-
-  isMockMode(): boolean {
-    return this.useMockFallback;
+    if (typeof window !== 'undefined') {
+      try {
+        this.sessionToken = window.sessionStorage.getItem(SESSION_TOKEN_STORAGE_KEY);
+      } catch {
+        this.sessionToken = null;
+      }
+    }
   }
 
   setSessionToken(token: string | null) {
     this.sessionToken = token;
+    if (typeof window !== 'undefined') {
+      try {
+        if (token) {
+          window.sessionStorage.setItem(SESSION_TOKEN_STORAGE_KEY, token);
+        } else {
+          window.sessionStorage.removeItem(SESSION_TOKEN_STORAGE_KEY);
+        }
+      } catch {
+        // ignore sessionStorage restriction
+      }
+    }
   }
 
   getAuthHeaders(includeGoogleToken = false): Record<string, string> {
@@ -105,50 +163,22 @@ class AegionApiClient {
   }
 
   async getHealth(): Promise<BackendHealthStatus> {
-    try {
-      return await this.jsonFetch<BackendHealthStatus>('/api/v1/health');
-    } catch {
-      this.useMockFallback = true;
-      return mockDevApi.getHealth();
-    }
+    return this.jsonFetch<BackendHealthStatus>('/api/v1/health');
   }
 
   async getRuntimeMode(): Promise<RuntimeModeStatus> {
-    try {
-      return await this.jsonFetch<RuntimeModeStatus>('/api/v1/runtime/mode');
-    } catch {
-      this.useMockFallback = true;
-      return mockDevApi.getRuntimeMode();
-    }
-  }
-
-  async enterDevPreviewSession(role: 'builder' | 'super_admin') {
-    try {
-      const data = await this.jsonFetch<{
-        ok: boolean;
-        isDevPreview: boolean;
-        sessionToken: string;
-        user: UserAccount;
-      }>('/api/v1/auth/dev-preview-session', {
-        method: 'POST',
-        body: JSON.stringify({ role }),
-      });
-      this.useMockFallback = false;
-      this.setSessionToken(data.sessionToken);
-      return data;
-    } catch (err) {
-      const status = (err as { status?: number }).status;
-      if (status === 403) throw err;
-      this.useMockFallback = true;
-      const mock = mockDevApi.devPreviewSession(role);
-      this.setSessionToken(mock.sessionToken);
-      return { ok: true, isDevPreview: true, ...mock };
-    }
+    return this.jsonFetch<RuntimeModeStatus>('/api/v1/runtime/mode');
   }
 
   async getCurrentSession(): Promise<{ authenticated: boolean; user: UserAccount | null }> {
     try {
-      return await this.jsonFetch<{ authenticated: boolean; user: UserAccount | null }>('/api/v1/auth/me');
+      const res = await this.jsonFetch<{ authenticated: boolean; user: UserAccount | null }>(
+        '/api/v1/auth/me'
+      );
+      if (!res.authenticated) {
+        this.setSessionToken(null);
+      }
+      return res;
     } catch {
       return { authenticated: false, user: null };
     }
@@ -165,6 +195,25 @@ class AegionApiClient {
     });
     this.setSessionToken(data.sessionToken);
     return data;
+  }
+
+  async adminForgotPassword(email: string) {
+    return this.jsonFetch<{
+      ok: boolean;
+      emailConfigured: boolean;
+      deliveryStatus?: string;
+      message: string;
+    }>('/api/v1/auth/admin/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  async adminResetPassword(token: string, password: string) {
+    return this.jsonFetch<{ ok: boolean }>('/api/v1/auth/admin/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, password }),
+    });
   }
 
   async adminChangePassword(currentPassword: string, newPassword: string) {
@@ -192,13 +241,162 @@ class AegionApiClient {
     return data;
   }
 
+  async updateProfile(payload: ProfileUpdatePayload) {
+    return this.jsonFetch<{
+      ok: boolean;
+      user: UserAccount;
+    }>('/api/v1/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async getPlatformThemeConfig() {
+    return this.jsonFetch<{ config: PlatformThemeGovernanceConfig }>('/api/v1/platform-themes/config');
+  }
+
+  async saveUserThemePreference(payload: Partial<PlatformThemePreference>) {
+    return this.jsonFetch<{
+      ok: boolean;
+      appliedFallback?: boolean;
+      warning?: string;
+      user: UserAccount;
+    }>('/api/v1/auth/theme-preference', {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async updateAdminPlatformThemeConfig(payload: Partial<PlatformThemeGovernanceConfig>) {
+    return this.jsonFetch<{
+      ok: boolean;
+      config: PlatformThemeGovernanceConfig;
+    }>('/api/v1/admin/platform-themes/config', {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async requestEmailChange(newEmail: string, currentPassword?: string) {
+    return this.jsonFetch<{
+      ok: boolean;
+      pendingEmail: string;
+      message: string;
+    }>(
+      '/api/v1/auth/request-email-change',
+      {
+        method: 'POST',
+        body: JSON.stringify({ newEmail, currentPassword }),
+      },
+      true
+    );
+  }
+
+  async verifyEmailChange(token: string) {
+    const data = await this.jsonFetch<{
+      ok: boolean;
+      sessionToken: string;
+      user: UserAccount;
+    }>('/api/v1/auth/verify-email-change', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
+    this.setSessionToken(data.sessionToken);
+    return data;
+  }
+
+  async changePassword(currentPassword: string, newPassword: string) {
+    const data = await this.jsonFetch<{
+      ok: boolean;
+      sessionToken: string;
+      user: UserAccount;
+    }>('/api/v1/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+    this.setSessionToken(data.sessionToken);
+    return data;
+  }
+
+  async assistantChat(
+    messages: Array<{ role: 'user' | 'assistant'; content: string }>,
+    message: string,
+    projectContext?: AssistantProjectContext
+  ) {
+    return this.jsonFetch<{
+      reply: string;
+      model: string;
+    }>('/api/v1/assistant/chat', {
+      method: 'POST',
+      body: JSON.stringify({ messages, message, projectContext }),
+    });
+  }
+
+  async streamAssistantChat(
+    messages: Array<{ role: 'user' | 'assistant'; content: string }>,
+    message: string,
+    handlers: {
+      projectContext?: AssistantProjectContext;
+      onToken: (chunk: string) => void;
+      onDone?: (model: string) => void;
+    }
+  ): Promise<void> {
+    const res = await fetch(this.getEndpoint('/api/v1/assistant/stream'), {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...this.getAuthHeaders(false),
+      },
+      body: JSON.stringify({ messages, message, projectContext: handlers.projectContext }),
+    });
+
+    if (!res.ok || !res.body) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error((data as { error?: string }).error || `Assistant stream failed (${res.status})`);
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const blocks = buffer.split('\n\n');
+      buffer = blocks.pop() || '';
+
+      for (const block of blocks) {
+        const lines = block.split('\n');
+        let eventName = 'message';
+        let dataLine = '';
+        for (const line of lines) {
+          if (line.startsWith('event:')) eventName = line.slice(6).trim();
+          if (line.startsWith('data:')) dataLine += line.slice(5).trim();
+        }
+        if (!dataLine) continue;
+        const parsed = JSON.parse(dataLine) as { text?: string; model?: string; message?: string };
+        if (eventName === 'token' && parsed.text) {
+          handlers.onToken(parsed.text);
+        } else if (eventName === 'error') {
+          throw new Error(parsed.message || 'Assistant response failed.');
+        } else if (eventName === 'done') {
+          handlers.onDone?.(parsed.model || 'gemini-4-hydrogen');
+        }
+      }
+    }
+  }
+
   async googleAuthExchange(idToken: string, portalMode: 'builder' | 'admin' = 'builder') {
     const data = await this.jsonFetch<{
       status: 'authenticated' | 'pending_approval' | 'needs_registration';
       sessionToken?: string;
       user?: UserAccount;
+      accountStatus?: string;
       registrationStatus?: string;
       registrationId?: string;
+      message?: string;
       email?: string;
       name?: string;
       adminComments?: string;
@@ -233,62 +431,69 @@ class AegionApiClient {
     });
   }
 
+  async resetUserPassword(token: string, password: string) {
+    return this.jsonFetch<{ ok: boolean }>('/api/v1/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, password }),
+    });
+  }
+
   async logout() {
     await this.jsonFetch('/api/v1/auth/logout', { method: 'POST' }).catch(() => {});
     this.setSessionToken(null);
   }
 
   async submitRegistration(payload: Record<string, unknown>) {
-    try {
-      return await this.jsonFetch<{
-        registrationId: string;
-        status: string;
-        submissionDate: string;
-        projectName: string;
-        email: string;
-      }>('/api/v1/registrations', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      });
-    } catch (err) {
-      const status = (err as { status?: number }).status;
-      if (status && status >= 400 && status < 500) throw err;
-      return mockDevApi.submitRegistration(payload);
-    }
+    return this.jsonFetch<{
+      registrationId: string;
+      status: string;
+      submissionDate: string;
+      projectName: string;
+      email: string;
+    }>('/api/v1/registrations', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async submitContactInquiry(payload: {
+    fullName: string;
+    email: string;
+    company: string;
+    phone?: string;
+    subject: string;
+    category: ContactCategory;
+    message: string;
+    website_hp?: string;
+  }) {
+    return this.jsonFetch<{
+      ok: boolean;
+      inquiryId: string;
+      message: string;
+      emailNotificationStatus: string;
+    }>('/api/v1/contacts', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   }
 
   async checkRegistrationStatus(query: { email?: string; id?: string }) {
     const params = new URLSearchParams();
     if (query.email) params.set('email', query.email);
     if (query.id) params.set('id', query.id);
-    try {
-      return await this.jsonFetch<{
-        registrationId: string;
-        projectName: string;
-        fullName: string;
-        status: string;
-        submissionDate: string;
-        approvalDate?: string;
-        adminComments?: string;
-      }>(`/api/v1/registrations/status?${params.toString()}`);
-    } catch (err) {
-      const status = (err as { status?: number }).status;
-      if (status && status >= 400 && status < 500) throw err;
-      return mockDevApi.checkRegistrationStatus(query);
-    }
+    return this.jsonFetch<{
+      registrationId: string;
+      projectName: string;
+      fullName: string;
+      status: string;
+      submissionDate: string;
+      approvalDate?: string;
+      adminComments?: string;
+    }>(`/api/v1/registrations/status?${params.toString()}`);
   }
 
   async getAdminOverview(): Promise<AdminOverviewPayload> {
-    if (this.useMockFallback) {
-      return mockDevApi.getAdminOverview();
-    }
-    try {
-      return await this.jsonFetch<AdminOverviewPayload>('/api/v1/admin/overview');
-    } catch (err) {
-      const status = (err as { status?: number }).status;
-      if (status === 401 || status === 403) throw err;
-      return mockDevApi.getAdminOverview();
-    }
+    return this.jsonFetch<AdminOverviewPayload>('/api/v1/admin/overview');
   }
 
   async decideRegistration(
@@ -296,31 +501,35 @@ class AegionApiClient {
     decision: 'approve' | 'reject' | 'request_info' | 'suspend' | 'reactivate',
     comments: string
   ) {
-    if (this.useMockFallback) {
-      return mockDevApi.decideRegistration(registrationId, decision, comments);
-    }
-    try {
-      return await this.jsonFetch<{
-        ok: boolean;
-        registration: CustomerRegistration;
-        activationLinkPreview?: string;
-      }>(
-        `/api/v1/admin/registrations/${encodeURIComponent(registrationId)}/decision`,
-        {
-          method: 'POST',
-          body: JSON.stringify({ decision, comments }),
-        },
-        true
-      );
-    } catch (err) {
-      const status = (err as { status?: number }).status;
-      if (status && status >= 400 && status < 500) throw err;
-      return mockDevApi.decideRegistration(registrationId, decision, comments);
-    }
+    return this.jsonFetch<{
+      ok: boolean;
+      registration: CustomerRegistration;
+      activationLinkPreview?: string;
+    }>(
+      `/api/v1/admin/registrations/${encodeURIComponent(registrationId)}/decision`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ decision, comments }),
+      },
+      true
+    );
   }
 
-  async exportRegistrationsCsv(): Promise<void> {
-    const res = await fetch(this.getEndpoint('/api/v1/admin/registrations/export'), {
+  async updateAdminContactInquiry(
+    inquiryId: string,
+    payload: { status?: ContactInquiryStatus; adminNotes?: string }
+  ) {
+    return this.jsonFetch<{ ok: boolean; inquiry: ContactInquiry }>(
+      `/api/v1/admin/contacts/${encodeURIComponent(inquiryId)}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      }
+    );
+  }
+
+  async exportRegistrations(format: 'csv' | 'xlsx' = 'csv'): Promise<void> {
+    const res = await fetch(this.getEndpoint(`/api/v1/admin/registrations/export?format=${format}`), {
       credentials: 'include',
       headers: this.getAuthHeaders(false),
     });
@@ -332,11 +541,39 @@ class AegionApiClient {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `AEGION_AI_CUSTOMER_REGISTRATIONS_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `AEGION_AI_CUSTOMER_REGISTRATIONS_${new Date().toISOString().slice(0, 10)}.${format}`;
     document.body.appendChild(a);
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+  }
+
+  async exportRegistrationsCsv(): Promise<void> {
+    return this.exportRegistrations('csv');
+  }
+
+  async exportContacts(format: 'csv' | 'xlsx' = 'csv'): Promise<void> {
+    const res = await fetch(this.getEndpoint(`/api/v1/admin/contacts/export?format=${format}`), {
+      credentials: 'include',
+      headers: this.getAuthHeaders(false),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Export forbidden' }));
+      throw new Error(err.error || 'Only Super Admin can download contact sheets.');
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `AEGION_AI_CONTACT_INQUIRIES_${new Date().toISOString().slice(0, 10)}.${format}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  async exportContactsCsv(): Promise<void> {
+    return this.exportContacts('csv');
   }
 
   async syncGoogleSheets() {
@@ -344,9 +581,12 @@ class AegionApiClient {
       ok: boolean;
       spreadsheetId: string;
       spreadsheetUrl: string;
+      contactSpreadsheetId: string;
+      contactSpreadsheetUrl: string;
       syncedRegistrations: number;
       syncedHistory: number;
       syncedLogs: number;
+      syncedContacts: number;
     }>('/api/v1/admin/sheets/sync', { method: 'POST' }, true);
   }
 

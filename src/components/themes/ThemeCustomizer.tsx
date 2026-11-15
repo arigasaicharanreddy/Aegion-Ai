@@ -47,36 +47,36 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <label className="block space-y-1.5">
-            <span className="text-xs font-medium text-[#D1D5DB]">Accent Color</span>
-            <div className="flex items-center gap-2 bg-white/[0.04] border border-white/10 rounded-lg px-2.5 py-1.5">
+            <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">Accent Color</span>
+            <div className="flex items-center gap-2 bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] rounded-lg px-2.5 py-1.5">
               <input
                 type="color"
                 value={draft.accentOverride}
                 onChange={(e) => setDraft({ ...draft, accentOverride: e.target.value })}
                 className="w-7 h-7 rounded bg-transparent cursor-pointer border-0"
               />
-              <span className="text-xs font-mono text-[#E5E7EB]">{draft.accentOverride}</span>
+              <span className="text-xs font-mono text-[var(--aegion-platform-text)]">{draft.accentOverride}</span>
             </div>
           </label>
 
           <label className="block space-y-1.5">
-            <span className="text-xs font-medium text-[#D1D5DB]">Canvas Background</span>
-            <div className="flex items-center gap-2 bg-white/[0.04] border border-white/10 rounded-lg px-2.5 py-1.5">
+            <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">Canvas Background</span>
+            <div className="flex items-center gap-2 bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] rounded-lg px-2.5 py-1.5">
               <input
                 type="color"
                 value={draft.backgroundOverride}
                 onChange={(e) => setDraft({ ...draft, backgroundOverride: e.target.value })}
                 className="w-7 h-7 rounded bg-transparent cursor-pointer border-0"
               />
-              <span className="text-xs font-mono text-[#E5E7EB]">{draft.backgroundOverride}</span>
+              <span className="text-xs font-mono text-[var(--aegion-platform-text)]">{draft.backgroundOverride}</span>
             </div>
           </label>
         </div>
 
         <label className="block space-y-1.5">
           <div className="flex justify-between text-xs">
-            <span className="text-[#D1D5DB]">Glass Opacity</span>
-            <span className="font-mono tabular-nums text-[#9CA3AF]">
+            <span className="text-[var(--aegion-platform-text-secondary)]">Glass Opacity</span>
+            <span className="font-mono tabular-nums text-[var(--aegion-platform-text-muted)]">
               {Math.round((draft.glassOpacityOverride ?? 0.8) * 100)}%
             </span>
           </div>
@@ -89,14 +89,14 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
             onChange={(e) =>
               setDraft({ ...draft, glassOpacityOverride: parseFloat(e.target.value) })
             }
-            className="w-full accent-[#7C3AED]"
+            className="w-full accent-[var(--aegion-platform-accent)]"
           />
         </label>
 
         <label className="block space-y-1.5">
           <div className="flex justify-between text-xs">
-            <span className="text-[#D1D5DB]">Backdrop Blur</span>
-            <span className="font-mono tabular-nums text-[#9CA3AF]">{draft.blurPxOverride}px</span>
+            <span className="text-[var(--aegion-platform-text-secondary)]">Backdrop Blur</span>
+            <span className="font-mono tabular-nums text-[var(--aegion-platform-text-muted)]">{draft.blurPxOverride}px</span>
           </div>
           <input
             type="range"
@@ -105,14 +105,14 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
             step={2}
             value={draft.blurPxOverride}
             onChange={(e) => setDraft({ ...draft, blurPxOverride: parseInt(e.target.value, 10) })}
-            className="w-full accent-[#7C3AED]"
+            className="w-full accent-[var(--aegion-platform-accent)]"
           />
         </label>
 
         <label className="block space-y-1.5">
           <div className="flex justify-between text-xs">
-            <span className="text-[#D1D5DB]">Corner Radius</span>
-            <span className="font-mono tabular-nums text-[#9CA3AF]">{draft.radiusPxOverride}px</span>
+            <span className="text-[var(--aegion-platform-text-secondary)]">Corner Radius</span>
+            <span className="font-mono tabular-nums text-[var(--aegion-platform-text-muted)]">{draft.radiusPxOverride}px</span>
           </div>
           <input
             type="range"
@@ -121,12 +121,12 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
             step={2}
             value={draft.radiusPxOverride}
             onChange={(e) => setDraft({ ...draft, radiusPxOverride: parseInt(e.target.value, 10) })}
-            className="w-full accent-[#7C3AED]"
+            className="w-full accent-[var(--aegion-platform-accent)]"
           />
         </label>
 
         <label className="block space-y-1.5">
-          <span className="text-xs font-medium text-[#D1D5DB]">Display Typography</span>
+          <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">Display Typography</span>
           <select
             value={draft.fontDisplayOverride}
             onChange={(e) =>
@@ -135,7 +135,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                 fontDisplayOverride: e.target.value as ThemeCustomization['fontDisplayOverride'],
               })
             }
-            className="w-full bg-[#1C1E26] border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#8B5CF6]"
+            className="w-full bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] rounded-lg px-3 py-2 text-xs text-[var(--aegion-platform-text)] focus:outline-none focus:border-[var(--aegion-platform-accent)]"
           >
             <option value="Manrope">Manrope (Default Enterprise)</option>
             <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
@@ -167,7 +167,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
       </div>
 
       <div className="space-y-2">
-        <p className="text-xs text-[#9CA3AF]">
+        <p className="text-xs text-[var(--aegion-platform-text-muted)]">
           Live CSS token preview — updates visual appearance without altering application logic.
         </p>
         <ThemePreview preset={preset} customization={draft} selected />

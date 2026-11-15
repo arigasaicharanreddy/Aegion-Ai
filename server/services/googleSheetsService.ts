@@ -1,11 +1,13 @@
 import { loadDb, persistDb } from '../data/database';
 import type {
   ApprovalHistoryRecord,
+  ContactInquiry,
   CustomerRegistration,
   NotificationLogRecord,
 } from '../../src/types/registration';
 
-const SPREADSHEET_TITLE = 'AEGION_AI_CUSTOMER_REGISTRATIONS';
+const REGISTRATIONS_SPREADSHEET_TITLE = 'AEGION_AI_CUSTOMER_REGISTRATIONS';
+const CONTACTS_SPREADSHEET_TITLE = 'AEGION_AI_CONTACT_INQUIRIES';
 
 const REGISTRATIONS_HEADERS = [
   'Registration ID',
@@ -53,20 +55,48 @@ const NOTIFICATION_LOGS_HEADERS = [
   'Failure Reason',
 ];
 
-async function sheetsFetch(url: string, accessToken: string, init?: RequestInit) {
-  const res = await fetch(url, {
-    ...init,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      ...(init?.headers || {}),
-    },
-  });
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Google Sheets API ${res.status}: ${errText.slice(0, 240)}`);
+const CONTACT_INQUIRIES_HEADERS = [
+  'Inquiry ID',
+  'Submission Date',
+  'Full Name',
+  'Business Email',
+  'Company Name',
+  'Subject',
+  'Inquiry Category',
+  'Message',
+  'Inquiry Status',
+  'Admin Notes',
+  'Response Date',
+];
+
+async function sheetsFetch(url: string, accessToken: string, init?: RequestInit, retries = 2) {
+  let lastErr: unknown;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(url, {
+        ...init,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+          ...(init?.headers || {}),
+        },
+      });
+      if (res.ok) {
+        return res.json();
+      }
+      const errText = await res.text();
+      if (res.status >= 500 && attempt < retries) {
+        lastErr = new Error(`Google Sheets API ${res.status}: ${errText.slice(0, 240)}`);
+      } else {
+        throw new Error(`Google Sheets API ${res.status}: ${errText.slice(0, 240)}`);
+      }
+    } catch (err) {
+      lastErr = err;
+      if (attempt === retries) break;
+    }
+    await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
   }
-  return res.json();
+  throw lastErr instanceof Error ? lastErr : new Error('Google Sheets API request failed');
 }
 
 function registrationToRow(reg: CustomerRegistration): string[] {
@@ -89,7 +119,7 @@ function registrationToRow(reg: CustomerRegistration): string[] {
     reg.themeModePreference,
     [reg.additionalFeatures, reg.integrationRequirements, reg.additionalComments].filter(Boolean).join(' | '),
     reg.consentMarketing ? 'Yes' : 'No',
-    reg.status,
+    reg.accountStatus || reg.status,
     reg.approvalDate || '',
     reg.adminComments || '',
   ];
@@ -121,9 +151,30 @@ function notificationToRow(n: NotificationLogRecord): string[] {
   ];
 }
 
-async function ensureSpreadsheet(accessToken: string): Promise<{ spreadsheetId: string; spreadsheetUrl: string }> {
-  const db = await loadDb();
-  let spreadsheetId = db.notificationConfig.sheetsSpreadsheetId;
+function contactToRow(c: ContactInquiry): string[] {
+  return [
+    c.id,
+    c.submittedAt,
+    c.fullName,
+    c.email,
+    c.company || '',
+    c.subject,
+    c.category,
+    c.message,
+    c.status,
+    c.adminNotes || '',
+    c.responseDate || '',
+  ];
+}
+
+async function ensureSpreadsheet(params: {
+  accessToken: string;
+  existingId: string;
+  title: string;
+  sheetNames: string[];
+}): Promise<{ spreadsheetId: string; spreadsheetUrl: string }> {
+  const { accessToken, title, sheetNames } = params;
+  let spreadsheetId = params.existingId;
 
   if (spreadsheetId) {
     try {
@@ -134,10 +185,7 @@ async function ensureSpreadsheet(accessToken: string): Promise<{ spreadsheetId: 
       const existingTitles = new Set<string>(
         (meta.sheets || []).map((s: { properties?: { title?: string } }) => s.properties?.title || '')
       );
-
-      const missing = ['Registrations', 'Approval History', 'Notification Logs'].filter(
-        (title) => !existingTitles.has(title)
-      );
+      const missing = sheetNames.filter((name) => !existingTitles.has(name));
       if (missing.length > 0) {
         await sheetsFetch(
           `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}:batchUpdate`,
@@ -145,12 +193,11 @@ async function ensureSpreadsheet(accessToken: string): Promise<{ spreadsheetId: 
           {
             method: 'POST',
             body: JSON.stringify({
-              requests: missing.map((title) => ({ addSheet: { properties: { title } } })),
+              requests: missing.map((name) => ({ addSheet: { properties: { title: name } } })),
             }),
           }
         );
       }
-
       return {
         spreadsheetId: meta.spreadsheetId,
         spreadsheetUrl: meta.spreadsheetUrl || `https://docs.google.com/spreadsheets/d/${meta.spreadsheetId}/edit`,
@@ -163,41 +210,44 @@ async function ensureSpreadsheet(accessToken: string): Promise<{ spreadsheetId: 
   const created = await sheetsFetch('https://sheets.googleapis.com/v4/spreadsheets', accessToken, {
     method: 'POST',
     body: JSON.stringify({
-      properties: { title: SPREADSHEET_TITLE },
-      sheets: [
-        { properties: { title: 'Registrations' } },
-        { properties: { title: 'Approval History' } },
-        { properties: { title: 'Notification Logs' } },
-      ],
+      properties: { title },
+      sheets: sheetNames.map((name) => ({ properties: { title: name } })),
     }),
   });
 
   const newId = created.spreadsheetId as string;
   const newUrl = (created.spreadsheetUrl as string) || `https://docs.google.com/spreadsheets/d/${newId}/edit`;
-
-  db.notificationConfig.sheetsSpreadsheetId = newId;
-  db.notificationConfig.sheetsSpreadsheetUrl = newUrl;
-  await persistDb(db);
-
   return { spreadsheetId: newId, spreadsheetUrl: newUrl };
 }
 
 export async function syncAllToGoogleSheets(accessToken: string): Promise<{
   spreadsheetId: string;
   spreadsheetUrl: string;
+  contactSpreadsheetId: string;
+  contactSpreadsheetUrl: string;
   syncedRegistrations: number;
   syncedHistory: number;
   syncedLogs: number;
+  syncedContacts: number;
 }> {
   const db = await loadDb();
-  const { spreadsheetId, spreadsheetUrl } = await ensureSpreadsheet(accessToken);
+
+  // 1. Sync AEGION_AI_CUSTOMER_REGISTRATIONS (3 worksheets)
+  const regSheet = await ensureSpreadsheet({
+    accessToken,
+    existingId: db.notificationConfig.sheetsSpreadsheetId,
+    title: REGISTRATIONS_SPREADSHEET_TITLE,
+    sheetNames: ['Registrations', 'Approval History', 'Notification Logs'],
+  });
+  db.notificationConfig.sheetsSpreadsheetId = regSheet.spreadsheetId;
+  db.notificationConfig.sheetsSpreadsheetUrl = regSheet.spreadsheetUrl;
 
   const regValues = [REGISTRATIONS_HEADERS, ...db.registrations.map(registrationToRow)];
   const historyValues = [APPROVAL_HISTORY_HEADERS, ...db.approvalHistory.map(historyToRow)];
   const logValues = [NOTIFICATION_LOGS_HEADERS, ...db.notificationLogs.map(notificationToRow)];
 
   await sheetsFetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values:batchClear`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(regSheet.spreadsheetId)}/values:batchClear`,
     accessToken,
     {
       method: 'POST',
@@ -208,7 +258,7 @@ export async function syncAllToGoogleSheets(accessToken: string): Promise<{
   );
 
   await sheetsFetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values:batchUpdate`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(regSheet.spreadsheetId)}/values:batchUpdate`,
     accessToken,
     {
       method: 'POST',
@@ -223,19 +273,57 @@ export async function syncAllToGoogleSheets(accessToken: string): Promise<{
     }
   );
 
+  // 2. Sync AEGION_AI_CONTACT_INQUIRIES (dedicated spreadsheet)
+  const contactSheet = await ensureSpreadsheet({
+    accessToken,
+    existingId: db.notificationConfig.contactSpreadsheetId || '',
+    title: CONTACTS_SPREADSHEET_TITLE,
+    sheetNames: ['Contact Inquiries'],
+  });
+  db.notificationConfig.contactSpreadsheetId = contactSheet.spreadsheetId;
+  db.notificationConfig.contactSpreadsheetUrl = contactSheet.spreadsheetUrl;
+
+  const contactValues = [CONTACT_INQUIRIES_HEADERS, ...db.contactInquiries.map(contactToRow)];
+  await sheetsFetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(contactSheet.spreadsheetId)}/values:batchClear`,
+    accessToken,
+    {
+      method: 'POST',
+      body: JSON.stringify({ ranges: ['Contact Inquiries!A:K'] }),
+    }
+  );
+
+  await sheetsFetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(contactSheet.spreadsheetId)}/values:batchUpdate`,
+    accessToken,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        valueInputOption: 'USER_ENTERED',
+        data: [{ range: 'Contact Inquiries!A1', values: contactValues }],
+      }),
+    }
+  );
+
   const now = new Date().toISOString();
   db.notificationConfig.lastSheetsSyncAt = now;
   for (const reg of db.registrations) {
     reg.sheetsSynced = true;
     reg.sheetsSyncError = undefined;
   }
+  for (const contact of db.contactInquiries) {
+    contact.sheetsSynced = true;
+  }
   await persistDb(db);
 
   return {
-    spreadsheetId,
-    spreadsheetUrl,
+    spreadsheetId: regSheet.spreadsheetId,
+    spreadsheetUrl: regSheet.spreadsheetUrl,
+    contactSpreadsheetId: contactSheet.spreadsheetId,
+    contactSpreadsheetUrl: contactSheet.spreadsheetUrl,
     syncedRegistrations: db.registrations.length,
     syncedHistory: db.approvalHistory.length,
     syncedLogs: db.notificationLogs.length,
+    syncedContacts: db.contactInquiries.length,
   };
 }

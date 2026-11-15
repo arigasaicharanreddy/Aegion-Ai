@@ -1,14 +1,21 @@
 import { Router } from 'express';
+import * as XLSX from 'xlsx';
 import { appendAuditLog, loadDb, persistDb } from '../data/database';
 import { requireSuperAdmin, sanitizeUserForClient, type AuthenticatedRequest } from '../middleware/auth';
 import { generateSecureToken, sha256Hex } from '../security/crypto';
 import { syncAllToGoogleSheets } from '../services/googleSheetsService';
-import { dispatchEmailNotification, dispatchWhatsAppNotification, notifyOnRegistrationDecision } from '../services/notificationService';
-import type { RegistrationStatus } from '../../src/types/registration';
+import {
+  dispatchEmailNotification,
+  dispatchWhatsAppNotification,
+  isEmailDeliveryConfigured,
+  notifyOnRegistrationDecision,
+} from '../services/notificationService';
+import type { ContactInquiryStatus, RegistrationStatus } from '../../src/types/registration';
+import { isValidPlatformThemeId, PLATFORM_THEME_CATEGORIES } from '../../src/platform-themes/catalog';
 
 export const adminRouter = Router();
 
-// Every single route in adminRouter requires verified super_admin session + rotated password
+// Every single route in adminRouter requires verified super_admin session
 adminRouter.use(requireSuperAdmin);
 
 function escapeCsvCell(value: unknown): string {
@@ -19,23 +26,64 @@ function escapeCsvCell(value: unknown): string {
   return str;
 }
 
-adminRouter.get('/overview', async (_req: AuthenticatedRequest, res) => {
+function buildXlsxBuffer(sheetName: string, headers: string[], rows: unknown[][]): Buffer {
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  XLSX.utils.book_append_sheet(wb, ws, sheetName.slice(0, 31));
+  return XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }) as Buffer;
+}
+
+adminRouter.get('/overview', async (req: AuthenticatedRequest, res) => {
   const db = await loadDb();
+  const googleAccessToken = req.headers['x-google-access-token'] as string | undefined;
 
   const totalRegistrations = db.registrations.length;
   const pendingApprovals = db.registrations.filter(
     (r) => r.status === 'Pending Approval' || r.status === 'Info Requested'
   ).length;
-  const approvedUsers = db.users.filter((u) => u.status === 'active').length;
+  const approvedUsers = db.registrations.filter((r) => r.status === 'Approved').length;
+  const activeUsers = db.users.filter((u) => u.status === 'active' && u.role !== 'super_admin').length;
+  const rejectedRegistrations = db.registrations.filter((r) => r.status === 'Rejected').length;
+  const contactInquiriesCount = db.contactInquiries.length;
+
   const totalNotifications = db.notificationLogs.length;
   const sentNotifications = db.notificationLogs.filter((n) => n.status === 'Sent').length;
   const deliveryRate = totalNotifications > 0 ? Math.round((sentNotifications / totalNotifications) * 100) : 100;
+
+  const emailConfigured = isEmailDeliveryConfigured(db, googleAccessToken);
+  const whatsappConfigured = Boolean(
+    (db.whatsappSecrets.accessToken || process.env.WHATSAPP_ACCESS_TOKEN) &&
+      (db.notificationConfig.whatsappPhoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID)
+  );
+
+  const enrichedRegistrations = db.registrations.map((reg) => {
+    const user = db.users.find(
+      (u) => u.email.toLowerCase() === reg.email.toLowerCase() || u.registrationId === reg.id
+    );
+    const displayStatus =
+      reg.status === 'Rejected'
+        ? 'Rejected'
+        : reg.status === 'Suspended' || user?.status === 'suspended'
+        ? 'Suspended'
+        : user?.status === 'active'
+        ? 'Active'
+        : reg.status === 'Approved'
+        ? 'Approved — Awaiting Activation'
+        : reg.status;
+    return {
+      ...reg,
+      accountStatus: displayStatus,
+    };
+  });
 
   return res.json({
     kpis: {
       totalRegistrations,
       pendingApprovals,
       approvedUsers,
+      activeUsers,
+      rejectedRegistrations,
+      contactInquiriesCount,
       activeProjects: db.aiStats.activeProjects,
       applicationsGenerated: db.aiStats.applicationsGenerated,
       failedGenerations: db.aiStats.failedGenerations,
@@ -43,13 +91,17 @@ adminRouter.get('/overview', async (_req: AuthenticatedRequest, res) => {
       notificationDeliveryRate: deliveryRate,
       recentActivitiesCount: db.auditLogs.length,
     },
-    registrations: db.registrations,
+    emailConfigured,
+    whatsappConfigured,
+    registrations: enrichedRegistrations,
+    contactInquiries: db.contactInquiries,
     approvalHistory: db.approvalHistory,
     notificationLogs: db.notificationLogs,
     users: db.users.map(sanitizeUserForClient),
     auditLogs: db.auditLogs,
     supportTickets: db.supportTickets,
     notificationConfig: db.notificationConfig,
+    platformThemeConfig: db.platformThemeConfig,
   });
 });
 
@@ -98,7 +150,6 @@ adminRouter.post('/registrations/:id/decision', async (req: AuthenticatedRequest
   reg.status = nextStatus;
   if (comments) reg.adminComments = String(comments).trim();
 
-  // Synchronize or create associated user account & single-use activation token
   let user = db.users.find((u) => u.email.toLowerCase() === reg.email.toLowerCase());
   if (decision === 'approve' || decision === 'reactivate') {
     if (!user) {
@@ -107,21 +158,33 @@ adminRouter.post('/registrations/:id/decision', async (req: AuthenticatedRequest
         name: reg.fullName,
         email: reg.email,
         role: 'builder',
-        status: reg.authProvider === 'google' ? 'active' : 'approved_pending_activation',
+        status: 'approved_pending_activation',
         mustChangePassword: false,
         mfaEnabled: false,
         authProvider: reg.authProvider === 'google' ? 'google' : 'password',
         workspaceId: `ws-${reg.id.toLowerCase()}`,
         workspaceName: reg.companyName || `${reg.fullName} Workspace`,
+        phone: reg.phone,
+        companyName: reg.companyName,
+        jobTitle: reg.jobTitle,
+        country: reg.country,
+        platformTheme: {
+          themeId: db.platformThemeConfig.defaultUserThemeId,
+          animationMode: db.platformThemeConfig.animationsGloballyAllowed ? 'balanced' : 'disabled',
+          enable3D: false,
+          updatedAt: now,
+        },
         registrationId: reg.id,
         createdAt: now,
         updatedAt: now,
       };
       db.users.push(user);
     } else if (decision === 'reactivate') {
-      user.status = user.passwordHash || user.authProvider === 'google' ? 'active' : 'approved_pending_activation';
+      user.status = user.passwordHash ? 'active' : 'approved_pending_activation';
       user.updatedAt = now;
     }
+
+    reg.accountStatus = user.status === 'active' ? 'Active' : 'Approved — Awaiting Activation';
 
     if (decision === 'approve') {
       const rawToken = generateSecureToken(24);
@@ -139,11 +202,15 @@ adminRouter.post('/registrations/:id/decision', async (req: AuthenticatedRequest
   } else if (decision === 'suspend' && user) {
     user.status = 'suspended';
     user.updatedAt = now;
+    reg.accountStatus = 'Suspended';
     db.sessions = db.sessions.filter((s) => s.userId !== user!.id);
-  } else if (decision === 'reject' && user) {
-    user.status = 'rejected';
-    user.updatedAt = now;
-    db.sessions = db.sessions.filter((s) => s.userId !== user!.id);
+  } else if (decision === 'reject') {
+    reg.accountStatus = 'Rejected';
+    if (user) {
+      user.status = 'rejected';
+      user.updatedAt = now;
+      db.sessions = db.sessions.filter((s) => s.userId !== user!.id);
+    }
   }
 
   db.approvalHistory.unshift({
@@ -189,9 +256,44 @@ adminRouter.post('/registrations/:id/decision', async (req: AuthenticatedRequest
   });
 });
 
-// Super Admin ONLY: CSV export of platform registrations
+// Super Admin ONLY: Update Contact Inquiry Status / Internal Notes
+adminRouter.put('/contacts/:id', async (req: AuthenticatedRequest, res) => {
+  const admin = req.authUser!;
+  const inquiryId = req.params.id;
+  const { status, adminNotes } = req.body || {};
+
+  const validStatuses = new Set<ContactInquiryStatus>(['New', 'In Review', 'Resolved']);
+  if (status && !validStatuses.has(status)) {
+    return res.status(400).json({ error: 'Invalid inquiry status.' });
+  }
+
+  const db = await loadDb();
+  const inquiry = db.contactInquiries.find((c) => c.id === inquiryId);
+  if (!inquiry) {
+    return res.status(404).json({ error: 'Contact inquiry not found.' });
+  }
+
+  if (status) {
+    inquiry.status = status;
+    if (status === 'Resolved' && !inquiry.responseDate) {
+      inquiry.responseDate = new Date().toISOString();
+    }
+  }
+  if (typeof adminNotes === 'string') {
+    inquiry.adminNotes = adminNotes.trim();
+  }
+  inquiry.sheetsSynced = false;
+
+  appendAuditLog(db, admin.email, admin.role, 'UPDATE_CONTACT_INQUIRY', `${inquiry.id} -> ${inquiry.status}`, 'Allowed');
+  await persistDb(db);
+
+  return res.json({ ok: true, inquiry });
+});
+
+// Super Admin ONLY: CSV or XLSX export of platform registrations
 adminRouter.get('/registrations/export', async (req: AuthenticatedRequest, res) => {
   const admin = req.authUser!;
+  const format = req.query.format === 'xlsx' ? 'xlsx' : 'csv';
   const db = await loadDb();
 
   const headers = [
@@ -237,30 +339,115 @@ adminRouter.get('/registrations/export', async (req: AuthenticatedRequest, res) 
     r.themeModePreference,
     [r.additionalFeatures, r.integrationRequirements, r.additionalComments].filter(Boolean).join(' ; '),
     r.consentMarketing ? 'Yes' : 'No',
-    r.status,
+    r.accountStatus || r.status,
     r.approvalDate || '',
     r.adminComments || '',
   ]);
+
+  appendAuditLog(
+    db,
+    admin.email,
+    admin.role,
+    `EXPORT_REGISTRATIONS_${format.toUpperCase()}`,
+    `${db.registrations.length} records`,
+    'Allowed'
+  );
+  await persistDb(db);
+
+  const dateStamp = new Date().toISOString().slice(0, 10);
+  if (format === 'xlsx') {
+    const buffer = buildXlsxBuffer('Registrations', headers, rows);
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="AEGION_AI_CUSTOMER_REGISTRATIONS_${dateStamp}.xlsx"`
+    );
+    return res.send(buffer);
+  }
 
   const csvContent = [
     headers.map(escapeCsvCell).join(','),
     ...rows.map((row) => row.map(escapeCsvCell).join(',')),
   ].join('\r\n');
 
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename="AEGION_AI_CUSTOMER_REGISTRATIONS_${dateStamp}.csv"`
+  );
+  return res.send(csvContent);
+});
+
+// Super Admin ONLY: CSV or XLSX export of contact inquiries sheet
+adminRouter.get('/contacts/export', async (req: AuthenticatedRequest, res) => {
+  const admin = req.authUser!;
+  const format = req.query.format === 'xlsx' ? 'xlsx' : 'csv';
+  const db = await loadDb();
+
+  const headers = [
+    'Inquiry ID',
+    'Submission Date',
+    'Full Name',
+    'Business Email',
+    'Company Name',
+    'Subject',
+    'Inquiry Category',
+    'Message',
+    'Inquiry Status',
+    'Admin Notes',
+    'Response Date',
+  ];
+
+  const rows = db.contactInquiries.map((c) => [
+    c.id,
+    c.submittedAt,
+    c.fullName,
+    c.email,
+    c.company || '',
+    c.subject,
+    c.category,
+    c.message,
+    c.status,
+    c.adminNotes || '',
+    c.responseDate || '',
+  ]);
+
   appendAuditLog(
     db,
     admin.email,
     admin.role,
-    'EXPORT_REGISTRATIONS_CSV',
-    `${db.registrations.length} records`,
+    `EXPORT_CONTACTS_${format.toUpperCase()}`,
+    `${db.contactInquiries.length} contact records`,
     'Allowed'
   );
   await persistDb(db);
 
+  const dateStamp = new Date().toISOString().slice(0, 10);
+  if (format === 'xlsx') {
+    const buffer = buildXlsxBuffer('Contact Inquiries', headers, rows);
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="AEGION_AI_CONTACT_INQUIRIES_${dateStamp}.xlsx"`
+    );
+    return res.send(buffer);
+  }
+
+  const csvContent = [
+    headers.map(escapeCsvCell).join(','),
+    ...rows.map((row) => row.map(escapeCsvCell).join(',')),
+  ].join('\r\n');
+
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
   res.setHeader(
     'Content-Disposition',
-    `attachment; filename="AEGION_AI_CUSTOMER_REGISTRATIONS_${new Date().toISOString().slice(0, 10)}.csv"`
+    `attachment; filename="AEGION_AI_CONTACT_INQUIRIES_${dateStamp}.csv"`
   );
   return res.send(csvContent);
 });
@@ -283,7 +470,7 @@ adminRouter.post('/sheets/sync', async (req: AuthenticatedRequest, res) => {
       admin.email,
       admin.role,
       'SYNC_GOOGLE_SHEETS',
-      `Spreadsheet ${summary.spreadsheetId}`,
+      `Registrations ${summary.spreadsheetId} & Contacts ${summary.contactSpreadsheetId}`,
       'Allowed'
     );
     await persistDb(db);
@@ -331,7 +518,6 @@ adminRouter.put('/notifications/config', async (req: AuthenticatedRequest, res) 
     db.notificationConfig.notifyUserOnApproval = body.notifyUserOnApproval;
   }
 
-  // Server-only secrets (never returned raw to frontend)
   if (typeof body.whatsappAccessToken === 'string' && body.whatsappAccessToken.trim()) {
     db.whatsappSecrets.accessToken = body.whatsappAccessToken.trim();
     db.notificationConfig.whatsappAccessTokenConfigured = true;
@@ -400,6 +586,12 @@ adminRouter.put('/users/:id/status', async (req: AuthenticatedRequest, res) => {
   if (status === 'suspended') {
     db.sessions = db.sessions.filter((s) => s.userId !== target.id);
   }
+  const linkedReg = db.registrations.find(
+    (r) => r.email.toLowerCase() === target.email.toLowerCase() || r.id === target.registrationId
+  );
+  if (linkedReg) {
+    linkedReg.accountStatus = status === 'suspended' ? 'Suspended' : 'Active';
+  }
   appendAuditLog(db, admin.email, admin.role, `USER_STATUS_${status.toUpperCase()}`, target.email, 'Allowed');
   await persistDb(db);
 
@@ -416,4 +608,72 @@ adminRouter.put('/tickets/:id', async (req: AuthenticatedRequest, res) => {
   appendAuditLog(db, admin.email, admin.role, 'UPDATE_SUPPORT_TICKET', `${ticket.id} -> ${status}`, 'Allowed');
   await persistDb(db);
   return res.json({ ok: true, ticket });
+});
+
+// Super Admin ONLY: Platform Theme Catalog & Governance Policy
+adminRouter.put('/platform-themes/config', async (req: AuthenticatedRequest, res) => {
+  const admin = req.authUser!;
+  const body = req.body || {};
+  const db = await loadDb();
+  const current = db.platformThemeConfig;
+
+  const nextDefaultPublic =
+    typeof body.defaultPublicThemeId === 'string' && isValidPlatformThemeId(body.defaultPublicThemeId)
+      ? body.defaultPublicThemeId
+      : current.defaultPublicThemeId;
+  const nextDefaultUser =
+    typeof body.defaultUserThemeId === 'string' && isValidPlatformThemeId(body.defaultUserThemeId)
+      ? body.defaultUserThemeId
+      : current.defaultUserThemeId;
+  const nextDefaultAdmin =
+    typeof body.defaultAdminThemeId === 'string' && isValidPlatformThemeId(body.defaultAdminThemeId)
+      ? body.defaultAdminThemeId
+      : current.defaultAdminThemeId;
+  const nextFallback =
+    typeof body.fallbackThemeId === 'string' && isValidPlatformThemeId(body.fallbackThemeId)
+      ? body.fallbackThemeId
+      : current.fallbackThemeId;
+
+  const rawDisabledThemes = Array.isArray(body.disabledThemeIds)
+    ? body.disabledThemeIds.filter(
+        (id: unknown): id is string =>
+          typeof id === 'string' && isValidPlatformThemeId(id) && id !== nextFallback
+      )
+    : current.disabledThemeIds;
+
+  const validCats = new Set<string>(PLATFORM_THEME_CATEGORIES);
+  const rawDisabledCats = Array.isArray(body.disabledCategories)
+    ? body.disabledCategories.filter((c: unknown): c is string => typeof c === 'string' && validCats.has(c))
+    : current.disabledCategories;
+
+  db.platformThemeConfig = {
+    defaultPublicThemeId: nextDefaultPublic,
+    defaultUserThemeId: nextDefaultUser,
+    defaultAdminThemeId: nextDefaultAdmin,
+    fallbackThemeId: nextFallback,
+    disabledThemeIds: Array.from(new Set(rawDisabledThemes)),
+    disabledCategories: Array.from(new Set(rawDisabledCats)),
+    animationsGloballyAllowed:
+      typeof body.animationsGloballyAllowed === 'boolean'
+        ? body.animationsGloballyAllowed
+        : current.animationsGloballyAllowed,
+    threeDGloballyAllowed: false,
+    updatedAt: new Date().toISOString(),
+    updatedBy: admin.email,
+  };
+
+  appendAuditLog(
+    db,
+    admin.email,
+    admin.role,
+    'UPDATE_PLATFORM_THEME_GOVERNANCE',
+    `Public:${nextDefaultPublic}, User:${nextDefaultUser}, Disabled:${db.platformThemeConfig.disabledThemeIds.length}`,
+    'Allowed'
+  );
+  await persistDb(db);
+
+  return res.json({
+    ok: true,
+    config: db.platformThemeConfig,
+  });
 });

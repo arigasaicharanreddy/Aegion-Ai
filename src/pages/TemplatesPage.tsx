@@ -13,8 +13,8 @@ export const TemplatesPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold text-white font-display">Application Templates</h1>
-        <p className="text-xs text-[#9CA3AF]">
+        <h1 className="text-2xl font-bold text-[var(--aegion-platform-text)] font-display">Application Templates</h1>
+        <p className="text-xs text-[var(--aegion-platform-text-muted)]">
           Choose a domain blueprint and pair it with any of the 12 supported backend languages.
         </p>
       </div>
@@ -25,20 +25,20 @@ export const TemplatesPage: React.FC = () => {
           return (
             <GlassCard key={tpl.id} className="flex flex-col justify-between gap-5">
               <div className="space-y-3">
-                <div className="text-xs text-[#A78BFA] font-medium">{tpl.category}</div>
-                <h2 className="text-lg font-semibold text-white font-display">{tpl.title}</h2>
-                <p className="text-xs text-[#9CA3AF] leading-relaxed">{tpl.summary}</p>
-                <div className="text-[11px] text-[#D1D5DB] pt-1">
+                <div className="text-xs text-[var(--aegion-platform-accent)] font-medium">{tpl.category}</div>
+                <h2 className="text-lg font-semibold text-[var(--aegion-platform-text)] font-display">{tpl.title}</h2>
+                <p className="text-xs text-[var(--aegion-platform-text-muted)] leading-relaxed">{tpl.summary}</p>
+                <div className="text-[11px] text-[var(--aegion-platform-text-secondary)] pt-1">
                   Modules: {tpl.coreModules.join(' · ')}
                 </div>
-                <div className="text-[11px] text-[#9CA3AF]">
+                <div className="text-[11px] text-[var(--aegion-platform-text-muted)]">
                   Roles: {tpl.defaultRoles.join(' · ')}
                 </div>
               </div>
 
-              <div className="space-y-3 pt-3 border-t border-white/10">
+              <div className="space-y-3 pt-3 border-t border-[var(--aegion-platform-border)]">
                 <label className="block space-y-1">
-                  <span className="text-[11px] text-[#9CA3AF]">Target Backend Stack</span>
+                  <span className="text-[11px] text-[var(--aegion-platform-text-muted)]">Target Backend Stack</span>
                   <select
                     value={chosenLang}
                     onChange={(e) =>
@@ -47,7 +47,7 @@ export const TemplatesPage: React.FC = () => {
                         [tpl.id]: e.target.value as ProgrammingLanguage,
                       }))
                     }
-                    className="w-full bg-[#181922] border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-[#8B5CF6]"
+                    className="w-full bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] px-2.5 py-1.5 text-xs text-[var(--aegion-platform-text)] focus:outline-none focus:border-[var(--aegion-platform-accent)] aegion-btn-shape"
                   >
                     {SUPPORTED_LANGUAGES.map((l) => (
                       <option key={l.language} value={l.language}>
@@ -84,3 +84,4 @@ export const TemplatesPage: React.FC = () => {
     </div>
   );
 };
+

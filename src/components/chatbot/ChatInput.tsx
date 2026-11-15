@@ -64,7 +64,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   return (
-    <div className="border-t border-white/10 bg-[#101116]/95 p-4 space-y-3">
+    <div className="border-t border-[var(--aegion-platform-border)] bg-[var(--aegion-platform-bg-alt)] p-4 space-y-3">
       {/* Prompt suggestions */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
         {PROMPT_SUGGESTIONS.map((s, idx) => (
@@ -72,7 +72,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             key={idx}
             type="button"
             onClick={() => setText(s)}
-            className="text-[11px] text-[#9CA3AF] hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 rounded-lg px-2.5 py-1 whitespace-nowrap shrink-0 cursor-pointer transition-colors"
+            className="text-[11px] text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)] bg-[var(--aegion-platform-surface-solid)] hover:bg-[var(--aegion-platform-cement)] border border-[var(--aegion-platform-border)] aegion-btn-shape px-2.5 py-1 whitespace-nowrap shrink-0 cursor-pointer transition-colors"
           >
             {s.length > 56 ? `${s.slice(0, 56)}…` : s}
           </button>
@@ -85,7 +85,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           aria-label="Application category"
           value={category}
           onChange={(e) => onCategoryChange(e.target.value as AppCategory)}
-          className="bg-[#181922] border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-[#E5E7EB] focus:outline-none focus:border-[#8B5CF6]"
+          className="bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] aegion-btn-shape px-2.5 py-1.5 text-xs text-[var(--aegion-platform-text)] focus:outline-none focus:border-[var(--aegion-platform-accent)]"
         >
           {APPLICATION_TEMPLATES.map((tpl) => (
             <option key={tpl.id} value={tpl.category}>
@@ -98,7 +98,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           aria-label="Backend programming language"
           value={language}
           onChange={(e) => onLanguageChange(e.target.value as ProgrammingLanguage)}
-          className="bg-[#181922] border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-[#E5E7EB] focus:outline-none focus:border-[#8B5CF6]"
+          className="bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] aegion-btn-shape px-2.5 py-1.5 text-xs text-[var(--aegion-platform-text)] focus:outline-none focus:border-[var(--aegion-platform-accent)]"
         >
           {SUPPORTED_LANGUAGES.map((l) => (
             <option key={l.language} value={l.language}>
@@ -110,9 +110,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <button
           type="button"
           onClick={onOpenThemePicker}
-          className="inline-flex items-center gap-1.5 bg-[#181922] hover:bg-white/[0.08] border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-[#E5E7EB] whitespace-nowrap cursor-pointer"
+          className="inline-flex items-center gap-1.5 bg-[var(--aegion-platform-input-bg)] hover:bg-[var(--aegion-platform-cement)] border border-[var(--aegion-platform-border)] aegion-btn-shape px-2.5 py-1.5 text-xs text-[var(--aegion-platform-text)] whitespace-nowrap cursor-pointer transition-colors"
         >
-          <Palette className="w-3.5 h-3.5 text-[#A78BFA]" />
+          <Palette className="w-3.5 h-3.5 text-[var(--aegion-platform-accent)]" />
           <span>{activeTheme.name}</span>
         </button>
       </div>
@@ -122,14 +122,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           {attachments.map((att) => (
             <span
               key={att.id}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/[0.06] border border-white/10 text-xs text-[#E5E7EB]"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--aegion-platform-cement)] border border-[var(--aegion-platform-border)] text-xs text-[var(--aegion-platform-text)]"
             >
-              <Paperclip className="w-3 h-3 text-[#A78BFA]" />
+              <Paperclip className="w-3 h-3 text-[var(--aegion-platform-accent)]" />
               <span>{att.name}</span>
               <button
                 type="button"
                 onClick={() => setAttachments((prev) => prev.filter((a) => a.id !== att.id))}
-                className="text-[#9CA3AF] hover:text-white cursor-pointer"
+                className="text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)] cursor-pointer"
                 aria-label="Remove attachment"
               >
                 <X className="w-3 h-3" />
@@ -152,7 +152,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           type="button"
           onClick={() => fileRef.current?.click()}
           title="Attach specification, SQL schema, or reference file"
-          className="p-2.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-[#9CA3AF] hover:text-white cursor-pointer shrink-0"
+          className="p-2.5 aegion-btn-shape bg-[var(--aegion-platform-surface-solid)] hover:bg-[var(--aegion-platform-cement)] border border-[var(--aegion-platform-border)] text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)] cursor-pointer shrink-0 transition-colors"
         >
           <Paperclip className="w-4 h-4" />
         </button>
@@ -168,13 +168,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             }
           }}
           placeholder="Describe your application, target language (e.g. Java Spring Boot, Python FastAPI, Go Gin), or UI change..."
-          className="flex-1 resize-none bg-[#161720] border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder:text-[#6B7280] focus:outline-none focus:border-[#8B5CF6]"
+          className="flex-1 resize-none bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] aegion-btn-shape px-3.5 py-2.5 text-sm text-[var(--aegion-platform-text)] placeholder:text-[var(--aegion-platform-text-muted)] focus:outline-none focus:border-[var(--aegion-platform-accent)]"
         />
 
         <button
           type="submit"
           disabled={!text.trim() || isStreaming}
-          className="px-4 py-2.5 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-45 text-white text-sm font-medium inline-flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer transition-colors"
+          className="px-4 py-2.5 aegion-btn-shape aegion-btn-glow bg-[var(--aegion-platform-accent)] hover:bg-[var(--aegion-platform-accent-hover)] disabled:opacity-45 text-[var(--aegion-platform-accent-fg)] text-sm font-medium inline-flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer transition-colors"
         >
           <Send className="w-4 h-4" />
           <span>{isStreaming ? 'Generating' : 'Generate'}</span>

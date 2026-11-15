@@ -1,4 +1,4 @@
-import type { Request, Response, NextFunction } from 'express';
+import type { CookieOptions, Request, Response, NextFunction } from 'express';
 import { appendAuditLog, loadDb, persistDb, type StoredUserRecord } from '../data/database';
 import { generateSecureToken, sha256Hex } from '../security/crypto';
 
@@ -36,8 +36,7 @@ export function extractSessionToken(req: Request): string | null {
 
 export async function createUserSession(
   user: StoredUserRecord,
-  res: Response,
-  options: { isDevPreview?: boolean } = {}
+  res: Response
 ): Promise<string> {
   const db = await loadDb();
   const rawToken = generateSecureToken(32);
@@ -50,25 +49,42 @@ export async function createUserSession(
     userId: user.id,
     email: user.email,
     role: user.role,
-    isDevPreview: Boolean(options.isDevPreview),
     createdAt: now.toISOString(),
     expiresAt,
   });
 
-  // Prune expired sessions
   const nowMs = now.getTime();
-  db.sessions = db.sessions.filter((s) => new Date(s.expiresAt).getTime() > nowMs);
+  db.sessions = db.sessions.filter(
+    (s) => !s.isDevPreview && new Date(s.expiresAt).getTime() > nowMs
+  );
   await persistDb(db);
 
-  res.cookie(SESSION_COOKIE_NAME, rawToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production' || Boolean(process.env.APP_URL?.startsWith('https://')),
-    sameSite: process.env.APP_URL?.startsWith('https://') ? 'none' : 'lax',
+  const req = res.req;
+  const cookieOpts: CookieOptions = {
+    ...getSessionCookieOptions(req),
     maxAge: SESSION_TTL_MS,
-    path: '/',
-  });
+  };
+  res.cookie(SESSION_COOKIE_NAME, rawToken, cookieOpts);
 
   return rawToken;
+}
+
+export function getSessionCookieOptions(req?: Request): CookieOptions {
+  const forwardedProto = (req?.headers?.['x-forwarded-proto'] as string | undefined) || '';
+  const isHttps = req
+    ? Boolean(req.secure) || forwardedProto.split(',')[0].trim() === 'https'
+    : Boolean(process.env.APP_URL?.startsWith('https://')) || process.env.NODE_ENV === 'production';
+
+  const opts: CookieOptions & { partitioned?: boolean } = {
+    httpOnly: true,
+    secure: isHttps,
+    sameSite: isHttps ? 'none' : 'lax',
+    path: '/',
+  };
+  if (isHttps) {
+    opts.partitioned = true;
+  }
+  return opts;
 }
 
 export async function revokeUserSessions(userId: string, exceptTokenHash?: string): Promise<void> {
@@ -82,14 +98,13 @@ export async function revokeUserSessions(userId: string, exceptTokenHash?: strin
 export async function resolveSessionUser(req: Request): Promise<{
   user: StoredUserRecord | null;
   tokenHash?: string;
-  isDevPreview?: boolean;
 }> {
   const rawToken = extractSessionToken(req);
   if (!rawToken) return { user: null };
 
   const tokenHash = sha256Hex(rawToken);
   const db = await loadDb();
-  const session = db.sessions.find((s) => s.tokenHash === tokenHash);
+  const session = db.sessions.find((s) => s.tokenHash === tokenHash && !s.isDevPreview);
   if (!session) return { user: null };
 
   if (new Date(session.expiresAt).getTime() <= Date.now()) {
@@ -99,7 +114,7 @@ export async function resolveSessionUser(req: Request): Promise<{
   }
 
   const user = db.users.find((u) => u.id === session.userId) || null;
-  return { user, tokenHash, isDevPreview: Boolean(session.isDevPreview) };
+  return { user, tokenHash };
 }
 
 export async function requireSession(req: AuthenticatedRequest, res: Response, next: NextFunction) {
@@ -113,7 +128,7 @@ export async function requireSession(req: AuthenticatedRequest, res: Response, n
 }
 
 export async function requireSuperAdmin(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-  const { user, tokenHash, isDevPreview } = await resolveSessionUser(req);
+  const { user, tokenHash } = await resolveSessionUser(req);
   if (!user) {
     return res.status(401).json({ error: 'Super Admin authentication required.' });
   }
@@ -125,7 +140,7 @@ export async function requireSuperAdmin(req: AuthenticatedRequest, res: Response
       error: 'Forbidden: Only the Super Admin can access this resource or export platform data.',
     });
   }
-  if (user.mustChangePassword && !isDevPreview) {
+  if (user.mustChangePassword) {
     return res.status(403).json({
       error: 'Password change required before accessing Super Admin console.',
       mustChangePassword: true,
@@ -157,6 +172,7 @@ export function sanitizeUserForClient(user: StoredUserRecord) {
     id: user.id,
     name: user.name,
     email: user.email,
+    pendingEmail: user.pendingEmail,
     role: user.role,
     status: user.status,
     mustChangePassword: user.mustChangePassword,
@@ -165,5 +181,11 @@ export function sanitizeUserForClient(user: StoredUserRecord) {
     workspaceId: user.workspaceId,
     workspaceName: user.workspaceName,
     avatarUrl: user.avatarUrl,
+    phone: user.phone,
+    companyName: user.companyName,
+    jobTitle: user.jobTitle,
+    country: user.country,
+    preferences: user.preferences,
+    platformTheme: user.platformTheme,
   };
 }

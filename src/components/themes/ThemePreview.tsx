@@ -23,8 +23,8 @@ export const ThemePreview: React.FC<ThemePreviewProps> = ({
     <div
       className={`rounded-xl border transition-all duration-150 overflow-hidden flex flex-col ${
         selected
-          ? 'border-[#8B5CF6] ring-1 ring-[#8B5CF6]/50 bg-[#171822]'
-          : 'border-white/10 bg-[#121318] hover:border-white/20'
+          ? 'border-[var(--aegion-platform-accent)] ring-1 ring-[var(--aegion-platform-accent)]/40 bg-[var(--aegion-platform-surface-solid)]'
+          : 'border-[var(--aegion-platform-border)] bg-[var(--aegion-platform-bg-alt)] hover:border-[var(--aegion-platform-border-strong)]'
       }`}
     >
       {/* Live tokenized mini app preview */}
@@ -114,36 +114,36 @@ export const ThemePreview: React.FC<ThemePreviewProps> = ({
       <div className="px-4 pb-4 pt-1 flex flex-col gap-2">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <h3 className="text-sm font-semibold text-white font-display">{preset.name}</h3>
-            <p className="text-xs text-[#9CA3AF] mt-0.5">
+            <h3 className="text-sm font-semibold text-[var(--aegion-platform-text)] font-display">{preset.name}</h3>
+            <p className="text-xs text-[var(--aegion-platform-text-muted)] mt-0.5">
               {preset.category} · {preset.mode === 'light' ? 'Light' : 'Dark'}
             </p>
           </div>
           <div className="flex items-center gap-1 pt-0.5" title="Background / Surface / Accent tokens">
             <span
-              className="w-3.5 h-3.5 rounded-sm border border-white/15"
+              className="w-3.5 h-3.5 rounded-sm border border-[var(--aegion-platform-border-strong)]"
               style={{ backgroundColor: customization?.backgroundOverride || preset.tokens.background }}
             />
             <span
-              className="w-3.5 h-3.5 rounded-sm border border-white/15"
+              className="w-3.5 h-3.5 rounded-sm border border-[var(--aegion-platform-border-strong)]"
               style={{ backgroundColor: preset.tokens.surface }}
             />
             <span
-              className="w-3.5 h-3.5 rounded-sm border border-white/15"
+              className="w-3.5 h-3.5 rounded-sm border border-[var(--aegion-platform-border-strong)]"
               style={{ backgroundColor: customization?.accentOverride || preset.tokens.accent }}
             />
           </div>
         </div>
-        <p className="text-xs text-[#9CA3AF] line-clamp-1">{preset.description}</p>
+        <p className="text-xs text-[var(--aegion-platform-text-muted)] line-clamp-1">{preset.description}</p>
         <div className="flex items-center gap-2 pt-1">
           {onSelect && (
             <button
               type="button"
               onClick={onSelect}
-              className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
+              className={`flex-1 py-1.5 px-3 aegion-btn-shape text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
                 selected
-                  ? 'bg-[#7C3AED] text-white'
-                  : 'bg-white/[0.06] hover:bg-white/[0.11] text-[#E5E7EB]'
+                  ? 'bg-[var(--aegion-platform-accent)] text-[var(--aegion-platform-accent-fg)]'
+                  : 'bg-[var(--aegion-platform-cement)] hover:bg-[var(--aegion-platform-accent-soft)] text-[var(--aegion-platform-text)]'
               }`}
             >
               {selected ? 'Active Theme' : 'Apply Theme'}
@@ -153,7 +153,7 @@ export const ThemePreview: React.FC<ThemePreviewProps> = ({
             <button
               type="button"
               onClick={onCustomize}
-              className="py-1.5 px-3 rounded-lg text-xs font-medium bg-white/[0.04] hover:bg-white/[0.09] text-[#D1D5DB] border border-white/10 whitespace-nowrap cursor-pointer"
+              className="py-1.5 px-3 aegion-btn-shape text-xs font-medium bg-[var(--aegion-platform-surface-solid)] hover:bg-[var(--aegion-platform-cement)] text-[var(--aegion-platform-text-secondary)] border border-[var(--aegion-platform-border)] whitespace-nowrap cursor-pointer transition-colors"
             >
               Customize
             </button>

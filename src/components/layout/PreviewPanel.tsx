@@ -270,15 +270,17 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
   };
 
   const renderPanelContent = () => (
-    <div className="flex flex-col h-full min-h-0 bg-[#0C0D12]">
+    <div className="flex flex-col h-full min-h-0 bg-[var(--aegion-platform-bg)]">
       {/* Toolbar */}
-      <div className="px-3.5 py-2.5 border-b border-white/10 flex flex-wrap items-center justify-between gap-2 bg-[#111218]">
-        <div className="flex items-center gap-1 p-0.5 bg-white/[0.04] border border-white/10 rounded-lg">
+      <div className="px-3.5 py-2.5 border-b border-[var(--aegion-platform-border)] flex flex-wrap items-center justify-between gap-2 bg-[var(--aegion-platform-bg-alt)]">
+        <div className="flex items-center gap-1 p-0.5 bg-[var(--aegion-platform-surface-solid)] border border-[var(--aegion-platform-border)] aegion-btn-shape">
           <button
             type="button"
             onClick={() => setTab('preview')}
-            className={`px-2.5 py-1 rounded-md text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
-              tab === 'preview' ? 'bg-[#7C3AED] text-white' : 'text-[#9CA3AF] hover:text-white'
+            className={`px-2.5 py-1 aegion-btn-shape text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap cursor-pointer transition-colors ${
+              tab === 'preview'
+                ? 'bg-[var(--aegion-platform-accent)] text-[var(--aegion-platform-accent-fg)]'
+                : 'text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)]'
             }`}
           >
             <Eye className="w-3.5 h-3.5" />
@@ -287,8 +289,10 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
           <button
             type="button"
             onClick={() => setTab('code')}
-            className={`px-2.5 py-1 rounded-md text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
-              tab === 'code' ? 'bg-[#7C3AED] text-white' : 'text-[#9CA3AF] hover:text-white'
+            className={`px-2.5 py-1 aegion-btn-shape text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap cursor-pointer transition-colors ${
+              tab === 'code'
+                ? 'bg-[var(--aegion-platform-accent)] text-[var(--aegion-platform-accent-fg)]'
+                : 'text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)]'
             }`}
           >
             <FileCode2 className="w-3.5 h-3.5" />
@@ -297,8 +301,10 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
           <button
             type="button"
             onClick={() => setTab('memory')}
-            className={`px-2.5 py-1 rounded-md text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
-              tab === 'memory' ? 'bg-[#7C3AED] text-white' : 'text-[#9CA3AF] hover:text-white'
+            className={`px-2.5 py-1 aegion-btn-shape text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap cursor-pointer transition-colors ${
+              tab === 'memory'
+                ? 'bg-[var(--aegion-platform-accent)] text-[var(--aegion-platform-accent-fg)]'
+                : 'text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)]'
             }`}
           >
             <Database className="w-3.5 h-3.5" />
@@ -311,19 +317,21 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
             <button
               type="button"
               onClick={onOpenThemePicker}
-              title="Switch Glass UI theme"
-              className="p-1.5 rounded-md text-[#9CA3AF] hover:text-white hover:bg-white/[0.06] cursor-pointer"
+              title="Switch Generated App Glass UI theme"
+              className="p-1.5 aegion-btn-shape text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)] hover:bg-[var(--aegion-platform-cement)] cursor-pointer transition-colors"
             >
               <Palette className="w-3.5 h-3.5" />
             </button>
           )}
-          <div className="hidden sm:flex items-center gap-0.5 bg-white/[0.04] border border-white/10 rounded-md p-0.5">
+          <div className="hidden sm:flex items-center gap-0.5 bg-[var(--aegion-platform-surface-solid)] border border-[var(--aegion-platform-border)] aegion-btn-shape p-0.5">
             <button
               type="button"
               onClick={() => setViewport('desktop')}
               title="Desktop viewport"
-              className={`p-1 rounded cursor-pointer ${
-                viewport === 'desktop' ? 'bg-white/15 text-white' : 'text-[#9CA3AF]'
+              className={`p-1 rounded cursor-pointer transition-colors ${
+                viewport === 'desktop'
+                  ? 'bg-[var(--aegion-platform-accent-soft)] text-[var(--aegion-platform-text)]'
+                  : 'text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)]'
               }`}
             >
               <Monitor className="w-3.5 h-3.5" />
@@ -332,8 +340,10 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
               type="button"
               onClick={() => setViewport('tablet')}
               title="Tablet viewport"
-              className={`p-1 rounded cursor-pointer ${
-                viewport === 'tablet' ? 'bg-white/15 text-white' : 'text-[#9CA3AF]'
+              className={`p-1 rounded cursor-pointer transition-colors ${
+                viewport === 'tablet'
+                  ? 'bg-[var(--aegion-platform-accent-soft)] text-[var(--aegion-platform-text)]'
+                  : 'text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)]'
               }`}
             >
               <Tablet className="w-3.5 h-3.5" />
@@ -342,8 +352,10 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
               type="button"
               onClick={() => setViewport('mobile')}
               title="Mobile viewport"
-              className={`p-1 rounded cursor-pointer ${
-                viewport === 'mobile' ? 'bg-white/15 text-white' : 'text-[#9CA3AF]'
+              className={`p-1 rounded cursor-pointer transition-colors ${
+                viewport === 'mobile'
+                  ? 'bg-[var(--aegion-platform-accent-soft)] text-[var(--aegion-platform-text)]'
+                  : 'text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)]'
               }`}
             >
               <Smartphone className="w-3.5 h-3.5" />
@@ -354,7 +366,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
             type="button"
             onClick={() => setRefreshKey((k) => k + 1)}
             title="Refresh preview"
-            className="p-1.5 rounded-md text-[#9CA3AF] hover:text-white hover:bg-white/[0.06] cursor-pointer"
+            className="p-1.5 aegion-btn-shape text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)] hover:bg-[var(--aegion-platform-cement)] cursor-pointer transition-colors"
           >
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
@@ -364,7 +376,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
               type="button"
               onClick={() => setFullscreen(true)}
               title="Open expanded preview"
-              className="p-1.5 rounded-md text-[#9CA3AF] hover:text-white hover:bg-white/[0.06] cursor-pointer"
+              className="p-1.5 aegion-btn-shape text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)] hover:bg-[var(--aegion-platform-cement)] cursor-pointer transition-colors"
             >
               <Maximize2 className="w-3.5 h-3.5" />
             </button>
@@ -376,7 +388,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
       <div className="flex-1 overflow-auto p-3 flex justify-center min-h-0">
         {tab === 'preview' && (
           <div
-            className={`${widthClass} h-full rounded-xl overflow-hidden border border-white/10 transition-all duration-200`}
+            className={`${widthClass} h-full rounded-xl overflow-hidden border border-[var(--aegion-platform-border)] transition-all duration-200`}
           >
             {renderDomainPreview()}
           </div>
@@ -385,7 +397,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
         {tab === 'code' && (
           <div className="w-full space-y-3">
             {project.files.length === 0 ? (
-              <div className="p-6 text-center text-xs text-[#9CA3AF] border border-white/10 rounded-xl">
+              <div className="p-6 text-center text-xs text-[var(--aegion-platform-text-muted)] border border-[var(--aegion-platform-border)] rounded-xl bg-[var(--aegion-platform-surface-solid)]">
                 No source files committed yet. Send a prompt in the AI Builder and approve a proposal.
               </div>
             ) : (
@@ -396,10 +408,10 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
                       key={file.path}
                       type="button"
                       onClick={() => setSelectedFileIdx(idx)}
-                      className={`px-2.5 py-1 rounded-md font-mono text-[11px] border cursor-pointer ${
+                      className={`px-2.5 py-1 aegion-btn-shape font-mono text-[11px] border cursor-pointer transition-colors ${
                         selectedFileIdx === idx
-                          ? 'bg-[#7C3AED]/20 border-[#8B5CF6]/50 text-white'
-                          : 'bg-white/[0.04] border-white/10 text-[#9CA3AF] hover:text-white'
+                          ? 'bg-[var(--aegion-platform-accent-soft)] border-[var(--aegion-platform-border-strong)] text-[var(--aegion-platform-text)]'
+                          : 'bg-[var(--aegion-platform-surface-solid)] border-[var(--aegion-platform-border)] text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)]'
                       }`}
                     >
                       {file.path}
@@ -407,14 +419,14 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
                   ))}
                 </div>
                 {project.files[selectedFileIdx] && (
-                  <div className="rounded-xl border border-white/10 bg-[#090A0D] overflow-hidden">
-                    <div className="px-3.5 py-2 border-b border-white/10 flex justify-between text-[11px] text-[#9CA3AF]">
-                      <span className="font-mono text-white">
+                  <div className="rounded-xl border border-[var(--aegion-platform-border)] bg-[var(--aegion-platform-bg-alt)] overflow-hidden">
+                    <div className="px-3.5 py-2 border-b border-[var(--aegion-platform-border)] flex justify-between text-[11px] text-[var(--aegion-platform-text-muted)]">
+                      <span className="font-mono text-[var(--aegion-platform-text)]">
                         {project.files[selectedFileIdx].path}
                       </span>
                       <span>{project.files[selectedFileIdx].summary}</span>
                     </div>
-                    <pre className="p-4 text-xs font-mono text-[#E5E7EB] overflow-x-auto leading-relaxed">
+                    <pre className="p-4 text-xs font-mono text-[var(--aegion-platform-text-secondary)] overflow-x-auto leading-relaxed">
                       <code>{project.files[selectedFileIdx].content}</code>
                     </pre>
                   </div>
@@ -426,26 +438,26 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
 
         {tab === 'memory' && (
           <div className="w-full space-y-4 text-xs">
-            <div className="p-4 rounded-xl border border-white/10 bg-white/[0.03] space-y-2">
-              <div className="font-semibold text-white">Project Specification</div>
-              <p className="text-[#9CA3AF] leading-relaxed">{project.memory.specification}</p>
+            <div className="p-4 rounded-xl border border-[var(--aegion-platform-border)] bg-[var(--aegion-platform-surface-solid)] space-y-2">
+              <div className="font-semibold text-[var(--aegion-platform-text)]">Project Specification</div>
+              <p className="text-[var(--aegion-platform-text-muted)] leading-relaxed">{project.memory.specification}</p>
             </div>
 
-            <div className="p-4 rounded-xl border border-white/10 bg-white/[0.03] space-y-2">
-              <div className="font-semibold text-white">User Roles & Business Rules</div>
-              <div className="text-[#D1D5DB]">Roles: {project.memory.userRoles.join(' · ')}</div>
-              <ul className="list-disc pl-4 space-y-1 text-[#9CA3AF]">
+            <div className="p-4 rounded-xl border border-[var(--aegion-platform-border)] bg-[var(--aegion-platform-surface-solid)] space-y-2">
+              <div className="font-semibold text-[var(--aegion-platform-text)]">User Roles & Business Rules</div>
+              <div className="text-[var(--aegion-platform-text-secondary)]">Roles: {project.memory.userRoles.join(' · ')}</div>
+              <ul className="list-disc pl-4 space-y-1 text-[var(--aegion-platform-text-muted)]">
                 {project.memory.businessRules.map((r, i) => (
                   <li key={i}>{r}</li>
                 ))}
               </ul>
             </div>
 
-            <div className="p-4 rounded-xl border border-white/10 bg-white/[0.03] space-y-2">
-              <div className="font-semibold text-white">Prompt History</div>
-              <ul className="space-y-1.5 text-[#9CA3AF]">
+            <div className="p-4 rounded-xl border border-[var(--aegion-platform-border)] bg-[var(--aegion-platform-surface-solid)] space-y-2">
+              <div className="font-semibold text-[var(--aegion-platform-text)]">Prompt History</div>
+              <ul className="space-y-1.5 text-[var(--aegion-platform-text-muted)]">
                 {project.memory.promptHistory.map((ph, i) => (
-                  <li key={i} className="font-mono text-[11px] bg-black/30 p-2 rounded border border-white/5">
+                  <li key={i} className="font-mono text-[11px] bg-[var(--aegion-platform-bg-alt)] p-2 rounded border border-[var(--aegion-platform-border)]">
                     {ph}
                   </li>
                 ))}
@@ -467,7 +479,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
         subtitle={`${project.category} · ${project.language} (${project.framework}) · Theme: ${preset.name}`}
         maxWidth="max-w-6xl"
       >
-        <div className="h-[72vh] rounded-xl overflow-hidden border border-white/10">
+        <div className="h-[72vh] rounded-xl overflow-hidden border border-[var(--aegion-platform-border)]">
           {renderDomainPreview()}
         </div>
       </Modal>

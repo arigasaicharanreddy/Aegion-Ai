@@ -1,28 +1,49 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import type { AccountStatus, UserRole } from '../../src/types/auth';
+import type {
+  AccountStatus,
+  PlatformThemeGovernanceConfig,
+  PlatformThemePreference,
+  UserPreferences,
+  UserRole,
+} from '../../src/types/auth';
 import type {
   ApprovalHistoryRecord,
+  ContactCategory,
+  ContactInquiry,
   CustomerRegistration,
   NotificationChannelConfig,
   NotificationLogRecord,
 } from '../../src/types/registration';
 import type { AuditLogEntry, SupportTicket } from '../../src/types/project';
+import {
+  isValidPlatformThemeId,
+  PLATFORM_THEME_CATEGORIES,
+  resolveLegacyPlatformThemeId,
+} from '../../src/platform-themes/catalog';
 
 export interface StoredUserRecord {
   id: string;
   name: string;
   email: string;
+  pendingEmail?: string;
   role: UserRole;
   status: AccountStatus;
   passwordHash?: string;
   mustChangePassword: boolean;
+  customPasswordSet?: boolean;
   mfaEnabled: boolean;
   mfaCodeHint?: string;
   authProvider: 'password' | 'google';
   workspaceId: string;
   workspaceName: string;
   avatarUrl?: string;
+  phone?: string;
+  companyName?: string;
+  jobTitle?: string;
+  country?: string;
+  preferences?: UserPreferences;
+  platformTheme?: PlatformThemePreference;
   registrationId?: string;
   createdAt: string;
   updatedAt: string;
@@ -43,8 +64,9 @@ export interface OneTimeTokenRecord {
   tokenHash: string;
   userId: string;
   email: string;
+  newEmail?: string;
   registrationId?: string;
-  purpose: 'activation' | 'password_reset';
+  purpose: 'activation' | 'password_reset' | 'admin_reset' | 'email_change';
   expiresAt: string;
   usedAt?: string;
 }
@@ -61,6 +83,7 @@ export interface AegionDatabaseState {
   sessions: SessionRecord[];
   oneTimeTokens: OneTimeTokenRecord[];
   registrations: CustomerRegistration[];
+  contactInquiries: ContactInquiry[];
   approvalHistory: ApprovalHistoryRecord[];
   notificationLogs: NotificationLogRecord[];
   notificationConfig: NotificationChannelConfig;
@@ -80,12 +103,69 @@ export interface AegionDatabaseState {
   auditLogs: AuditLogEntry[];
   supportTickets: SupportTicket[];
   aiStats: AiStatsRecord;
+  platformThemeConfig: PlatformThemeGovernanceConfig;
 }
 
 const DATA_DIR = path.resolve(process.cwd(), '.aegion-data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
 
+const VALID_CATEGORIES = new Set<ContactCategory>([
+  'General Inquiry',
+  'Business Partnership',
+  'Product Information',
+  'Technical Support',
+  'Workspace Access',
+  'Other',
+]);
+
+function normalizeContactCategory(raw: unknown): ContactCategory {
+  if (typeof raw === 'string' && VALID_CATEGORIES.has(raw as ContactCategory)) {
+    return raw as ContactCategory;
+  }
+  const lower = String(raw || '').toLowerCase();
+  if (lower.includes('partner')) return 'Business Partnership';
+  if (lower.includes('support') || lower.includes('technical')) return 'Technical Support';
+  if (lower.includes('access') || lower.includes('workspace') || lower.includes('demo')) return 'Workspace Access';
+  if (lower.includes('product') || lower.includes('store') || lower.includes('health') || lower.includes('hrms')) {
+    return 'Product Information';
+  }
+  return 'General Inquiry';
+}
+
+function normalizeContactInquiry(raw: Record<string, unknown>): ContactInquiry {
+  const legacyTopic = typeof raw.topic === 'string' ? raw.topic : '';
+  const subject =
+    typeof raw.subject === 'string' && raw.subject.trim()
+      ? raw.subject.trim()
+      : legacyTopic || 'Aegion AI Inquiry';
+  const category = normalizeContactCategory(raw.category || legacyTopic);
+  const status =
+    raw.status === 'In Review' || raw.status === 'Resolved' ? raw.status : 'New';
+  return {
+    id: String(raw.id || `INQ-${Date.now()}`),
+    submittedAt: String(raw.submittedAt || new Date().toISOString()),
+    fullName: String(raw.fullName || ''),
+    email: String(raw.email || ''),
+    company: String(raw.company || ''),
+    phone: typeof raw.phone === 'string' && raw.phone.trim() ? raw.phone.trim() : undefined,
+    subject,
+    category,
+    message: String(raw.message || ''),
+    status,
+    adminNotes: typeof raw.adminNotes === 'string' ? raw.adminNotes : '',
+    responseDate: typeof raw.responseDate === 'string' ? raw.responseDate : undefined,
+    emailNotificationStatus:
+      raw.emailNotificationStatus === 'Sent' ||
+      raw.emailNotificationStatus === 'Queued' ||
+      raw.emailNotificationStatus === 'Failed'
+        ? raw.emailNotificationStatus
+        : 'Skipped (Unconfigured)',
+    sheetsSynced: Boolean(raw.sheetsSynced),
+  };
+}
+
 function createInitialDbState(): AegionDatabaseState {
+  const defaultAdminEmail = (process.env.AEGION_SUPER_ADMIN_EMAIL || 'aegionlabs.in@gmail.com').trim();
   return {
     users: [
       {
@@ -99,6 +179,21 @@ function createInitialDbState(): AegionDatabaseState {
         authProvider: 'google',
         workspaceId: 'ws-vanguard',
         workspaceName: 'Vanguard People Ops',
+        phone: '+91 98450 22190',
+        companyName: 'Vanguard People Systems',
+        jobTitle: 'VP of Engineering',
+        country: 'India',
+        preferences: {
+          themePreference: 'dark',
+          compactMode: false,
+          emailNotificationsEnabled: true,
+        },
+        platformTheme: {
+          themeId: 'obsidian-glass',
+          animationMode: 'balanced',
+          enable3D: false,
+          updatedAt: '2026-11-09T11:30:00.000Z',
+        },
         createdAt: '2026-11-08T09:15:00.000Z',
         updatedAt: '2026-11-09T11:30:00.000Z',
         lastLoginAt: '2026-11-11T14:20:00.000Z',
@@ -144,8 +239,9 @@ function createInitialDbState(): AegionDatabaseState {
         consentRegistrationNotifications: true,
         consentMarketing: false,
         status: 'Approved',
+        accountStatus: 'Active',
         approvalDate: '2026-11-08T12:40:00.000Z',
-        approvedBy: 'arigasaicharan@gmail.com',
+        approvedBy: defaultAdminEmail,
         adminComments: 'Approved for Enterprise HRMS workspace onboarding.',
         sheetsSynced: false,
       },
@@ -185,6 +281,7 @@ function createInitialDbState(): AegionDatabaseState {
         consentRegistrationNotifications: true,
         consentMarketing: true,
         status: 'Pending Approval',
+        accountStatus: 'Pending Approval',
         sheetsSynced: false,
       },
       {
@@ -223,6 +320,39 @@ function createInitialDbState(): AegionDatabaseState {
         consentRegistrationNotifications: true,
         consentMarketing: false,
         status: 'Pending Approval',
+        accountStatus: 'Pending Approval',
+        sheetsSynced: false,
+      },
+    ],
+    contactInquiries: [
+      {
+        id: 'INQ-2026-3001',
+        submittedAt: '2026-11-12T10:15:00.000Z',
+        fullName: 'Ananya Deshmukh',
+        email: 'ananya@zenithretail.in',
+        company: 'Zenith Retail Group',
+        phone: '+91 98201 44510',
+        subject: 'Multi-Store Operations & Storefront Consolidation',
+        category: 'Product Information',
+        message: 'Looking to unify 18 retail stores, vendor billing, and customer portal under one branded workspace.',
+        status: 'In Review',
+        adminNotes: 'Prepared multi-store workflow blueprint overview for follow-up.',
+        emailNotificationStatus: 'Sent',
+        sheetsSynced: false,
+      },
+      {
+        id: 'INQ-2026-3002',
+        submittedAt: '2026-11-13T14:40:00.000Z',
+        fullName: 'Daniel Brooks',
+        email: 'dbrooks@harborclinic.org',
+        company: 'Harbor Health Network',
+        phone: '+1 415 620 8831',
+        subject: 'Healthcare & Clinic Portal Onboarding Walkthrough',
+        category: 'Workspace Access',
+        message: 'Interested in an enterprise demo for patient intake, pharmacy stock alerts, and role-based clinic approvals.',
+        status: 'New',
+        adminNotes: '',
+        emailNotificationStatus: 'Skipped (Unconfigured)',
         sheetsSynced: false,
       },
     ],
@@ -245,7 +375,7 @@ function createInitialDbState(): AegionDatabaseState {
         previousStatus: 'Pending Approval',
         newStatus: 'Approved',
         action: 'APPROVE',
-        adminId: 'arigasaicharan@gmail.com',
+        adminId: defaultAdminEmail,
         timestamp: '2026-11-08T12:40:00.000Z',
         comments: 'Approved for Enterprise HRMS workspace onboarding.',
       },
@@ -286,7 +416,7 @@ function createInitialDbState(): AegionDatabaseState {
         id: 'NTF-5002',
         registrationId: 'REG-2026-1002',
         channel: 'System',
-        recipient: 'arigasaicharan@gmail.com',
+        recipient: defaultAdminEmail,
         template: 'New Registration Alert',
         status: 'Sent',
         sentTimestamp: '2026-11-11T16:05:02.000Z',
@@ -294,7 +424,7 @@ function createInitialDbState(): AegionDatabaseState {
     ],
     notificationConfig: {
       emailProvider: 'Gmail API',
-      senderEmail: process.env.AEGION_SENDER_EMAIL || 'arigasaicharan@gmail.com',
+      senderEmail: process.env.AEGION_SENDER_EMAIL || defaultAdminEmail,
       senderName: 'Aegion AI Onboarding',
       emailEnabled: true,
       whatsappEnabled: Boolean(process.env.WHATSAPP_ACCESS_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID),
@@ -308,6 +438,10 @@ function createInitialDbState(): AegionDatabaseState {
       sheetsSpreadsheetId: process.env.AEGION_SHEETS_SPREADSHEET_ID || '',
       sheetsSpreadsheetUrl: process.env.AEGION_SHEETS_SPREADSHEET_ID
         ? `https://docs.google.com/spreadsheets/d/${process.env.AEGION_SHEETS_SPREADSHEET_ID}/edit`
+        : '',
+      contactSpreadsheetId: process.env.AEGION_CONTACT_SHEETS_SPREADSHEET_ID || '',
+      contactSpreadsheetUrl: process.env.AEGION_CONTACT_SHEETS_SPREADSHEET_ID
+        ? `https://docs.google.com/spreadsheets/d/${process.env.AEGION_CONTACT_SHEETS_SPREADSHEET_ID}/edit`
         : '',
     },
     whatsappSecrets: {
@@ -327,7 +461,7 @@ function createInitialDbState(): AegionDatabaseState {
       {
         id: 'AUD-1041',
         timestamp: '2026-11-08T12:40:00.000Z',
-        actorEmail: 'arigasaicharan@gmail.com',
+        actorEmail: defaultAdminEmail,
         actorRole: 'super_admin',
         action: 'APPROVE_REGISTRATION',
         target: 'REG-2026-1001 (meera.nair@vanguard.io)',
@@ -346,22 +480,22 @@ function createInitialDbState(): AegionDatabaseState {
     supportTickets: [
       {
         id: 'TKT-2041',
-        subject: 'Custom Spring Boot OAuth2 resource server rule in Prompt Registry',
+        subject: 'Custom workflow approval template',
         category: 'Code Generation',
         priority: 'High',
         status: 'In Review',
-        message: 'Need Keycloak tenant claim extraction added to the Java Backend Adapter pack.',
+        message: 'Need multi-department sign-off rules added to our enterprise HR portal.',
         userEmail: 'meera.nair@vanguard.io',
         createdAt: '2026-11-10T11:30:00.000Z',
       },
       {
         id: 'TKT-2044',
-        subject: 'Multi-store inventory reconciliation webhook retry interval',
+        subject: 'Multi-store inventory reconciliation schedule',
         category: 'Architecture',
         priority: 'Standard',
         status: 'Open',
-        message: 'Looking for exponential backoff defaults in generated Celery tasks.',
-        userEmail: 'arigasaicharan@gmail.com',
+        message: 'Looking for nightly stock reconciliation threshold alerts across branches.',
+        userEmail: defaultAdminEmail,
         createdAt: '2026-11-11T08:15:00.000Z',
       },
     ],
@@ -370,6 +504,18 @@ function createInitialDbState(): AegionDatabaseState {
       failedGenerations: 1,
       tokensConsumed: 184200,
       activeProjects: 6,
+    },
+    platformThemeConfig: {
+      defaultPublicThemeId: 'obsidian-glass',
+      defaultUserThemeId: 'obsidian-glass',
+      defaultAdminThemeId: 'graphite-executive',
+      fallbackThemeId: 'obsidian-glass',
+      disabledThemeIds: [],
+      disabledCategories: [],
+      animationsGloballyAllowed: true,
+      threeDGloballyAllowed: false,
+      updatedAt: '2026-11-12T00:00:00.000Z',
+      updatedBy: defaultAdminEmail,
     },
   };
 }
@@ -384,9 +530,32 @@ export async function loadDb(): Promise<AegionDatabaseState> {
     const raw = await fs.readFile(DB_FILE, 'utf-8');
     const parsed = JSON.parse(raw) as Partial<AegionDatabaseState>;
     const defaults = createInitialDbState();
+    const rawContacts = Array.isArray(parsed.contactInquiries)
+      ? parsed.contactInquiries
+      : defaults.contactInquiries;
+
+    const rawUsers = Array.isArray(parsed.users) ? parsed.users : defaults.users;
+    const rawThemeConfig = parsed.platformThemeConfig || defaults.platformThemeConfig;
+    const validCatSet = new Set<string>(PLATFORM_THEME_CATEGORIES);
+
     cachedDb = {
       ...defaults,
       ...parsed,
+      users: rawUsers.map((u) =>
+        u.platformTheme
+          ? {
+              ...u,
+              platformTheme: {
+                ...u.platformTheme,
+                themeId: resolveLegacyPlatformThemeId(u.platformTheme.themeId),
+                enable3D: false,
+              },
+            }
+          : u
+      ),
+      contactInquiries: rawContacts.map((item) =>
+        normalizeContactInquiry(item as unknown as Record<string, unknown>)
+      ),
       notificationConfig: {
         ...defaults.notificationConfig,
         ...(parsed.notificationConfig || {}),
@@ -402,6 +571,29 @@ export async function loadDb(): Promise<AegionDatabaseState> {
       aiStats: {
         ...defaults.aiStats,
         ...(parsed.aiStats || {}),
+      },
+      platformThemeConfig: {
+        ...defaults.platformThemeConfig,
+        ...rawThemeConfig,
+        defaultPublicThemeId: resolveLegacyPlatformThemeId(rawThemeConfig.defaultPublicThemeId),
+        defaultUserThemeId: resolveLegacyPlatformThemeId(rawThemeConfig.defaultUserThemeId),
+        defaultAdminThemeId: resolveLegacyPlatformThemeId(
+          rawThemeConfig.defaultAdminThemeId || 'graphite-executive'
+        ),
+        fallbackThemeId: resolveLegacyPlatformThemeId(rawThemeConfig.fallbackThemeId),
+        threeDGloballyAllowed: false,
+        disabledThemeIds: Array.isArray(rawThemeConfig.disabledThemeIds)
+          ? Array.from(
+              new Set(
+                rawThemeConfig.disabledThemeIds.filter(
+                  (id) => isValidPlatformThemeId(id) && id !== resolveLegacyPlatformThemeId(rawThemeConfig.fallbackThemeId)
+                )
+              )
+            )
+          : defaults.platformThemeConfig.disabledThemeIds,
+        disabledCategories: Array.isArray(rawThemeConfig.disabledCategories)
+          ? rawThemeConfig.disabledCategories.filter((c) => validCatSet.has(c))
+          : defaults.platformThemeConfig.disabledCategories,
       },
     };
   } catch {
@@ -440,4 +632,9 @@ export function appendAuditLog(
   if (db.auditLogs.length > 250) {
     db.auditLogs = db.auditLogs.slice(0, 250);
   }
+}
+
+export function getActiveSuperAdminEmail(db: AegionDatabaseState): string {
+  const admin = db.users.find((u) => u.role === 'super_admin');
+  return admin?.email || process.env.AEGION_SUPER_ADMIN_EMAIL || 'aegionlabs.in@gmail.com';
 }

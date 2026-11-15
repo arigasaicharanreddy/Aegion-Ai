@@ -8,14 +8,32 @@ import { SUPPORTED_LANGUAGES } from '../config/appConfig';
 import type { AppCategory, ProgrammingLanguage } from '../types/project';
 import type { ThemePreferenceOption } from '../types/registration';
 import { Button } from '../components/common/Button';
+import { ThemeAmbientBackdrop } from '../components/theme-3d/ThemeAmbientBackdrop';
+import { QuickThemeSwitcher } from '../components/platform-themes/QuickThemeSwitcher';
 
 const APP_TYPES: { id: AppCategory; label: string; detail: string }[] = [
   { id: 'HRMS', label: 'HRMS', detail: 'Employees, payroll ledger, leave & attendance workflows' },
   { id: 'E-Commerce', label: 'E-Commerce', detail: 'Catalog, storefront, cart, checkout & order management' },
-  { id: 'Multi-Store Management', label: 'Multi-Store Management', detail: 'Branch warehouses, stock transfers & unified POS' },
-  { id: 'SaaS Applications', label: 'SaaS Application', detail: 'Multi-tenant workspaces, RBAC & subscription billing' },
-  { id: 'Healthcare Store Management', label: 'Healthcare Store', detail: 'Pharmacy inventory, batch expiry & prescription compliance' },
-  { id: 'Custom Business Applications', label: 'Custom Business Application', detail: 'Tailored internal portals & operational pipelines' },
+  {
+    id: 'Multi-Store Management',
+    label: 'Multi-Store Management',
+    detail: 'Branch warehouses, stock transfers & unified POS',
+  },
+  {
+    id: 'SaaS Applications',
+    label: 'SaaS Application',
+    detail: 'Multi-tenant workspaces, RBAC & subscription billing',
+  },
+  {
+    id: 'Healthcare Store Management',
+    label: 'Healthcare Store',
+    detail: 'Pharmacy inventory, batch expiry & prescription compliance',
+  },
+  {
+    id: 'Custom Business Applications',
+    label: 'Custom Business Application',
+    detail: 'Tailored internal portals & operational pipelines',
+  },
 ];
 
 const THEME_OPTIONS: ThemePreferenceOption[] = [
@@ -37,19 +55,19 @@ const MODULE_PRESETS = [
   'Automated Notifications',
 ];
 
+const inputClass =
+  'w-full bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] aegion-btn-shape px-3.5 py-2 text-sm text-[var(--aegion-platform-text)] placeholder:text-[var(--aegion-platform-text-muted)] focus:outline-none focus:border-[var(--aegion-platform-accent)]';
+
 export const RegistrationPage: React.FC = () => {
-  const {
-    navigate,
-    googlePrefill,
-    setPendingStatusInfo,
-    notify,
-  } = useAegion();
+  const { navigate, googlePrefill, setPendingStatusInfo, notify } = useAegion();
 
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const [authProvider, setAuthProvider] = useState<'email' | 'google'>(googlePrefill ? 'google' : 'email');
+  const [authProvider, setAuthProvider] = useState<'email' | 'google'>(
+    googlePrefill ? 'google' : 'email'
+  );
 
   // Step 1: Personal Info
   const [fullName, setFullName] = useState(googlePrefill?.fullName || '');
@@ -68,15 +86,23 @@ export const RegistrationPage: React.FC = () => {
   const [projectDescription, setProjectDescription] = useState('');
   const [businessIndustry, setBusinessIndustry] = useState('Enterprise Technology');
   const [expectedUsers, setExpectedUsers] = useState('100 - 500');
-  const [requiredModules, setRequiredModules] = useState<string[]>(['RBAC & Tenant Isolation', 'Analytics Dashboard']);
-  const [preferredBackendLanguage, setPreferredBackendLanguage] = useState<ProgrammingLanguage>('Python');
+  const [requiredModules, setRequiredModules] = useState<string[]>([
+    'RBAC & Tenant Isolation',
+    'Analytics Dashboard',
+  ]);
+  const [preferredBackendLanguage, setPreferredBackendLanguage] =
+    useState<ProgrammingLanguage>('Python');
   const [preferredFrontendFramework, setPreferredFrontendFramework] = useState('React + TypeScript');
   const [preferredDatabase, setPreferredDatabase] = useState('PostgreSQL');
-  const [expectedComplexity, setExpectedComplexity] = useState<'Standard' | 'Moderate' | 'Enterprise Multi-Tenant'>('Moderate');
+  const [expectedComplexity, setExpectedComplexity] = useState<
+    'Standard' | 'Moderate' | 'Enterprise Multi-Tenant'
+  >('Moderate');
   const [preferredDeployment, setPreferredDeployment] = useState('Google Cloud Run / Docker');
 
   // Step 4: UI/UX Preferences
-  const [themeOption, setThemeOption] = useState<ThemePreferenceOption>('Yes, use Aegion Glassmorphism themes');
+  const [themeOption, setThemeOption] = useState<ThemePreferenceOption>(
+    'Yes, use Aegion Glassmorphism themes'
+  );
   const [themeModePreference, setThemeModePreference] = useState<'light' | 'dark'>('dark');
   const [selectedThemeId, setSelectedThemeId] = useState('hrms-aurora-hr');
   const [customAccentColor, setCustomAccentColor] = useState('#7C3AED');
@@ -147,7 +173,14 @@ export const RegistrationPage: React.FC = () => {
   const validateCurrentStep = (): boolean => {
     setErrorMessage(null);
     if (step === 1) {
-      if (!fullName.trim() || !email.trim() || !phone.trim() || !country.trim() || !companyName.trim() || !jobTitle.trim()) {
+      if (
+        !fullName.trim() ||
+        !email.trim() ||
+        !phone.trim() ||
+        !country.trim() ||
+        !companyName.trim() ||
+        !jobTitle.trim()
+      ) {
         setErrorMessage('Please complete all required personal and organization fields.');
         return false;
       }
@@ -176,7 +209,9 @@ export const RegistrationPage: React.FC = () => {
     setErrorMessage(null);
 
     if (!acceptedTerms || !acceptedPrivacy || !consentRegistrationNotifications) {
-      setErrorMessage('Please accept Terms of Service, Privacy Policy, and Registration Notifications consent.');
+      setErrorMessage(
+        'Please accept Terms of Service, Privacy Policy, and Registration Notifications consent.'
+      );
       return;
     }
 
@@ -249,27 +284,34 @@ export const RegistrationPage: React.FC = () => {
   const filteredThemes = ALL_THEMES.filter((t) => t.mode === themeModePreference).slice(0, 12);
 
   return (
-    <div className="min-h-screen bg-[#09090C] text-[#F3F4F6] py-8 px-4 sm:px-6">
-      <div className="max-w-3xl mx-auto space-y-6">
+    <div className="relative min-h-screen bg-[var(--aegion-platform-bg)] text-[var(--aegion-platform-text)] py-8 px-4 sm:px-6 transition-colors duration-300">
+      <ThemeAmbientBackdrop variant="public" />
+
+      <div className="relative z-10 max-w-3xl mx-auto space-y-6">
         <div className="flex items-center justify-between gap-4">
           <button
             type="button"
             onClick={() => navigate('login')}
-            className="inline-flex items-center gap-2 text-xs text-[#9CA3AF] hover:text-white cursor-pointer"
+            className="inline-flex items-center gap-2 text-xs text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)] cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Back to Sign In</span>
           </button>
-          <span className="text-xs text-[#9CA3AF] tabular-nums">Step {step} of 6</span>
+          <div className="flex items-center gap-3">
+            <QuickThemeSwitcher compact />
+            <span className="text-xs text-[var(--aegion-platform-text-muted)] tabular-nums">
+              Step {step} of 6
+            </span>
+          </div>
         </div>
 
-        <div className="aegion-glass rounded-xl p-6 sm:p-8 space-y-6">
+        <div className="aegion-glass p-6 sm:p-8 space-y-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="space-y-1">
-              <h1 className="text-2xl font-bold text-white font-display">
+              <h1 className="text-2xl font-bold text-[var(--aegion-platform-text)] font-display">
                 Request Aegion AI Workspace Access
               </h1>
-              <p className="text-xs text-[#9CA3AF]">
+              <p className="text-xs text-[var(--aegion-platform-text-muted)]">
                 Submissions are reviewed by the Super Admin before Application Builder activation.
               </p>
             </div>
@@ -293,12 +335,12 @@ export const RegistrationPage: React.FC = () => {
                   onClick={() => {
                     if (num < step) setStep(num);
                   }}
-                  className={`text-left p-2 rounded-lg border transition-colors ${
+                  className={`text-left p-2 aegion-btn-shape border transition-colors ${
                     active
-                      ? 'border-[#8B5CF6] bg-[#7C3AED]/15 text-white'
+                      ? 'border-[var(--aegion-platform-accent)] bg-[var(--aegion-platform-accent-soft)] text-[var(--aegion-platform-text)]'
                       : done
-                      ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300 cursor-pointer'
-                      : 'border-white/10 bg-[#14151C] text-[#6B7280]'
+                      ? 'border-emerald-500/35 bg-emerald-500/10 text-emerald-500 cursor-pointer'
+                      : 'border-[var(--aegion-platform-border)] bg-[var(--aegion-platform-bg-alt)] text-[var(--aegion-platform-text-muted)]'
                   }`}
                 >
                   <div className="text-[10px] font-mono tabular-nums">0{num}</div>
@@ -312,81 +354,95 @@ export const RegistrationPage: React.FC = () => {
             {step === 1 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <label className="block space-y-1.5">
-                  <span className="text-xs font-medium text-[#D1D5DB]">Full Name *</span>
+                  <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                    Full Name *
+                  </span>
                   <input
                     type="text"
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full bg-[#181922] border border-white/10 rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#8B5CF6]"
+                    className={inputClass}
                   />
                 </label>
 
                 <label className="block space-y-1.5">
-                  <span className="text-xs font-medium text-[#D1D5DB]">Email Address *</span>
+                  <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                    Email Address *
+                  </span>
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-[#181922] border border-white/10 rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#8B5CF6]"
+                    className={inputClass}
                   />
                 </label>
 
                 <label className="block space-y-1.5">
-                  <span className="text-xs font-medium text-[#D1D5DB]">Phone Number (WhatsApp enabled) *</span>
+                  <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                    Phone Number (WhatsApp enabled) *
+                  </span>
                   <input
                     type="tel"
                     required
                     placeholder="+1 415 555 0192"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full bg-[#181922] border border-white/10 rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#8B5CF6]"
+                    className={inputClass}
                   />
                 </label>
 
                 <label className="block space-y-1.5">
-                  <span className="text-xs font-medium text-[#D1D5DB]">Country *</span>
+                  <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                    Country *
+                  </span>
                   <input
                     type="text"
                     required
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
-                    className="w-full bg-[#181922] border border-white/10 rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#8B5CF6]"
+                    className={inputClass}
                   />
                 </label>
 
                 <label className="block space-y-1.5">
-                  <span className="text-xs font-medium text-[#D1D5DB]">Company Name *</span>
+                  <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                    Company Name *
+                  </span>
                   <input
                     type="text"
                     required
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
-                    className="w-full bg-[#181922] border border-white/10 rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#8B5CF6]"
+                    className={inputClass}
                   />
                 </label>
 
                 <label className="block space-y-1.5">
-                  <span className="text-xs font-medium text-[#D1D5DB]">Company Website</span>
+                  <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                    Company Website
+                  </span>
                   <input
                     type="url"
                     placeholder="https://company.com"
                     value={companyWebsite}
                     onChange={(e) => setCompanyWebsite(e.target.value)}
-                    className="w-full bg-[#181922] border border-white/10 rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#8B5CF6]"
+                    className={inputClass}
                   />
                 </label>
 
                 <label className="block space-y-1.5 sm:col-span-2">
-                  <span className="text-xs font-medium text-[#D1D5DB]">Job Title *</span>
+                  <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                    Job Title *
+                  </span>
                   <input
                     type="text"
                     required
                     placeholder="e.g. CTO, Head of Engineering, Founder"
                     value={jobTitle}
                     onChange={(e) => setJobTitle(e.target.value)}
-                    className="w-full bg-[#181922] border border-white/10 rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#8B5CF6]"
+                    className={inputClass}
                   />
                 </label>
               </div>
@@ -395,10 +451,10 @@ export const RegistrationPage: React.FC = () => {
             {step === 2 && (
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-base font-semibold text-white font-display">
+                  <h2 className="text-base font-semibold text-[var(--aegion-platform-text)] font-display">
                     Which application are you planning to build?
                   </h2>
-                  <p className="text-xs text-[#9CA3AF] mt-1">
+                  <p className="text-xs text-[var(--aegion-platform-text-muted)] mt-1">
                     Select one or more enterprise domains if your organization plans multiple projects.
                   </p>
                 </div>
@@ -411,20 +467,34 @@ export const RegistrationPage: React.FC = () => {
                         key={item.id}
                         type="button"
                         onClick={() => toggleAppType(item.id)}
-                        className={`p-4 rounded-xl border text-left transition-colors cursor-pointer flex items-start justify-between gap-3 ${
+                        className={`p-4 aegion-btn-shape border text-left transition-colors cursor-pointer flex items-start justify-between gap-3 ${
                           selected
-                            ? 'border-[#8B5CF6] bg-[#7C3AED]/15'
-                            : 'border-white/10 bg-[#14151C] hover:border-white/25'
+                            ? 'border-[var(--aegion-platform-accent)] bg-[var(--aegion-platform-accent-soft)]'
+                            : 'border-[var(--aegion-platform-border)] bg-[var(--aegion-platform-bg-alt)] hover:border-[var(--aegion-platform-border-strong)]'
                         }`}
                       >
                         <div className="space-y-1">
-                          <div className="text-sm font-semibold text-white">{item.label}</div>
-                          <div className="text-xs text-[#9CA3AF]">{item.detail}</div>
+                          <div className="text-sm font-semibold text-[var(--aegion-platform-text)]">
+                            {item.label}
+                          </div>
+                          <div className="text-xs text-[var(--aegion-platform-text-muted)]">
+                            {item.detail}
+                          </div>
                         </div>
                         <div
                           className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 mt-0.5 ${
-                            selected ? 'bg-[#7C3AED] border-[#8B5CF6] text-white' : 'border-white/20'
+                            selected
+                              ? 'border-[var(--aegion-platform-accent)]'
+                              : 'border-[var(--aegion-platform-border-strong)]'
                           }`}
+                          style={
+                            selected
+                              ? {
+                                  backgroundColor: 'var(--aegion-platform-accent)',
+                                  color: 'var(--aegion-platform-accent-fg)',
+                                }
+                              : undefined
+                          }
                         >
                           {selected && <Check className="w-3.5 h-3.5" />}
                         </div>
@@ -439,47 +509,55 @@ export const RegistrationPage: React.FC = () => {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <label className="block space-y-1.5">
-                    <span className="text-xs font-medium text-[#D1D5DB]">Project Name *</span>
+                    <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                      Project Name *
+                    </span>
                     <input
                       type="text"
                       required
                       value={projectName}
                       onChange={(e) => setProjectName(e.target.value)}
                       placeholder="e.g. Horizon Enterprise HRMS"
-                      className="w-full bg-[#181922] border border-white/10 rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#8B5CF6]"
+                      className={inputClass}
                     />
                   </label>
 
                   <label className="block space-y-1.5">
-                    <span className="text-xs font-medium text-[#D1D5DB]">Business Industry</span>
+                    <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                      Business Industry
+                    </span>
                     <input
                       type="text"
                       value={businessIndustry}
                       onChange={(e) => setBusinessIndustry(e.target.value)}
-                      className="w-full bg-[#181922] border border-white/10 rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#8B5CF6]"
+                      className={inputClass}
                     />
                   </label>
                 </div>
 
                 <label className="block space-y-1.5">
-                  <span className="text-xs font-medium text-[#D1D5DB]">Project Description *</span>
+                  <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                    Project Description *
+                  </span>
                   <textarea
                     rows={3}
                     required
                     value={projectDescription}
                     onChange={(e) => setProjectDescription(e.target.value)}
                     placeholder="Describe core business workflows, compliance rules, and user personas..."
-                    className="w-full bg-[#181922] border border-white/10 rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#8B5CF6]"
+                    className={inputClass}
                   />
                 </label>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <label className="block space-y-1.5">
-                    <span className="text-xs font-medium text-[#D1D5DB]">Expected Users</span>
+                    <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                      Expected Users
+                    </span>
                     <select
                       value={expectedUsers}
                       onChange={(e) => setExpectedUsers(e.target.value)}
-                      className="w-full bg-[#181922] border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
+                      className={inputClass}
                     >
                       <option value="1 - 100">1 - 100</option>
                       <option value="100 - 500">100 - 500</option>
@@ -490,11 +568,15 @@ export const RegistrationPage: React.FC = () => {
                   </label>
 
                   <label className="block space-y-1.5">
-                    <span className="text-xs font-medium text-[#D1D5DB]">Preferred Backend Language</span>
+                    <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                      Preferred Backend Language
+                    </span>
                     <select
                       value={preferredBackendLanguage}
-                      onChange={(e) => setPreferredBackendLanguage(e.target.value as ProgrammingLanguage)}
-                      className="w-full bg-[#181922] border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
+                      onChange={(e) =>
+                        setPreferredBackendLanguage(e.target.value as ProgrammingLanguage)
+                      }
+                      className={inputClass}
                     >
                       {SUPPORTED_LANGUAGES.map((l) => (
                         <option key={l.language} value={l.language}>
@@ -505,11 +587,13 @@ export const RegistrationPage: React.FC = () => {
                   </label>
 
                   <label className="block space-y-1.5">
-                    <span className="text-xs font-medium text-[#D1D5DB]">Frontend Framework</span>
+                    <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                      Frontend Framework
+                    </span>
                     <select
                       value={preferredFrontendFramework}
                       onChange={(e) => setPreferredFrontendFramework(e.target.value)}
-                      className="w-full bg-[#181922] border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
+                      className={inputClass}
                     >
                       <option value="React + TypeScript">React + TypeScript</option>
                       <option value="Next.js + TypeScript">Next.js + TypeScript</option>
@@ -519,11 +603,13 @@ export const RegistrationPage: React.FC = () => {
                   </label>
 
                   <label className="block space-y-1.5">
-                    <span className="text-xs font-medium text-[#D1D5DB]">Preferred Database</span>
+                    <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                      Preferred Database
+                    </span>
                     <select
                       value={preferredDatabase}
                       onChange={(e) => setPreferredDatabase(e.target.value)}
-                      className="w-full bg-[#181922] border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
+                      className={inputClass}
                     >
                       <option value="PostgreSQL">PostgreSQL</option>
                       <option value="MySQL">MySQL</option>
@@ -533,11 +619,15 @@ export const RegistrationPage: React.FC = () => {
                   </label>
 
                   <label className="block space-y-1.5">
-                    <span className="text-xs font-medium text-[#D1D5DB]">Expected Complexity</span>
+                    <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                      Expected Complexity
+                    </span>
                     <select
                       value={expectedComplexity}
-                      onChange={(e) => setExpectedComplexity(e.target.value as typeof expectedComplexity)}
-                      className="w-full bg-[#181922] border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
+                      onChange={(e) =>
+                        setExpectedComplexity(e.target.value as typeof expectedComplexity)
+                      }
+                      className={inputClass}
                     >
                       <option value="Standard">Standard</option>
                       <option value="Moderate">Moderate</option>
@@ -546,18 +636,22 @@ export const RegistrationPage: React.FC = () => {
                   </label>
 
                   <label className="block space-y-1.5">
-                    <span className="text-xs font-medium text-[#D1D5DB]">Deployment Environment</span>
+                    <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                      Deployment Environment
+                    </span>
                     <input
                       type="text"
                       value={preferredDeployment}
                       onChange={(e) => setPreferredDeployment(e.target.value)}
-                      className="w-full bg-[#181922] border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
+                      className={inputClass}
                     />
                   </label>
                 </div>
 
                 <div className="space-y-2">
-                  <span className="text-xs font-medium text-[#D1D5DB]">Required Modules</span>
+                  <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                    Required Modules
+                  </span>
                   <div className="flex flex-wrap gap-2">
                     {MODULE_PRESETS.map((mod) => {
                       const active = requiredModules.includes(mod);
@@ -566,10 +660,10 @@ export const RegistrationPage: React.FC = () => {
                           key={mod}
                           type="button"
                           onClick={() => toggleModule(mod)}
-                          className={`px-3 py-1.5 rounded-lg text-xs border transition-colors cursor-pointer ${
+                          className={`px-3 py-1.5 aegion-btn-shape text-xs border transition-colors cursor-pointer ${
                             active
-                              ? 'border-[#8B5CF6] bg-[#7C3AED]/20 text-white'
-                              : 'border-white/10 bg-[#14151C] text-[#9CA3AF] hover:text-white'
+                              ? 'border-[var(--aegion-platform-accent)] bg-[var(--aegion-platform-accent-soft)] text-[var(--aegion-platform-text)]'
+                              : 'border-[var(--aegion-platform-border)] bg-[var(--aegion-platform-bg-alt)] text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)]'
                           }`}
                         >
                           {mod}
@@ -584,17 +678,17 @@ export const RegistrationPage: React.FC = () => {
             {step === 4 && (
               <div className="space-y-5">
                 <div className="space-y-2">
-                  <span className="text-xs font-medium text-[#D1D5DB]">
-                    Would you like to use Aegion's predefined UI themes?
+                  <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                    Would you like to use Aegion&apos;s predefined UI themes for your generated application?
                   </span>
                   <div className="grid grid-cols-1 gap-2">
                     {THEME_OPTIONS.map((opt) => (
                       <label
                         key={opt}
-                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer ${
+                        className={`flex items-center gap-3 p-3 aegion-btn-shape border cursor-pointer ${
                           themeOption === opt
-                            ? 'border-[#8B5CF6] bg-[#7C3AED]/15 text-white'
-                            : 'border-white/10 bg-[#14151C] text-[#D1D5DB]'
+                            ? 'border-[var(--aegion-platform-accent)] bg-[var(--aegion-platform-accent-soft)] text-[var(--aegion-platform-text)]'
+                            : 'border-[var(--aegion-platform-border)] bg-[var(--aegion-platform-bg-alt)] text-[var(--aegion-platform-text-secondary)]'
                         }`}
                       >
                         <input
@@ -611,11 +705,13 @@ export const RegistrationPage: React.FC = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <label className="block space-y-1.5">
-                    <span className="text-xs font-medium text-[#D1D5DB]">Theme Mode Preference</span>
+                    <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                      Theme Mode Preference
+                    </span>
                     <select
                       value={themeModePreference}
                       onChange={(e) => setThemeModePreference(e.target.value as 'light' | 'dark')}
-                      className="w-full bg-[#181922] border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
+                      className={inputClass}
                     >
                       <option value="dark">Dark Theme (Obsidian / Midnight Glass)</option>
                       <option value="light">Light Theme (Pearl / Frosted Daylight)</option>
@@ -623,11 +719,13 @@ export const RegistrationPage: React.FC = () => {
                   </label>
 
                   <label className="block space-y-1.5">
-                    <span className="text-xs font-medium text-[#D1D5DB]">Application-Specific Preset</span>
+                    <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                      Application-Specific Preset
+                    </span>
                     <select
                       value={selectedThemeId}
                       onChange={(e) => setSelectedThemeId(e.target.value)}
-                      className="w-full bg-[#181922] border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
+                      className={inputClass}
                     >
                       {filteredThemes.map((t) => (
                         <option key={t.id} value={t.id}>
@@ -638,46 +736,52 @@ export const RegistrationPage: React.FC = () => {
                   </label>
 
                   <label className="block space-y-1.5">
-                    <span className="text-xs font-medium text-[#D1D5DB]">Custom Accent Color</span>
+                    <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                      Custom Accent Color
+                    </span>
                     <div className="flex items-center gap-2">
                       <input
                         type="color"
                         value={customAccentColor}
                         onChange={(e) => setCustomAccentColor(e.target.value)}
-                        className="h-9 w-12 rounded bg-[#181922] border border-white/10 cursor-pointer"
+                        className="h-9 w-12 rounded bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] cursor-pointer"
                       />
                       <input
                         type="text"
                         value={customAccentColor}
                         onChange={(e) => setCustomAccentColor(e.target.value)}
-                        className="flex-1 bg-[#181922] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white"
+                        className="flex-1 bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] aegion-btn-shape px-3 py-2 text-xs font-mono text-[var(--aegion-platform-text)]"
                       />
                     </div>
                   </label>
 
                   <label className="block space-y-1.5">
-                    <span className="text-xs font-medium text-[#D1D5DB]">Typography Preference</span>
+                    <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                      Typography Preference
+                    </span>
                     <select
                       value={typographyPreference}
                       onChange={(e) => setTypographyPreference(e.target.value)}
-                      className="w-full bg-[#181922] border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
+                      className={inputClass}
                     >
                       <option value="Manrope + Plus Jakarta Sans">Manrope + Plus Jakarta Sans</option>
                       <option value="Inter + JetBrains Mono">Inter + JetBrains Mono</option>
-                      <option value="Space Grotesk + IBM Plex Sans">Space Grotesk + IBM Plex Sans</option>
+                      <option value="Space Grotesk + IBM Plex Sans">
+                        Space Grotesk + IBM Plex Sans
+                      </option>
                     </select>
                   </label>
                 </div>
 
                 <div className="space-y-1.5">
-                  <span className="text-xs font-medium text-[#D1D5DB]">
+                  <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
                     UI Reference Upload (Optional · PNG, JPG, WEBP, PDF max 5MB)
                   </span>
-                  <label className="flex items-center justify-between gap-3 p-3 rounded-lg border border-dashed border-white/20 bg-[#14151C] hover:border-white/35 cursor-pointer">
-                    <span className="text-xs text-[#9CA3AF] truncate">
+                  <label className="flex items-center justify-between gap-3 p-3 aegion-btn-shape border border-dashed border-[var(--aegion-platform-border-strong)] bg-[var(--aegion-platform-bg-alt)] hover:border-[var(--aegion-platform-accent)] cursor-pointer">
+                    <span className="text-xs text-[var(--aegion-platform-text-muted)] truncate">
                       {uiReferenceFileName || 'Choose screenshot or design brief PDF...'}
                     </span>
-                    <span className="inline-flex items-center gap-1.5 text-xs text-[#A78BFA] shrink-0">
+                    <span className="inline-flex items-center gap-1.5 text-xs text-[var(--aegion-platform-accent)] shrink-0">
                       <Upload className="w-3.5 h-3.5" />
                       <span>Upload</span>
                     </span>
@@ -695,44 +799,52 @@ export const RegistrationPage: React.FC = () => {
             {step === 5 && (
               <div className="space-y-4">
                 <label className="block space-y-1.5">
-                  <span className="text-xs font-medium text-[#D1D5DB]">Target Project Deadline</span>
+                  <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                    Target Project Deadline
+                  </span>
                   <input
                     type="date"
                     value={projectDeadline}
                     onChange={(e) => setProjectDeadline(e.target.value)}
-                    className="w-full bg-[#181922] border border-white/10 rounded-lg px-3.5 py-2 text-sm text-white"
+                    className={inputClass}
                   />
                 </label>
 
                 <label className="block space-y-1.5">
-                  <span className="text-xs font-medium text-[#D1D5DB]">Additional Features</span>
+                  <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                    Additional Features
+                  </span>
                   <textarea
                     rows={2}
                     value={additionalFeatures}
                     onChange={(e) => setAdditionalFeatures(e.target.value)}
                     placeholder="Specific audit exports, custom approval workflows, reporting..."
-                    className="w-full bg-[#181922] border border-white/10 rounded-lg px-3.5 py-2 text-sm text-white"
+                    className={inputClass}
                   />
                 </label>
 
                 <label className="block space-y-1.5">
-                  <span className="text-xs font-medium text-[#D1D5DB]">Integration Requirements</span>
+                  <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                    Integration Requirements
+                  </span>
                   <textarea
                     rows={2}
                     value={integrationRequirements}
                     onChange={(e) => setIntegrationRequirements(e.target.value)}
                     placeholder="Stripe, Google Workspace, WhatsApp Cloud API, ERP webhooks..."
-                    className="w-full bg-[#181922] border border-white/10 rounded-lg px-3.5 py-2 text-sm text-white"
+                    className={inputClass}
                   />
                 </label>
 
                 <label className="block space-y-1.5">
-                  <span className="text-xs font-medium text-[#D1D5DB]">Additional Comments</span>
+                  <span className="text-xs font-medium text-[var(--aegion-platform-text-secondary)]">
+                    Additional Comments
+                  </span>
                   <textarea
                     rows={2}
                     value={additionalComments}
                     onChange={(e) => setAdditionalComments(e.target.value)}
-                    className="w-full bg-[#181922] border border-white/10 rounded-lg px-3.5 py-2 text-sm text-white"
+                    className={inputClass}
                   />
                 </label>
               </div>
@@ -740,15 +852,24 @@ export const RegistrationPage: React.FC = () => {
 
             {step === 6 && (
               <div className="space-y-4">
-                <div className="p-4 rounded-xl bg-[#14151C] border border-white/10 text-xs text-[#9CA3AF] space-y-1">
-                  <div className="text-white font-semibold">Review Summary</div>
-                  <div>Applicant: {fullName} ({email}) · {companyName}</div>
-                  <div>Project: {projectName} · {applicationTypes.join(', ')}</div>
-                  <div>Stack: {preferredBackendLanguage} / {preferredFrontendFramework} / {preferredDatabase}</div>
+                <div className="p-4 aegion-btn-shape bg-[var(--aegion-platform-bg-alt)] border border-[var(--aegion-platform-border)] text-xs text-[var(--aegion-platform-text-muted)] space-y-1">
+                  <div className="text-[var(--aegion-platform-text)] font-semibold">
+                    Review Summary
+                  </div>
+                  <div>
+                    Applicant: {fullName} ({email}) · {companyName}
+                  </div>
+                  <div>
+                    Project: {projectName} · {applicationTypes.join(', ')}
+                  </div>
+                  <div>
+                    Stack: {preferredBackendLanguage} / {preferredFrontendFramework} /{' '}
+                    {preferredDatabase}
+                  </div>
                 </div>
 
                 <div className="space-y-3">
-                  <label className="flex items-start gap-3 text-xs text-[#D1D5DB] cursor-pointer">
+                  <label className="flex items-start gap-3 text-xs text-[var(--aegion-platform-text-secondary)] cursor-pointer">
                     <input
                       type="checkbox"
                       checked={acceptedTerms}
@@ -758,17 +879,19 @@ export const RegistrationPage: React.FC = () => {
                     <span>I accept the Aegion AI Terms of Service (Required)</span>
                   </label>
 
-                  <label className="flex items-start gap-3 text-xs text-[#D1D5DB] cursor-pointer">
+                  <label className="flex items-start gap-3 text-xs text-[var(--aegion-platform-text-secondary)] cursor-pointer">
                     <input
                       type="checkbox"
                       checked={acceptedPrivacy}
                       onChange={(e) => setAcceptedPrivacy(e.target.checked)}
                       className="mt-0.5"
                     />
-                    <span>I accept the Privacy Policy and server-side audit storage terms (Required)</span>
+                    <span>
+                      I accept the Privacy Policy and server-side audit storage terms (Required)
+                    </span>
                   </label>
 
-                  <label className="flex items-start gap-3 text-xs text-[#D1D5DB] cursor-pointer">
+                  <label className="flex items-start gap-3 text-xs text-[var(--aegion-platform-text-secondary)] cursor-pointer">
                     <input
                       type="checkbox"
                       checked={consentRegistrationNotifications}
@@ -780,15 +903,17 @@ export const RegistrationPage: React.FC = () => {
                     </span>
                   </label>
 
-                  <div className="pt-2 border-t border-white/10">
-                    <label className="flex items-start gap-3 text-xs text-[#9CA3AF] cursor-pointer">
+                  <div className="pt-2 border-t border-[var(--aegion-platform-border)]">
+                    <label className="flex items-start gap-3 text-xs text-[var(--aegion-platform-text-muted)] cursor-pointer">
                       <input
                         type="checkbox"
                         checked={consentMarketing}
                         onChange={(e) => setConsentMarketing(e.target.checked)}
                         className="mt-0.5"
                       />
-                      <span>Optional: Send me Aegion AI product release notes and architecture updates.</span>
+                      <span>
+                        Optional: Send me Aegion AI product release notes and architecture updates.
+                      </span>
                     </label>
                   </div>
                 </div>
@@ -796,12 +921,12 @@ export const RegistrationPage: React.FC = () => {
             )}
 
             {errorMessage && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/25 text-xs text-red-300">
+              <div className="p-3 aegion-btn-shape bg-red-500/10 border border-red-500/25 text-xs text-red-500 dark:text-red-300">
                 {errorMessage}
               </div>
             )}
 
-            <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-3">
+            <div className="pt-3 border-t border-[var(--aegion-platform-border)] flex items-center justify-between gap-3">
               <Button
                 type="button"
                 variant="secondary"

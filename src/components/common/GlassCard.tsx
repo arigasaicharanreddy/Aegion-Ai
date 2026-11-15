@@ -25,8 +25,8 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`aegion-glass rounded-xl transition-colors duration-150 ${padClass} ${
-        onClick ? 'cursor-pointer hover:border-white/20' : ''
+      className={`aegion-glass transition-colors duration-150 ${padClass} ${
+        onClick ? 'cursor-pointer hover:border-[var(--aegion-platform-border-strong)]' : ''
       } ${className}`}
     >
       {children}

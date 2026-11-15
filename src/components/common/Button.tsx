@@ -10,6 +10,7 @@ export const Button: React.FC<ButtonProps> = ({
   variant = 'primary',
   size = 'md',
   className = '',
+  style,
   children,
   ...props
 }) => {
@@ -22,17 +23,27 @@ export const Button: React.FC<ButtonProps> = ({
 
   const variantClass =
     variant === 'primary'
-      ? 'bg-[#7C3AED] hover:bg-[#6D28D9] text-white border border-transparent shadow-sm'
+      ? 'aegion-btn-glow border border-transparent shadow-sm hover:opacity-95'
       : variant === 'secondary'
-      ? 'bg-white/[0.06] hover:bg-white/[0.11] text-[#F3F4F6] border border-white/10'
+      ? 'bg-[var(--aegion-platform-bg-alt)] hover:bg-[var(--aegion-platform-cement)] text-[var(--aegion-platform-text)] border border-[var(--aegion-platform-border-strong)]'
       : variant === 'danger'
-      ? 'bg-red-500/15 hover:bg-red-500/25 text-red-200 border border-red-500/25'
-      : 'bg-transparent hover:bg-white/[0.06] text-[#D1D5DB] hover:text-white border border-transparent';
+      ? 'bg-red-500/15 hover:bg-red-500/25 text-red-500 dark:text-red-200 border border-red-500/30'
+      : 'bg-transparent hover:bg-[var(--aegion-platform-accent-soft)] text-[var(--aegion-platform-text-secondary)] hover:text-[var(--aegion-platform-text)] border border-transparent';
+
+  const primaryStyle =
+    variant === 'primary'
+      ? {
+          backgroundColor: 'var(--aegion-platform-accent)',
+          color: 'var(--aegion-platform-accent-fg)',
+          ...style,
+        }
+      : style;
 
   return (
     <button
       {...props}
-      className={`inline-flex items-center justify-center gap-2 rounded-lg font-medium whitespace-nowrap shrink-0 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6] disabled:opacity-45 disabled:pointer-events-none cursor-pointer ${sizeClass} ${variantClass} ${className}`}
+      style={primaryStyle}
+      className={`inline-flex items-center justify-center gap-2 aegion-btn-shape font-medium whitespace-nowrap shrink-0 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aegion-platform-accent)] disabled:opacity-45 disabled:pointer-events-none cursor-pointer ${sizeClass} ${variantClass} ${className}`}
     >
       {children}
     </button>

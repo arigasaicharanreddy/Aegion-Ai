@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { UserAccount, Workspace } from '../types/auth';
 import { ChangeProposal, ChatMessage } from '../types/chat';
 import { AppCategory, AuditLogEntry, ProgrammingLanguage, Project, SupportTicket } from '../types/project';
@@ -9,8 +9,7 @@ import { APPLICATION_TEMPLATES, SUPPORTED_LANGUAGES } from '../config/appConfig'
 import { getDefaultThemeForCategory, mapAppCategoryToThemeCategory } from '../themes';
 import { loadThemeCustomizations, saveThemeCustomizations } from '../services/themeService';
 import { bumpMinorVersion } from '../services/promptService';
-import { apiClient } from '../services/apiClient';
-import type { RuntimeModeStatus } from '../config/mockDevApi';
+import { apiClient, type RuntimeModeStatus } from '../services/apiClient';
 import {
   clearGoogleAccessToken,
   getGoogleAccessToken,
@@ -24,6 +23,9 @@ export type AppRoute =
   | 'register'
   | 'pending-approval'
   | 'activate'
+  | 'reset-password'
+  | 'admin-reset'
+  | 'verify-email'
   | 'admin-login'
   | 'forgot-password'
   | 'dashboard'
@@ -67,9 +69,9 @@ interface AegionContextValue {
   user: UserAccount | null;
   authInitialized: boolean;
   runtimeMode: RuntimeModeStatus;
-  enterFreeDevPreview: (role?: 'builder' | 'super_admin', destination?: AppRoute) => Promise<void>;
   workspace: Workspace;
   setAuthenticatedUser: (user: UserAccount, destination?: AppRoute) => void;
+  updateCurrentUser: (user: UserAccount) => void;
   logout: () => Promise<void>;
   updateWorkspace: (patch: Partial<Workspace>) => void;
 
@@ -80,8 +82,16 @@ interface AegionContextValue {
   setPendingStatusInfo: (info: PendingStatusContext | null) => void;
   googlePrefill: GooglePrefillProfile | null;
   setGooglePrefill: (profile: GooglePrefillProfile | null) => void;
+  adminPortalEmailPrefill: string | null;
+  setAdminPortalEmailPrefill: (email: string | null) => void;
   activationToken: string | null;
   setActivationToken: (token: string | null) => void;
+  resetToken: string | null;
+  setResetToken: (token: string | null) => void;
+  adminResetToken: string | null;
+  setAdminResetToken: (token: string | null) => void;
+  verifyEmailToken: string | null;
+  setVerifyEmailToken: (token: string | null) => void;
 
   platformCompactMode: boolean;
   setPlatformCompactMode: (compact: boolean) => void;
@@ -165,6 +175,8 @@ const INITIAL_CHAT: Record<string, ChatMessage[]> = {
   ],
 };
 
+const ACTIVE_ROUTE_STORAGE_KEY = 'aegion_active_route_v1';
+
 const PROTECTED_WORKSPACE_ROUTES = new Set<AppRoute>([
   'dashboard',
   'projects',
@@ -185,7 +197,19 @@ export const AegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const params = new URLSearchParams(window.location.search);
       if (params.get('share')) return 'shared-preview';
       if (params.get('activate')) return 'activate';
+      if (params.get('reset')) return 'reset-password';
+      if (params.get('adminReset')) return 'admin-reset';
+      if (params.get('verifyEmail')) return 'verify-email';
       if (params.get('portal') === 'admin') return 'admin-login';
+      try {
+        const hasToken = Boolean(window.sessionStorage.getItem('aegion_session_token_v1'));
+        const saved = window.sessionStorage.getItem(ACTIVE_ROUTE_STORAGE_KEY) as AppRoute | null;
+        if (hasToken && saved && PROTECTED_WORKSPACE_ROUTES.has(saved)) {
+          return saved;
+        }
+      } catch {
+        // ignore storage errors
+      }
     }
     return 'landing';
   });
@@ -197,20 +221,41 @@ export const AegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return null;
   });
 
+  const [resetToken, setResetToken] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      return new URLSearchParams(window.location.search).get('reset');
+    }
+    return null;
+  });
+
+  const [adminResetToken, setAdminResetToken] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      return new URLSearchParams(window.location.search).get('adminReset');
+    }
+    return null;
+  });
+
+  const [verifyEmailToken, setVerifyEmailToken] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      return new URLSearchParams(window.location.search).get('verifyEmail');
+    }
+    return null;
+  });
+
   const [user, setUser] = useState<UserAccount | null>(null);
   const [authInitialized, setAuthInitialized] = useState(false);
   const [runtimeMode, setRuntimeMode] = useState<RuntimeModeStatus>({
-    freeDevMode: true,
     nodeEnv: 'development',
     pythonBackendConfigured: false,
     geminiConfigured: false,
     emailConfigured: false,
     whatsappConfigured: false,
-    superAdminSecretProvided: false,
+    superAdminConfigured: true,
   });
   const [googleAccessToken, setGoogleAccessToken] = useState<string | null>(() => getGoogleAccessToken());
   const [pendingStatusInfo, setPendingStatusInfo] = useState<PendingStatusContext | null>(null);
   const [googlePrefill, setGooglePrefill] = useState<GooglePrefillProfile | null>(null);
+  const [adminPortalEmailPrefill, setAdminPortalEmailPrefill] = useState<string | null>(null);
   const [platformCompactMode, setPlatformCompactMode] = useState(false);
 
   const [workspace, setWorkspace] = useState<Workspace>(DEFAULT_WORKSPACE);
@@ -235,12 +280,70 @@ export const AegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     let active = true;
-    Promise.all([apiClient.getCurrentSession(), apiClient.getRuntimeMode()]).then(([sessionRes, modeRes]) => {
+    Promise.all([
+      apiClient.getCurrentSession(),
+      apiClient.getRuntimeMode().catch(() => null),
+    ]).then(([sessionRes, modeRes]) => {
       if (!active) return;
-      if (sessionRes.authenticated && sessionRes.user) {
-        setUser(sessionRes.user);
+      if (modeRes) {
+        setRuntimeMode(modeRes);
       }
-      setRuntimeMode(modeRes);
+      if (sessionRes.authenticated && sessionRes.user) {
+        const restoredUser = sessionRes.user;
+        setUser(restoredUser);
+        if (restoredUser.workspaceName) {
+          setWorkspace((prev) => ({
+            ...prev,
+            id: restoredUser.workspaceId || prev.id,
+            name: restoredUser.workspaceName,
+            slug: restoredUser.workspaceName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          }));
+        }
+
+        const params =
+          typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+        const hasActionToken = Boolean(
+          params?.get('share') ||
+            params?.get('activate') ||
+            params?.get('reset') ||
+            params?.get('adminReset') ||
+            params?.get('verifyEmail')
+        );
+
+        if (!hasActionToken) {
+          let savedRoute: AppRoute | null = null;
+          try {
+            const raw = sessionStorage.getItem(ACTIVE_ROUTE_STORAGE_KEY) as AppRoute | null;
+            if (raw && PROTECTED_WORKSPACE_ROUTES.has(raw)) {
+              savedRoute = raw;
+            }
+          } catch {
+            savedRoute = null;
+          }
+
+          if (restoredUser.role === 'super_admin') {
+            if (restoredUser.mustChangePassword) {
+              setRoute('admin-login');
+            } else {
+              const target = savedRoute || 'admin';
+              setRoute(target);
+              if (params?.get('portal') === 'admin') {
+                window.history.replaceState({}, '', window.location.pathname);
+              }
+            }
+          } else if (restoredUser.status === 'active') {
+            const target = savedRoute && savedRoute !== 'admin' ? savedRoute : 'dashboard';
+            setRoute(target);
+          }
+        }
+      } else {
+        try {
+          sessionStorage.removeItem(ACTIVE_ROUTE_STORAGE_KEY);
+        } catch {
+          // ignore
+        }
+        setRoute((prev) => (PROTECTED_WORKSPACE_ROUTES.has(prev) ? 'login' : prev));
+      }
       setAuthInitialized(true);
     });
     return () => {
@@ -256,47 +359,61 @@ export const AegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   }, [projects]);
 
-  const notify = (title: string, tone: ToastNotice['tone'] = 'info') => {
+  const notify = useCallback((title: string, tone: ToastNotice['tone'] = 'info') => {
     const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     setToasts((prev) => [...prev, { id, title, tone }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 3600);
-  };
+  }, []);
 
-  const dismissToast = (id: string) => {
+  const dismissToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
+  }, []);
 
-  const navigate = (nextRoute: AppRoute) => {
-    if (PROTECTED_WORKSPACE_ROUTES.has(nextRoute)) {
-      if (!user) {
-        notify('Please sign in or complete approved registration to enter the workspace.', 'info');
-        setRoute('login');
-        return;
-      }
-      if (user.status !== 'active') {
-        notify('Your registration is awaiting Super Admin approval or activation.', 'info');
-        setRoute('pending-approval');
-        return;
-      }
-      if (nextRoute === 'admin') {
-        if (user.role !== 'super_admin') {
-          notify('Super Admin privileges required to access the Admin Console.', 'error');
+  const navigate = useCallback(
+    (nextRoute: AppRoute) => {
+      if (PROTECTED_WORKSPACE_ROUTES.has(nextRoute)) {
+        if (!user) {
+          notify('Please sign in or complete approved registration to enter the workspace.', 'info');
+          setRoute('login');
           return;
         }
-        if (user.mustChangePassword) {
-          notify('Please set a strong permanent Super Admin password first.', 'info');
-          setRoute('admin-login');
+        if (user.status !== 'active') {
+          notify('Your registration is awaiting Super Admin approval or activation.', 'info');
+          setRoute('pending-approval');
           return;
         }
+        if (nextRoute === 'admin') {
+          if (user.role !== 'super_admin') {
+            notify('Super Admin privileges required to access the Admin Console.', 'error');
+            return;
+          }
+          if (user.mustChangePassword) {
+            notify('Please set a strong permanent Super Admin password first.', 'info');
+            setRoute('admin-login');
+            return;
+          }
+        }
+        try {
+          sessionStorage.setItem(ACTIVE_ROUTE_STORAGE_KEY, nextRoute);
+        } catch {
+          // ignore
+        }
+      } else {
+        try {
+          sessionStorage.removeItem(ACTIVE_ROUTE_STORAGE_KEY);
+        } catch {
+          // ignore
+        }
       }
-    }
-    setRoute(nextRoute);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+      setRoute(nextRoute);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    [user, notify]
+  );
 
-  const setAuthenticatedUser = (nextUser: UserAccount, destination?: AppRoute) => {
+  const setAuthenticatedUser = useCallback((nextUser: UserAccount, destination?: AppRoute) => {
     setUser(nextUser);
     if (nextUser.workspaceName) {
       setWorkspace((prev) => ({
@@ -306,45 +423,45 @@ export const AegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         slug: nextUser.workspaceName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       }));
     }
-    if (destination) {
-      setRoute(destination);
-    } else if (nextUser.role === 'super_admin' && !nextUser.mustChangePassword) {
-      setRoute('admin');
-    } else if (nextUser.status === 'active') {
-      setRoute('dashboard');
-    } else {
-      setRoute('pending-approval');
-    }
-  };
+    const targetRoute: AppRoute =
+      destination ||
+      (nextUser.role === 'super_admin' && !nextUser.mustChangePassword
+        ? 'admin'
+        : nextUser.status === 'active'
+        ? 'dashboard'
+        : 'pending-approval');
 
-  const logout = async () => {
+    if (PROTECTED_WORKSPACE_ROUTES.has(targetRoute)) {
+      try {
+        sessionStorage.setItem(ACTIVE_ROUTE_STORAGE_KEY, targetRoute);
+      } catch {
+        // ignore
+      }
+      if (typeof window !== 'undefined' && window.location.search.includes('portal=admin')) {
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+    setRoute(targetRoute);
+  }, []);
+
+  const updateCurrentUser = useCallback((nextUser: UserAccount) => {
+    setUser(nextUser);
+  }, []);
+
+  const logout = useCallback(async () => {
     await apiClient.logout();
     await signOutGoogle();
     clearGoogleAccessToken();
+    try {
+      sessionStorage.removeItem(ACTIVE_ROUTE_STORAGE_KEY);
+    } catch {
+      // ignore
+    }
     setGoogleAccessToken(null);
     setUser(null);
     setRoute('landing');
     notify('Signed out securely');
-  };
-
-  const enterFreeDevPreview = async (
-    role: 'builder' | 'super_admin' = 'builder',
-    destination?: AppRoute
-  ) => {
-    try {
-      const res = await apiClient.enterDevPreviewSession(role);
-      setAuthenticatedUser(
-        res.user,
-        destination || (role === 'super_admin' ? 'admin' : 'builder')
-      );
-      notify(
-        `Entered Free Dev Preview (${role === 'super_admin' ? 'Super Admin' : 'Builder'})`,
-        'success'
-      );
-    } catch (err) {
-      notify(err instanceof Error ? err.message : 'Unable to start dev preview session', 'error');
-    }
-  };
+  }, [notify]);
 
   const connectGoogleWorkspace = async (): Promise<string | null> => {
     const res = await signInWithGooglePopup();
@@ -772,9 +889,9 @@ export const AegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         user,
         authInitialized,
         runtimeMode,
-        enterFreeDevPreview,
         workspace,
         setAuthenticatedUser,
+        updateCurrentUser,
         logout,
         updateWorkspace,
         googleAccessToken,
@@ -783,8 +900,16 @@ export const AegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setPendingStatusInfo,
         googlePrefill,
         setGooglePrefill,
+        adminPortalEmailPrefill,
+        setAdminPortalEmailPrefill,
         activationToken,
         setActivationToken,
+        resetToken,
+        setResetToken,
+        adminResetToken,
+        setAdminResetToken,
+        verifyEmailToken,
+        setVerifyEmailToken,
         platformCompactMode,
         setPlatformCompactMode,
         projects,

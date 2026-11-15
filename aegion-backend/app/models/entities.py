@@ -18,7 +18,24 @@ class UserAccountModel(Base):
     password_hash: Mapped[str | None] = mapped_column(Text, nullable=True)
     must_change_password: Mapped[bool] = mapped_column(Boolean, default=False)
     auth_provider: Mapped[str] = mapped_column(String(32), default="password")
+    platform_theme_preferences: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class PlatformThemeConfigModel(Base):
+    __tablename__ = "platform_theme_config"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default="global")
+    default_public_theme_id: Mapped[str] = mapped_column(String(64), default="ent-obsidian-command")
+    default_user_theme_id: Mapped[str] = mapped_column(String(64), default="ent-obsidian-command")
+    default_admin_theme_id: Mapped[str] = mapped_column(String(64), default="ent-graphite-executive")
+    fallback_theme_id: Mapped[str] = mapped_column(String(64), default="ent-obsidian-command")
+    disabled_theme_ids: Mapped[list] = mapped_column(JSON, default=list)
+    disabled_categories: Mapped[list] = mapped_column(JSON, default=list)
+    animations_globally_allowed: Mapped[bool] = mapped_column(Boolean, default=True)
+    three_d_globally_allowed: Mapped[bool] = mapped_column(Boolean, default=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
 
 class RegistrationRequestModel(Base):

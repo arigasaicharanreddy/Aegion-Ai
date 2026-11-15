@@ -1,8 +1,10 @@
 import React from 'react';
 import { AnimatePresence, MotionConfig } from 'motion/react';
 import { AegionProvider, useAegion } from './context/AegionContext';
+import { PlatformThemeProvider, usePlatformTheme } from './context/PlatformThemeContext';
 import { WorkspaceLayout } from './components/layout/WorkspaceLayout';
 import { ToastContainer } from './components/common/ToastContainer';
+import { AegionChatbot } from './components/common/AegionChatbot';
 import { PageTransition } from './components/common/MotionWrapper';
 import { LandingPage } from './pages/LandingPage';
 import { AuthPage } from './pages/AuthPage';
@@ -30,15 +32,17 @@ const AegionRouter: React.FC = () => {
   if (route === 'landing') return <LandingPage />;
   if (route === 'login') return <AuthPage initialMode="login" />;
   if (route === 'forgot-password') return <AuthPage initialMode="forgot-password" />;
+  if (route === 'reset-password') return <AuthPage initialMode="reset-password" />;
   if (route === 'register') return <RegistrationPage />;
   if (route === 'pending-approval') return <RegistrationStatusPage mode="status" />;
   if (route === 'activate') return <RegistrationStatusPage mode="activate" />;
-  if (route === 'admin-login') return <AdminAuthPage />;
+  if (route === 'verify-email') return <RegistrationStatusPage mode="verify-email" />;
+  if (route === 'admin-login' || route === 'admin-reset') return <AdminAuthPage />;
   if (route === 'shared-preview') return <SharedPreviewPage />;
 
   if (!authInitialized) {
     return (
-      <div className="h-screen w-full bg-[#09090C] flex items-center justify-center text-xs text-[#9CA3AF]">
+      <div className="h-screen w-full bg-[var(--aegion-platform-bg)] flex items-center justify-center text-xs text-[var(--aegion-platform-text-muted)]">
         Verifying workspace session...
       </div>
     );
@@ -87,20 +91,32 @@ const AegionRouter: React.FC = () => {
   return (
     <WorkspaceLayout>
       <AnimatePresence mode="wait">
-        <PageTransition routeKey={route}>{renderWorkspacePage()}</PageTransition>
+        <PageTransition key={route} routeKey={route}>
+          {renderWorkspacePage()}
+        </PageTransition>
       </AnimatePresence>
     </WorkspaceLayout>
   );
 };
 
+const ThemedAppShell: React.FC = () => {
+  const { effectiveMotionMode } = usePlatformTheme();
+  return (
+    <MotionConfig reducedMotion={effectiveMotionMode === 'disabled' ? 'always' : 'user'}>
+      <AegionRouter />
+      <AegionChatbot />
+      <ToastContainer />
+    </MotionConfig>
+  );
+};
+
 export function App() {
   return (
-    <MotionConfig reducedMotion="user">
-      <AegionProvider>
-        <AegionRouter />
-        <ToastContainer />
-      </AegionProvider>
-    </MotionConfig>
+    <AegionProvider>
+      <PlatformThemeProvider>
+        <ThemedAppShell />
+      </PlatformThemeProvider>
+    </AegionProvider>
   );
 }
 

@@ -7,19 +7,34 @@
     --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
 
-    /* Default Aegion AI Platform Dark Obsidian Glass Tokens */
-    --aegion-platform-bg: #09090C;
-    --aegion-platform-surface: rgba(20, 21, 27, 0.78);
-    --aegion-platform-surface-solid: #14151B;
-    --aegion-platform-cement: #1E2029;
-    --aegion-platform-border: rgba(255, 255, 255, 0.08);
-    --aegion-platform-border-strong: rgba(255, 255, 255, 0.14);
-    --aegion-platform-text: #F3F4F6;
-    --aegion-platform-text-muted: #9CA3AF;
+    /* Default Aegion AI Platform Tokens — Obsidian Glass (Recommended) */
+    --aegion-platform-bg: #090A0F;
+    --aegion-platform-bg-alt: #10121B;
+    --aegion-platform-surface: rgba(255, 255, 255, 0.055);
+    --aegion-platform-surface-solid: #131620;
+    --aegion-platform-nav-surface: rgba(13, 15, 23, 0.72);
+    --aegion-platform-cement: #1C2030;
+    --aegion-platform-input-bg: rgba(255, 255, 255, 0.045);
+    --aegion-platform-border: rgba(255, 255, 255, 0.11);
+    --aegion-platform-border-strong: rgba(167, 139, 250, 0.34);
+    --aegion-platform-text: #F4F5F8;
+    --aegion-platform-text-secondary: #D4D8E2;
+    --aegion-platform-text-muted: #98A0B3;
     --aegion-platform-accent: #7C3AED;
-    --aegion-platform-accent-soft: rgba(124, 58, 237, 0.14);
+    --aegion-platform-accent-hover: #6D28D9;
+    --aegion-platform-accent-soft: rgba(124, 58, 237, 0.16);
+    --aegion-platform-accent-fg: #FFFFFF;
+    --aegion-platform-accent-secondary: #38BDF8;
+    --aegion-platform-mesh-primary: rgba(124, 58, 237, 0.16);
+    --aegion-platform-mesh-secondary: rgba(56, 189, 248, 0.11);
+    --aegion-platform-shadow: 0 12px 36px rgba(0, 0, 0, 0.36);
+    --aegion-platform-inner-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.11);
+    --aegion-platform-backdrop: blur(24px) saturate(145%);
+    --aegion-platform-radius: 16px;
+    --aegion-platform-btn-radius: 10px;
+    --aegion-platform-blur: 22px;
 
-    /* Generated Preview App Dynamic Theme Tokens (default: Aurora HR / Cloud Midnight) */
+    /* Generated Preview App Dynamic Theme Tokens (strictly separate from platform themes) */
     --preview-bg: #0B0D1A;
     --preview-surface: #171B30;
     --preview-surface-elevated: #1E2440;
@@ -49,23 +64,117 @@
   code, pre, .font-mono {
     font-family: var(--font-mono);
   }
+
+  ::selection {
+    background: var(--aegion-platform-accent-soft);
+    color: var(--aegion-platform-text);
+  }
 }
 
+/* Platform Surface Treatments driven cleanly by CSS variables & data-surface */
 .aegion-glass {
   background: var(--aegion-platform-surface);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: var(--aegion-platform-backdrop);
+  -webkit-backdrop-filter: var(--aegion-platform-backdrop);
   border: 1px solid var(--aegion-platform-border);
-  box-shadow: 0 12px 36px -12px rgba(0, 0, 0, 0.55);
+  box-shadow: var(--aegion-platform-shadow), var(--aegion-platform-inner-highlight);
+  border-radius: var(--aegion-platform-radius);
+  transition: background-color 220ms ease, border-color 220ms ease, box-shadow 220ms ease, transform 200ms ease;
 }
 
 .aegion-glass-subtle {
-  background: rgba(24, 25, 32, 0.58);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--aegion-platform-bg-alt);
+  backdrop-filter: var(--aegion-platform-backdrop);
+  -webkit-backdrop-filter: var(--aegion-platform-backdrop);
+  border: 1px solid var(--aegion-platform-border);
+  border-radius: var(--aegion-platform-radius);
+}
+
+/* Theme-specific structural signatures */
+:root[data-surface='liquid-glass'] .aegion-glass {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    var(--aegion-platform-surface) 55%,
+    rgba(20, 184, 166, 0.07) 100%
+  );
+}
+
+:root[data-surface='bordered'] .aegion-glass {
+  background: var(--aegion-platform-surface-solid);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-color: var(--aegion-platform-border-strong);
+}
+
+:root[data-surface='elevated'] .aegion-glass {
+  background: var(--aegion-platform-surface-solid);
+}
+
+:root[data-theme-id='prism-fusion'] .aegion-glass {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    var(--aegion-platform-surface) 30%
+  );
+  border-top-color: rgba(129, 140, 248, 0.32);
+}
+
+:root[data-surface='bento'] .aegion-glass {
+  background: var(--aegion-platform-surface-solid);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid var(--aegion-platform-border);
 }
 
+:root[data-surface='bento'] .aegion-glass:hover {
+  border-color: var(--aegion-platform-border-strong);
+}
+
+:root[data-surface='minimal-flat'] .aegion-glass {
+  background: var(--aegion-platform-surface-solid);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+
+:root[data-surface='neon-restrained'] .aegion-glass {
+  border-color: var(--aegion-platform-border);
+}
+
+/* Platform Navigation & Header Surface */
+.aegion-nav-surface {
+  background: var(--aegion-platform-nav-surface);
+  backdrop-filter: var(--aegion-platform-backdrop);
+  -webkit-backdrop-filter: var(--aegion-platform-backdrop);
+}
+
+/* Platform Button Shapes driven by data-btn-style */
+.aegion-btn-shape {
+  border-radius: var(--aegion-platform-btn-radius);
+}
+
+:root[data-btn-style='elevated-glow'] .aegion-btn-glow {
+  box-shadow: 0 8px 24px -6px var(--aegion-platform-accent-soft), 0 0 0 1px var(--aegion-platform-border-strong);
+}
+
+/* Platform Sidebar Styles */
+.aegion-sidebar-surface {
+  background: var(--aegion-platform-nav-surface);
+  border-color: var(--aegion-platform-border);
+}
+
+:root[data-nav-style='sidebar-glass'] .aegion-sidebar-surface {
+  background: var(--aegion-platform-nav-surface);
+  backdrop-filter: var(--aegion-platform-backdrop);
+  -webkit-backdrop-filter: var(--aegion-platform-backdrop);
+}
+
+:root[data-nav-style='sidebar-minimal'] .aegion-sidebar-surface {
+  background: var(--aegion-platform-bg);
+}
+
+/* Generated Preview App Glass Surface (strictly separate from platform tokens) */
 .preview-glass-surface {
   background-color: color-mix(in srgb, var(--preview-surface) calc(var(--preview-glass-opacity) * 100%), transparent);
   backdrop-filter: blur(var(--preview-blur));
@@ -79,10 +188,128 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Custom subtle scrollbars */
+/* Restrained GPU-accelerated Animation Keyframes */
+@keyframes aegionAuroraShift {
+  0% {
+    transform: translate3d(-4%, -3%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(4%, 3%, 0) scale(1.05);
+  }
+  100% {
+    transform: translate3d(-4%, -3%, 0) scale(1);
+  }
+}
+
+@keyframes aegionNeuralPulse {
+  0%, 100% {
+    opacity: 0.65;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: translate3d(1.5%, -1.5%, 0) scale(1.03);
+  }
+}
+
+@keyframes aegionPrismShift {
+  0% {
+    transform: translate3d(-3%, -2%, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(3%, 2%, 0) rotate(4deg);
+  }
+  100% {
+    transform: translate3d(-3%, -2%, 0) rotate(0deg);
+  }
+}
+
+@keyframes aegionSubtleBreath {
+  0%, 100% {
+    opacity: 0.72;
+  }
+  50% {
+    opacity: 0.98;
+  }
+}
+
+@keyframes aegionShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.aegion-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--aegion-platform-surface-solid) 25%,
+    var(--aegion-platform-cement) 50%,
+    var(--aegion-platform-surface-solid) 75%
+  );
+  background-size: 200% 100%;
+  animation: aegionShimmer 2.2s linear infinite;
+}
+
+.aegion-anim-aurora-flow {
+  animation: aegionAuroraShift 18s ease-in-out infinite;
+}
+
+.aegion-anim-neural-pulse {
+  animation: aegionNeuralPulse 14s ease-in-out infinite;
+}
+
+.aegion-anim-prism-shift {
+  animation: aegionPrismShift 16s ease-in-out infinite;
+}
+
+.aegion-anim-subtle-breath {
+  animation: aegionSubtleBreath 10s ease-in-out infinite;
+}
+
+.aegion-grid-pattern {
+  background-image:
+    linear-gradient(to right, var(--aegion-platform-border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--aegion-platform-border) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.aegion-dot-pattern {
+  background-image: radial-gradient(var(--aegion-platform-border-strong) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+
+/* Respect Motion Preferences & Reduced Motion */
+:root[data-motion='minimal'] .aegion-anim-aurora-flow,
+:root[data-motion='minimal'] .aegion-anim-neural-pulse,
+:root[data-motion='minimal'] .aegion-anim-prism-shift {
+  animation-duration: 36s;
+}
+
+:root[data-motion='disabled'] .aegion-anim-aurora-flow,
+:root[data-motion='disabled'] .aegion-anim-neural-pulse,
+:root[data-motion='disabled'] .aegion-anim-prism-shift,
+:root[data-motion='disabled'] .aegion-anim-subtle-breath,
+:root[data-motion='disabled'] .aegion-shimmer {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aegion-anim-aurora-flow,
+  .aegion-anim-neural-pulse,
+  .aegion-anim-prism-shift,
+  .aegion-anim-subtle-breath,
+  .aegion-shimmer {
+    animation: none !important;
+  }
+}
+
+/* Scrollbars adapting dynamically to Dark & Light platform themes */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
@@ -90,10 +317,10 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.14);
-  border-radius: 3px;
+  background: var(--aegion-platform-border-strong);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.24);
+  background: var(--aegion-platform-text-muted);
 }

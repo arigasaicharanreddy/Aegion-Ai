@@ -92,7 +92,7 @@ export const PromptLibraryPage: React.FC = () => {
       key: 'id',
       header: 'Prompt ID',
       render: (p) => (
-        <div className="flex items-center gap-1.5 font-mono text-xs text-[#A78BFA]">
+        <div className="flex items-center gap-1.5 font-mono text-xs text-[var(--aegion-platform-accent)]">
           {p.protected && <Lock className="w-3 h-3 text-amber-400 shrink-0" />}
           <span>{p.id}</span>
         </div>
@@ -103,8 +103,8 @@ export const PromptLibraryPage: React.FC = () => {
       header: 'Name & Layer',
       render: (p) => (
         <div>
-          <div className="font-medium text-white">{p.name}</div>
-          <div className="text-xs text-[#9CA3AF]">{p.layer}</div>
+          <div className="font-medium text-[var(--aegion-platform-text)]">{p.name}</div>
+          <div className="text-xs text-[var(--aegion-platform-text-muted)]">{p.layer}</div>
         </div>
       ),
     },
@@ -112,7 +112,7 @@ export const PromptLibraryPage: React.FC = () => {
       key: 'scope',
       header: 'Language / App',
       render: (p) => (
-        <span className="text-xs text-[#D1D5DB]">
+        <span className="text-xs text-[var(--aegion-platform-text-secondary)]">
           {p.language} · {p.applicationType}
         </span>
       ),
@@ -120,7 +120,11 @@ export const PromptLibraryPage: React.FC = () => {
     {
       key: 'version',
       header: 'Version',
-      render: (p) => <span className="font-mono text-xs tabular-nums text-[#E5E7EB]">{p.version}</span>,
+      render: (p) => (
+        <span className="font-mono text-xs tabular-nums text-[var(--aegion-platform-text)]">
+          {p.version}
+        </span>
+      ),
     },
     {
       key: 'status',
@@ -131,8 +135,8 @@ export const PromptLibraryPage: React.FC = () => {
             p.status === 'Approved'
               ? 'text-emerald-400'
               : p.status === 'Pending Review'
-              ? 'text-amber-300'
-              : 'text-[#9CA3AF]'
+              ? 'text-amber-400'
+              : 'text-[var(--aegion-platform-text-muted)]'
           }`}
         >
           {p.status}
@@ -155,9 +159,11 @@ export const PromptLibraryPage: React.FC = () => {
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white font-display">Prompt Registry</h1>
-          <p className="text-xs text-[#9CA3AF] mt-1">
-            9-layer prompt architecture with version comparison, draft editing, and server-enforced RBAC on protected Core & Security layers.
+          <h1 className="text-2xl font-bold text-[var(--aegion-platform-text)] font-display">
+            Prompt Registry
+          </h1>
+          <p className="text-xs text-[var(--aegion-platform-text-muted)] mt-1">
+            9-layer prompt architecture with version comparison, draft editing, and server-enforced RBAC on protected Core &amp; Security layers.
           </p>
         </div>
 
@@ -168,12 +174,14 @@ export const PromptLibraryPage: React.FC = () => {
       </div>
 
       {/* Layer Filter Tabs */}
-      <div className="flex flex-wrap items-center gap-1 p-1 bg-white/[0.04] border border-white/10 rounded-lg">
+      <div className="flex flex-wrap items-center gap-1 p-1 bg-[var(--aegion-platform-bg-alt)] border border-[var(--aegion-platform-border)] aegion-btn-shape">
         <button
           type="button"
           onClick={() => setLayerFilter('All')}
-          className={`px-3 py-1.5 text-xs font-medium rounded-md whitespace-nowrap cursor-pointer ${
-            layerFilter === 'All' ? 'bg-[#7C3AED] text-white' : 'text-[#9CA3AF] hover:text-white'
+          className={`px-3 py-1.5 text-xs font-medium whitespace-nowrap cursor-pointer aegion-btn-shape ${
+            layerFilter === 'All'
+              ? 'bg-[var(--aegion-platform-accent)] text-[var(--aegion-platform-accent-fg)]'
+              : 'text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)]'
           }`}
         >
           All Layers ({prompts.length})
@@ -183,8 +191,10 @@ export const PromptLibraryPage: React.FC = () => {
             key={layer}
             type="button"
             onClick={() => setLayerFilter(layer)}
-            className={`px-3 py-1.5 text-xs font-medium rounded-md whitespace-nowrap cursor-pointer ${
-              layerFilter === layer ? 'bg-[#7C3AED] text-white' : 'text-[#9CA3AF] hover:text-white'
+            className={`px-3 py-1.5 text-xs font-medium whitespace-nowrap cursor-pointer aegion-btn-shape ${
+              layerFilter === layer
+                ? 'bg-[var(--aegion-platform-accent)] text-[var(--aegion-platform-accent-fg)]'
+                : 'text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)]'
             }`}
           >
             {layer.replace(' Prompts', '')}
@@ -214,7 +224,7 @@ export const PromptLibraryPage: React.FC = () => {
         {selectedPrompt && (
           <div className="space-y-4 text-xs">
             {!canUserAccessPromptContent(selectedPrompt, role) ? (
-              <div className="p-5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-200 space-y-2">
+              <div className="p-5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-400 space-y-2">
                 <div className="flex items-center gap-2 font-semibold">
                   <Lock className="w-4 h-4" />
                   <span>Protected Platform Prompt</span>
@@ -227,8 +237,8 @@ export const PromptLibraryPage: React.FC = () => {
             ) : (
               <>
                 <div className="flex items-center justify-between">
-                  <span className="text-[#9CA3AF]">
-                    Status: <strong className="text-white">{selectedPrompt.status}</strong> · Scope:{' '}
+                  <span className="text-[var(--aegion-platform-text-muted)]">
+                    Status: <strong className="text-[var(--aegion-platform-text)]">{selectedPrompt.status}</strong> · Scope:{' '}
                     {selectedPrompt.language} / {selectedPrompt.applicationType}
                   </span>
                   {selectedPrompt.previousContent && (
@@ -247,18 +257,18 @@ export const PromptLibraryPage: React.FC = () => {
                 {showDiff && selectedPrompt.previousContent ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="p-3 rounded-lg bg-red-500/5 border border-red-500/20 space-y-1.5">
-                      <div className="font-mono text-[11px] text-red-300">
+                      <div className="font-mono text-[11px] text-red-400">
                         Previous ({selectedPrompt.previousVersion || 'v1.0.0'})
                       </div>
-                      <pre className="whitespace-pre-wrap font-mono text-[11px] text-[#D1D5DB]">
+                      <pre className="whitespace-pre-wrap font-mono text-[11px] text-[var(--aegion-platform-text-secondary)]">
                         {selectedPrompt.previousContent}
                       </pre>
                     </div>
                     <div className="p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20 space-y-1.5">
-                      <div className="font-mono text-[11px] text-emerald-300">
+                      <div className="font-mono text-[11px] text-emerald-400">
                         Current ({selectedPrompt.version})
                       </div>
-                      <pre className="whitespace-pre-wrap font-mono text-[11px] text-[#D1D5DB]">
+                      <pre className="whitespace-pre-wrap font-mono text-[11px] text-[var(--aegion-platform-text-secondary)]">
                         {draftContent}
                       </pre>
                     </div>
@@ -266,31 +276,31 @@ export const PromptLibraryPage: React.FC = () => {
                 ) : (
                   <div className="space-y-3">
                     <label className="block space-y-1.5">
-                      <span className="text-[#D1D5DB] font-medium">Prompt Instructions</span>
+                      <span className="text-[var(--aegion-platform-text-secondary)] font-medium">Prompt Instructions</span>
                       <textarea
                         rows={6}
                         value={draftContent}
                         onChange={(e) => setDraftContent(e.target.value)}
-                        className="w-full font-mono text-xs bg-[#0B0C10] border border-white/10 rounded-lg p-3 text-[#E5E7EB] focus:outline-none focus:border-[#8B5CF6]"
+                        className="w-full font-mono text-xs bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] p-3 text-[var(--aegion-platform-text)] focus:outline-none focus:border-[var(--aegion-platform-accent)] aegion-btn-shape"
                       />
                     </label>
                     <label className="block space-y-1.5">
-                      <span className="text-[#D1D5DB] font-medium">Change Description</span>
+                      <span className="text-[var(--aegion-platform-text-secondary)] font-medium">Change Description</span>
                       <input
                         type="text"
                         value={draftChangeDesc}
                         onChange={(e) => setDraftChangeDesc(e.target.value)}
-                        className="w-full bg-[#181922] border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#8B5CF6]"
+                        className="w-full bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] px-3 py-2 text-xs text-[var(--aegion-platform-text)] focus:outline-none focus:border-[var(--aegion-platform-accent)] aegion-btn-shape"
                       />
                     </label>
                   </div>
                 )}
 
                 {selectedPrompt.approvalHistory.length > 0 && (
-                  <div className="space-y-1.5 pt-2 border-t border-white/10">
-                    <div className="font-medium text-white">Approval History</div>
+                  <div className="space-y-1.5 pt-2 border-t border-[var(--aegion-platform-border)]">
+                    <div className="font-medium text-[var(--aegion-platform-text)]">Approval History</div>
                     {selectedPrompt.approvalHistory.map((h, i) => (
-                      <div key={i} className="text-[#9CA3AF] flex justify-between gap-2">
+                      <div key={i} className="text-[var(--aegion-platform-text-muted)] flex justify-between gap-2">
                         <span>
                           {h.version} · {h.note} ({h.approvedBy})
                         </span>
@@ -302,7 +312,7 @@ export const PromptLibraryPage: React.FC = () => {
                   </div>
                 )}
 
-                <div className="flex justify-end gap-2 pt-3 border-t border-white/10">
+                <div className="flex justify-end gap-2 pt-3 border-t border-[var(--aegion-platform-border)]">
                   <Button type="button" variant="secondary" size="sm" onClick={handleSaveDraft}>
                     Save Draft Version
                   </Button>
@@ -326,23 +336,23 @@ export const PromptLibraryPage: React.FC = () => {
       >
         <form onSubmit={handleCreate} className="space-y-4 text-xs">
           <label className="block space-y-1.5">
-            <span className="text-[#D1D5DB] font-medium">Prompt Name</span>
+            <span className="text-[var(--aegion-platform-text-secondary)] font-medium">Prompt Name</span>
             <input
               type="text"
               required
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="e.g. Rust Axum SQLx Repository Pack"
-              className="w-full bg-[#181922] border border-white/10 rounded-lg px-3 py-2 text-white"
+              className="w-full bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] px-3 py-2 text-[var(--aegion-platform-text)] aegion-btn-shape"
             />
           </label>
           <div className="grid grid-cols-2 gap-3">
             <label className="block space-y-1.5">
-              <span className="text-[#D1D5DB] font-medium">Layer</span>
+              <span className="text-[var(--aegion-platform-text-secondary)] font-medium">Layer</span>
               <select
                 value={newLayer}
                 onChange={(e) => setNewLayer(e.target.value as PromptLayer)}
-                className="w-full bg-[#181922] border border-white/10 rounded-lg px-3 py-2 text-white"
+                className="w-full bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] px-3 py-2 text-[var(--aegion-platform-text)] aegion-btn-shape"
               >
                 {PROMPT_LAYERS.map((l) => (
                   <option key={l} value={l}>
@@ -352,11 +362,11 @@ export const PromptLibraryPage: React.FC = () => {
               </select>
             </label>
             <label className="block space-y-1.5">
-              <span className="text-[#D1D5DB] font-medium">Language</span>
+              <span className="text-[var(--aegion-platform-text-secondary)] font-medium">Language</span>
               <select
                 value={newLang}
                 onChange={(e) => setNewLang(e.target.value)}
-                className="w-full bg-[#181922] border border-white/10 rounded-lg px-3 py-2 text-white"
+                className="w-full bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] px-3 py-2 text-[var(--aegion-platform-text)] aegion-btn-shape"
               >
                 <option value="All">All</option>
                 {SUPPORTED_LANGUAGES.map((l) => (
@@ -369,11 +379,11 @@ export const PromptLibraryPage: React.FC = () => {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <label className="block space-y-1.5">
-              <span className="text-[#D1D5DB] font-medium">Application Type</span>
+              <span className="text-[var(--aegion-platform-text-secondary)] font-medium">Application Type</span>
               <select
                 value={newAppType}
                 onChange={(e) => setNewAppType(e.target.value)}
-                className="w-full bg-[#181922] border border-white/10 rounded-lg px-3 py-2 text-white"
+                className="w-full bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] px-3 py-2 text-[var(--aegion-platform-text)] aegion-btn-shape"
               >
                 <option value="All">All</option>
                 {APPLICATION_TEMPLATES.map((t) => (
@@ -384,24 +394,24 @@ export const PromptLibraryPage: React.FC = () => {
               </select>
             </label>
             <label className="block space-y-1.5">
-              <span className="text-[#D1D5DB] font-medium">Module</span>
+              <span className="text-[var(--aegion-platform-text-secondary)] font-medium">Module</span>
               <input
                 type="text"
                 value={newModule}
                 onChange={(e) => setNewModule(e.target.value)}
                 placeholder="e.g. Payroll / Backend"
-                className="w-full bg-[#181922] border border-white/10 rounded-lg px-3 py-2 text-white"
+                className="w-full bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] px-3 py-2 text-[var(--aegion-platform-text)] aegion-btn-shape"
               />
             </label>
           </div>
           <label className="block space-y-1.5">
-            <span className="text-[#D1D5DB] font-medium">Prompt Content</span>
+            <span className="text-[var(--aegion-platform-text-secondary)] font-medium">Prompt Content</span>
             <textarea
               rows={4}
               required
               value={newContent}
               onChange={(e) => setNewContent(e.target.value)}
-              className="w-full font-mono bg-[#0B0C10] border border-white/10 rounded-lg p-3 text-white"
+              className="w-full font-mono bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] p-3 text-[var(--aegion-platform-text)] aegion-btn-shape"
             />
           </label>
           <div className="flex justify-end gap-2">
@@ -415,3 +425,4 @@ export const PromptLibraryPage: React.FC = () => {
     </div>
   );
 };
+

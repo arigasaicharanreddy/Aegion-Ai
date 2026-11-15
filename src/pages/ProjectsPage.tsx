@@ -42,8 +42,8 @@ export const ProjectsPage: React.FC = () => {
       header: 'Project',
       render: (p) => (
         <div>
-          <div className="font-medium text-white">{p.name}</div>
-          <div className="text-xs text-[#9CA3AF]">{p.category}</div>
+          <div className="font-medium text-[var(--aegion-platform-text)]">{p.name}</div>
+          <div className="text-xs text-[var(--aegion-platform-text-muted)]">{p.category}</div>
         </div>
       ),
     },
@@ -51,7 +51,7 @@ export const ProjectsPage: React.FC = () => {
       key: 'stack',
       header: 'Backend Stack',
       render: (p) => (
-        <span className="text-xs text-[#D1D5DB]">
+        <span className="text-xs text-[var(--aegion-platform-text-secondary)]">
           {p.language} / {p.framework}
         </span>
       ),
@@ -59,13 +59,21 @@ export const ProjectsPage: React.FC = () => {
     {
       key: 'version',
       header: 'Version',
-      render: (p) => <span className="font-mono text-xs text-[#A78BFA] tabular-nums">{p.version}</span>,
+      render: (p) => (
+        <span className="font-mono text-xs text-[var(--aegion-platform-accent)] tabular-nums">
+          {p.version}
+        </span>
+      ),
     },
     {
       key: 'modules',
       header: 'Modules',
       align: 'right',
-      render: (p) => <span className="tabular-nums text-xs text-[#D1D5DB]">{p.modules.length}</span>,
+      render: (p) => (
+        <span className="tabular-nums text-xs text-[var(--aegion-platform-text-secondary)]">
+          {p.modules.length}
+        </span>
+      ),
     },
     {
       key: 'actions',
@@ -123,8 +131,10 @@ export const ProjectsPage: React.FC = () => {
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white font-display">Projects & Version History</h1>
-          <p className="text-xs text-[#9CA3AF] mt-1">
+          <h1 className="text-2xl font-bold text-[var(--aegion-platform-text)] font-display">
+            Projects &amp; Version History
+          </h1>
+          <p className="text-xs text-[var(--aegion-platform-text-muted)] mt-1">
             Inspect Project Memory, roll back approved versions, share read-only previews, or export ZIP archives.
           </p>
         </div>
@@ -134,7 +144,7 @@ export const ProjectsPage: React.FC = () => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search projects, category, or language..."
-          className="w-full sm:w-72 bg-[#14151B] border border-white/10 rounded-lg px-3.5 py-2 text-xs text-white placeholder:text-[#6B7280] focus:outline-none focus:border-[#8B5CF6]"
+          className="w-full sm:w-72 bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] px-3.5 py-2 text-xs text-[var(--aegion-platform-text)] placeholder:text-[var(--aegion-platform-text-muted)] focus:outline-none focus:border-[var(--aegion-platform-accent)] aegion-btn-shape"
         />
       </div>
 
@@ -160,10 +170,10 @@ export const ProjectsPage: React.FC = () => {
         {liveInspect && (
           <div className="space-y-6 text-xs">
             {/* Share & Export */}
-            <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10 flex flex-wrap items-center justify-between gap-3">
+            <div className="p-4 rounded-xl bg-[var(--aegion-platform-bg-alt)] border border-[var(--aegion-platform-border)] flex flex-wrap items-center justify-between gap-3">
               <div>
-                <div className="font-semibold text-white">Read-Only Preview Sharing</div>
-                <div className="text-[#9CA3AF] mt-0.5">
+                <div className="font-semibold text-[var(--aegion-platform-text)]">Read-Only Preview Sharing</div>
+                <div className="text-[var(--aegion-platform-text-muted)] mt-0.5">
                   {liveInspect.shareEnabled
                     ? `Enabled · Token ${liveInspect.shareToken}`
                     : 'Private to workspace collaborators'}
@@ -207,19 +217,21 @@ export const ProjectsPage: React.FC = () => {
 
             {/* Version History with Rollback */}
             <div className="space-y-2.5">
-              <div className="font-semibold text-white text-sm font-display">Version Snapshots</div>
-              <div className="divide-y divide-white/[0.06] border border-white/10 rounded-xl bg-black/20">
+              <div className="font-semibold text-[var(--aegion-platform-text)] text-sm font-display">
+                Version Snapshots
+              </div>
+              <div className="divide-y divide-[var(--aegion-platform-border)] border border-[var(--aegion-platform-border)] rounded-xl bg-[var(--aegion-platform-bg-alt)]">
                 {liveInspect.versions
                   .slice()
                   .reverse()
                   .map((v) => (
                     <div key={v.id} className="p-3.5 flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <div className="text-white font-medium">
-                          <span className="font-mono text-[#A78BFA] mr-2">{v.version}</span>
+                        <div className="text-[var(--aegion-platform-text)] font-medium">
+                          <span className="font-mono text-[var(--aegion-platform-accent)] mr-2">{v.version}</span>
                           {v.changeSummary}
                         </div>
-                        <div className="text-[#9CA3AF] mt-0.5">
+                        <div className="text-[var(--aegion-platform-text-muted)] mt-0.5">
                           {v.author} · {new Date(v.createdAt).toLocaleString()} · {v.language}
                         </div>
                       </div>
@@ -243,15 +255,15 @@ export const ProjectsPage: React.FC = () => {
 
             {/* Collaborators */}
             <div className="space-y-3">
-              <div className="font-semibold text-white text-sm font-display">Collaborators</div>
-              <div className="divide-y divide-white/[0.06] border border-white/10 rounded-xl bg-black/20">
+              <div className="font-semibold text-[var(--aegion-platform-text)] text-sm font-display">Collaborators</div>
+              <div className="divide-y divide-[var(--aegion-platform-border)] border border-[var(--aegion-platform-border)] rounded-xl bg-[var(--aegion-platform-bg-alt)]">
                 {liveInspect.collaborators.map((c) => (
                   <div key={c.id} className="px-3.5 py-2.5 flex items-center justify-between">
                     <div>
-                      <span className="text-white font-medium">{c.name}</span>
-                      <span className="text-[#9CA3AF] ml-2">{c.email}</span>
+                      <span className="text-[var(--aegion-platform-text)] font-medium">{c.name}</span>
+                      <span className="text-[var(--aegion-platform-text-muted)] ml-2">{c.email}</span>
                     </div>
-                    <span className="text-[#A78BFA] font-medium">{c.role}</span>
+                    <span className="text-[var(--aegion-platform-accent)] font-medium">{c.role}</span>
                   </div>
                 ))}
               </div>
@@ -262,7 +274,7 @@ export const ProjectsPage: React.FC = () => {
                   value={inviteName}
                   onChange={(e) => setInviteName(e.target.value)}
                   placeholder="Collaborator name"
-                  className="bg-[#181922] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white"
+                  className="bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] px-3 py-1.5 text-xs text-[var(--aegion-platform-text)] aegion-btn-shape"
                 />
                 <input
                   type="email"
@@ -270,12 +282,12 @@ export const ProjectsPage: React.FC = () => {
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   placeholder="colleague@company.com"
-                  className="flex-1 min-w-[180px] bg-[#181922] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white"
+                  className="flex-1 min-w-[180px] bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] px-3 py-1.5 text-xs text-[var(--aegion-platform-text)] aegion-btn-shape"
                 />
                 <select
                   value={inviteRole}
                   onChange={(e) => setInviteRole(e.target.value as 'Editor' | 'Viewer')}
-                  className="bg-[#181922] border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white"
+                  className="bg-[var(--aegion-platform-input-bg)] border border-[var(--aegion-platform-border)] px-2.5 py-1.5 text-xs text-[var(--aegion-platform-text)] aegion-btn-shape"
                 >
                   <option value="Editor">Editor</option>
                   <option value="Viewer">Viewer</option>
@@ -292,3 +304,4 @@ export const ProjectsPage: React.FC = () => {
     </div>
   );
 };
+

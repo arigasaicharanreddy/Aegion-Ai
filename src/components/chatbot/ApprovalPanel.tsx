@@ -20,24 +20,26 @@ export const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
   const activeFile = proposal.files[selectedFileIndex];
 
   return (
-    <div className="mt-3 rounded-xl border border-white/12 bg-[#14151C] overflow-hidden">
-      <div className="px-4 py-3 border-b border-white/10 flex flex-wrap items-center justify-between gap-3">
+    <div className="mt-3 rounded-xl border border-[var(--aegion-platform-border-strong)] bg-[var(--aegion-platform-bg-alt)] overflow-hidden">
+      <div className="px-4 py-3 border-b border-[var(--aegion-platform-border)] flex flex-wrap items-center justify-between gap-3">
         <div>
-          <div className="text-xs font-medium text-[#A78BFA]">Proposed Architecture & Code Change</div>
-          <div className="text-sm font-semibold text-white mt-0.5">{proposal.summary}</div>
+          <div className="text-xs font-medium text-[var(--aegion-platform-accent)]">Proposed Architecture & Code Change</div>
+          <div className="text-sm font-semibold text-[var(--aegion-platform-text)] mt-0.5">{proposal.summary}</div>
         </div>
-        <div className="text-xs text-[#9CA3AF]">
+        <div className="text-xs text-[var(--aegion-platform-text-muted)]">
           {proposal.detectedLanguage} / {proposal.detectedFramework} · {proposal.detectedCategory}
         </div>
       </div>
 
       {/* Sub-tabs */}
-      <div className="px-4 py-2 border-b border-white/[0.06] flex items-center gap-1 bg-black/20">
+      <div className="px-4 py-2 border-b border-[var(--aegion-platform-border)] flex items-center gap-1 bg-[var(--aegion-platform-surface-solid)]">
         <button
           type="button"
           onClick={() => setActiveTab('overview')}
-          className={`px-3 py-1.5 text-xs font-medium rounded-md whitespace-nowrap cursor-pointer transition-colors ${
-            activeTab === 'overview' ? 'bg-white/12 text-white' : 'text-[#9CA3AF] hover:text-white'
+          className={`px-3 py-1.5 text-xs font-medium aegion-btn-shape whitespace-nowrap cursor-pointer transition-colors ${
+            activeTab === 'overview'
+              ? 'bg-[var(--aegion-platform-accent)] text-[var(--aegion-platform-accent-fg)]'
+              : 'text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)]'
           }`}
         >
           Specification ({proposal.modules.length} modules)
@@ -45,8 +47,10 @@ export const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('files')}
-          className={`px-3 py-1.5 text-xs font-medium rounded-md whitespace-nowrap cursor-pointer transition-colors ${
-            activeTab === 'files' ? 'bg-white/12 text-white' : 'text-[#9CA3AF] hover:text-white'
+          className={`px-3 py-1.5 text-xs font-medium aegion-btn-shape whitespace-nowrap cursor-pointer transition-colors ${
+            activeTab === 'files'
+              ? 'bg-[var(--aegion-platform-accent)] text-[var(--aegion-platform-accent-fg)]'
+              : 'text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)]'
           }`}
         >
           Generated Files ({proposal.files.length})
@@ -54,8 +58,10 @@ export const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('schema')}
-          className={`px-3 py-1.5 text-xs font-medium rounded-md whitespace-nowrap cursor-pointer transition-colors ${
-            activeTab === 'schema' ? 'bg-white/12 text-white' : 'text-[#9CA3AF] hover:text-white'
+          className={`px-3 py-1.5 text-xs font-medium aegion-btn-shape whitespace-nowrap cursor-pointer transition-colors ${
+            activeTab === 'schema'
+              ? 'bg-[var(--aegion-platform-accent)] text-[var(--aegion-platform-accent-fg)]'
+              : 'text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)]'
           }`}
         >
           Schema & APIs ({proposal.databaseSchema.length + proposal.apiDefinitions.length})
@@ -66,11 +72,11 @@ export const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <div className="flex items-center gap-1.5 font-medium text-[#E5E7EB]">
-                <Layers className="w-3.5 h-3.5 text-[#A78BFA]" />
+              <div className="flex items-center gap-1.5 font-medium text-[var(--aegion-platform-text)]">
+                <Layers className="w-3.5 h-3.5 text-[var(--aegion-platform-accent)]" />
                 <span>Stack & Modules</span>
               </div>
-              <div className="text-[#9CA3AF] space-y-1">
+              <div className="text-[var(--aegion-platform-text-muted)] space-y-1">
                 <div>Backend: {proposal.detectedLanguage} ({proposal.detectedFramework})</div>
                 <div>Frontend: {proposal.detectedFrontend}</div>
                 <div>Database: {proposal.database} · Auth: {proposal.authMethod}</div>
@@ -80,11 +86,11 @@ export const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center gap-1.5 font-medium text-[#E5E7EB]">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <div className="flex items-center gap-1.5 font-medium text-[var(--aegion-platform-text)]">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
                 <span>Security & Business Rules</span>
               </div>
-              <ul className="space-y-1 text-[#9CA3AF] list-disc pl-4">
+              <ul className="space-y-1 text-[var(--aegion-platform-text-muted)] list-disc pl-4">
                 {proposal.businessRules.slice(0, 3).map((rule, i) => (
                   <li key={i}>{rule}</li>
                 ))}
@@ -99,7 +105,7 @@ export const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
         {activeTab === 'files' && (
           <div className="space-y-3">
             {proposal.files.length === 0 ? (
-              <p className="text-[#9CA3AF]">No files generated in this turn.</p>
+              <p className="text-[var(--aegion-platform-text-muted)]">No files generated in this turn.</p>
             ) : (
               <>
                 <div className="flex flex-wrap gap-1.5">
@@ -108,10 +114,10 @@ export const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
                       key={f.path}
                       type="button"
                       onClick={() => setSelectedFileIndex(idx)}
-                      className={`px-2.5 py-1 rounded-md font-mono text-[11px] flex items-center gap-1.5 cursor-pointer border ${
+                      className={`px-2.5 py-1 aegion-btn-shape font-mono text-[11px] flex items-center gap-1.5 cursor-pointer border transition-colors ${
                         selectedFileIndex === idx
-                          ? 'bg-[#7C3AED]/20 border-[#8B5CF6]/50 text-white'
-                          : 'bg-white/[0.03] border-white/10 text-[#9CA3AF] hover:text-white'
+                          ? 'bg-[var(--aegion-platform-accent-soft)] border-[var(--aegion-platform-border-strong)] text-[var(--aegion-platform-text)]'
+                          : 'bg-[var(--aegion-platform-surface-solid)] border-[var(--aegion-platform-border)] text-[var(--aegion-platform-text-muted)] hover:text-[var(--aegion-platform-text)]'
                       }`}
                     >
                       <FileCode2 className="w-3 h-3" />
@@ -120,12 +126,12 @@ export const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
                   ))}
                 </div>
                 {activeFile && (
-                  <div className="rounded-lg border border-white/10 bg-[#0B0C10] overflow-hidden">
-                    <div className="px-3 py-1.5 border-b border-white/10 text-[11px] text-[#9CA3AF] flex justify-between gap-2">
-                      <span className="font-mono text-[#E5E7EB] truncate">{activeFile.path}</span>
+                  <div className="rounded-lg border border-[var(--aegion-platform-border)] bg-[var(--aegion-platform-bg)] overflow-hidden">
+                    <div className="px-3 py-1.5 border-b border-[var(--aegion-platform-border)] text-[11px] text-[var(--aegion-platform-text-muted)] flex justify-between gap-2">
+                      <span className="font-mono text-[var(--aegion-platform-text)] truncate">{activeFile.path}</span>
                       <span>{activeFile.language}</span>
                     </div>
-                    <pre className="p-3 text-[11px] font-mono text-[#D1D5DB] overflow-x-auto max-h-60 leading-relaxed">
+                    <pre className="p-3 text-[11px] font-mono text-[var(--aegion-platform-text-secondary)] overflow-x-auto max-h-60 leading-relaxed">
                       <code>{activeFile.content}</code>
                     </pre>
                   </div>
@@ -138,14 +144,14 @@ export const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
         {activeTab === 'schema' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <div className="flex items-center gap-1.5 font-medium text-[#E5E7EB]">
-                <Database className="w-3.5 h-3.5 text-[#A78BFA]" />
+              <div className="flex items-center gap-1.5 font-medium text-[var(--aegion-platform-text)]">
+                <Database className="w-3.5 h-3.5 text-[var(--aegion-platform-accent)]" />
                 <span>Database Tables</span>
               </div>
               {proposal.databaseSchema.map((tbl) => (
-                <div key={tbl.name} className="p-2.5 rounded-lg bg-black/30 border border-white/10">
-                  <div className="font-mono text-[#E5E7EB] font-semibold">{tbl.name}</div>
-                  <div className="mt-1 space-y-0.5 text-[11px] text-[#9CA3AF] font-mono">
+                <div key={tbl.name} className="p-2.5 rounded-lg bg-[var(--aegion-platform-surface-solid)] border border-[var(--aegion-platform-border)]">
+                  <div className="font-mono text-[var(--aegion-platform-text)] font-semibold">{tbl.name}</div>
+                  <div className="mt-1 space-y-0.5 text-[11px] text-[var(--aegion-platform-text-muted)] font-mono">
                     {tbl.columns.map((c) => (
                       <div key={c.name}>
                         {c.name}: {c.type} {c.constraints}
@@ -156,17 +162,17 @@ export const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
               ))}
             </div>
             <div className="space-y-2">
-              <div className="font-medium text-[#E5E7EB]">API Endpoints</div>
+              <div className="font-medium text-[var(--aegion-platform-text)]">API Endpoints</div>
               <div className="space-y-1.5">
                 {proposal.apiDefinitions.map((ep, idx) => (
                   <div
                     key={`${ep.method}-${ep.path}-${idx}`}
-                    className="p-2 rounded-lg bg-black/30 border border-white/10"
+                    className="p-2 rounded-lg bg-[var(--aegion-platform-surface-solid)] border border-[var(--aegion-platform-border)]"
                   >
-                    <div className="font-mono text-[11px] text-[#E5E7EB]">
-                      <span className="text-[#A78BFA] font-semibold">{ep.method}</span> {ep.path}
+                    <div className="font-mono text-[11px] text-[var(--aegion-platform-text)]">
+                      <span className="text-[var(--aegion-platform-accent)] font-semibold">{ep.method}</span> {ep.path}
                     </div>
-                    <div className="text-[11px] text-[#9CA3AF] mt-0.5">{ep.summary}</div>
+                    <div className="text-[11px] text-[var(--aegion-platform-text-muted)] mt-0.5">{ep.summary}</div>
                   </div>
                 ))}
               </div>
@@ -176,10 +182,10 @@ export const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
       </div>
 
       {/* Approval Footer */}
-      <div className="px-4 py-3 border-t border-white/10 bg-black/25 flex items-center justify-between gap-3">
+      <div className="px-4 py-3 border-t border-[var(--aegion-platform-border)] bg-[var(--aegion-platform-surface-solid)] flex items-center justify-between gap-3">
         {proposal.status === 'pending' ? (
           <>
-            <span className="text-xs text-[#9CA3AF]">
+            <span className="text-xs text-[var(--aegion-platform-text-muted)]">
               Review generated specification before committing to Project Memory.
             </span>
             <div className="flex items-center gap-2">
@@ -194,11 +200,11 @@ export const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
             </div>
           </>
         ) : proposal.status === 'approved' ? (
-          <span className="text-xs text-emerald-400 font-medium">
+          <span className="text-xs text-emerald-500 font-medium">
             Approved & committed to Project Memory
           </span>
         ) : (
-          <span className="text-xs text-[#9CA3AF]">Proposal discarded</span>
+          <span className="text-xs text-[var(--aegion-platform-text-muted)]">Proposal discarded</span>
         )}
       </div>
     </div>

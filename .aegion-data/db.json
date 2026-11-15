@@ -1,20 +1,27 @@
 {
   "users": [
     {
-      "id": "usr-super-admin-charan",
-      "name": "Charan Ariga",
-      "email": "arigasaicharan@gmail.com",
+      "id": "usr-super-admin-aegionlabs",
+      "name": "Aegion Labs Super Admin",
+      "email": "aegionlabs.in@gmail.com",
       "role": "super_admin",
       "status": "active",
-      "passwordHash": "scrypt$1cacf4d431eae40f43b0ffaa2680c700$233f63fcdee3341a19a5a1195212bbadba67b7ce24dc583d9475089dc6fb2d51164d5e411d9035da90ab12caf7d09aced182d6737007377ac8a131fa1c305efb",
-      "mustChangePassword": true,
+      "passwordHash": "scrypt$02f3d9601cf362e80b48a2a928bfdd48$e3688fd53357c0941647ef630cba93602fb506b03fc10c3191b7642108270319d6e8fc9da40f5a7f1df176d79fe6b831936241670d36ad4f2a2da57ffab91ac8",
+      "mustChangePassword": false,
       "mfaEnabled": false,
       "authProvider": "password",
       "workspaceId": "ws-aegion-core",
       "workspaceName": "Aegion Core Studio",
-      "createdAt": "2026-11-13T01:08:34.558Z",
-      "updatedAt": "2026-11-13T01:08:34.558Z",
-      "lastLoginAt": "2026-11-13T01:18:27.474Z"
+      "createdAt": "2026-11-15T05:18:42.009Z",
+      "updatedAt": "2026-11-15T07:20:05.730Z",
+      "lastLoginAt": "2026-11-15T07:25:51.667Z",
+      "customPasswordSet": false,
+      "platformTheme": {
+        "themeId": "neural-cosmos",
+        "animationMode": "full",
+        "enable3D": false,
+        "updatedAt": "2026-11-15T06:29:18.139Z"
+      }
     },
     {
       "id": "usr-meera-approved",
@@ -29,7 +36,7 @@
       "workspaceName": "Vanguard People Ops",
       "createdAt": "2026-11-08T09:15:00.000Z",
       "updatedAt": "2026-11-09T11:30:00.000Z",
-      "lastLoginAt": "2026-11-13T01:17:50.410Z",
+      "lastLoginAt": "2026-11-15T05:44:24.609Z",
       "registrationId": "REG-2026-1001"
     },
     {
@@ -46,35 +53,123 @@
       "registrationId": "REG-2026-4144",
       "createdAt": "2026-11-13T01:18:27.484Z",
       "updatedAt": "2026-11-13T01:18:27.484Z"
+    },
+    {
+      "id": "usr-1794724158184",
+      "name": "E2E Theme Tester",
+      "email": "e2e.theme.1794724157992@example.com",
+      "role": "builder",
+      "status": "active",
+      "mustChangePassword": false,
+      "mfaEnabled": false,
+      "authProvider": "password",
+      "workspaceId": "ws-reg-2026-8726",
+      "workspaceName": "Test Corp",
+      "phone": "+1 555 010 9988",
+      "companyName": "Test Corp",
+      "jobTitle": "Architect",
+      "country": "United States",
+      "platformTheme": {
+        "themeId": "swiss-precision",
+        "animationMode": "minimal",
+        "enable3D": false,
+        "updatedAt": "2026-11-15T06:29:18.318Z"
+      },
+      "registrationId": "REG-2026-8726",
+      "createdAt": "2026-11-15T06:29:18.184Z",
+      "updatedAt": "2026-11-15T06:29:18.318Z",
+      "passwordHash": "scrypt$124a36f049d698bd73bedb2ef31c7b70$742b9c78b85231e733ae82d2b156793725e7d203daee9d4fef32efedf90efe15f70775f36dca2f504570a8a76b640159a1e0b99ffce1ef0355cbd09129fb0d3b",
+      "lastLoginAt": "2026-11-15T06:31:31.591Z"
     }
   ],
   "sessions": [
     {
-      "tokenHash": "30cda4e380e7a3be6cd7dc112de5e43776616cbe6348db34c5ed12c0896a1ced",
-      "userId": "usr-meera-approved",
-      "email": "meera.nair@vanguard.io",
+      "tokenHash": "0a561cbacec10da80cb08ba64ad4277ca93009c477ea727416bdc709661b9157",
+      "userId": "usr-1794724158184",
+      "email": "e2e.theme.1794724157992@example.com",
       "role": "builder",
-      "isDevPreview": true,
-      "createdAt": "2026-11-13T01:17:50.489Z",
-      "expiresAt": "2026-11-13T13:17:50.489Z"
+      "createdAt": "2026-11-15T06:29:18.282Z",
+      "expiresAt": "2026-11-15T18:29:18.282Z"
     },
     {
-      "tokenHash": "bee5f7c3822f880a3ef4b86da366890b2e8c379be3eed520591e969fc2123b60",
-      "userId": "usr-super-admin-charan",
-      "email": "arigasaicharan@gmail.com",
-      "role": "super_admin",
-      "isDevPreview": true,
-      "createdAt": "2026-11-13T01:17:50.996Z",
-      "expiresAt": "2026-11-13T13:17:50.996Z"
+      "tokenHash": "93779293693f898259161a7965fd533f0e2c9e4f07ec8272e11ceac7db51fe7d",
+      "userId": "usr-1794724158184",
+      "email": "e2e.theme.1794724157992@example.com",
+      "role": "builder",
+      "createdAt": "2026-11-15T06:31:31.594Z",
+      "expiresAt": "2026-11-15T18:31:31.594Z"
     },
     {
-      "tokenHash": "3d783e0a98db3626ce9a9b52252e539176709be47c148db02d4861405cb1d5f6",
-      "userId": "usr-super-admin-charan",
-      "email": "arigasaicharan@gmail.com",
+      "tokenHash": "e12d250062acc067e926069dbeecbde7117496708722b53c08f36763d26fa4f9",
+      "userId": "usr-super-admin-aegionlabs",
+      "email": "aegionlabs.in@gmail.com",
       "role": "super_admin",
-      "isDevPreview": true,
-      "createdAt": "2026-11-13T01:18:27.476Z",
-      "expiresAt": "2026-11-13T13:18:27.476Z"
+      "createdAt": "2026-11-15T07:20:28.105Z",
+      "expiresAt": "2026-11-15T19:20:28.105Z"
+    },
+    {
+      "tokenHash": "e51489762b5f3bf411deecfb168268baa9d0086bea64aaf389ddc8aa627695b7",
+      "userId": "usr-super-admin-aegionlabs",
+      "email": "aegionlabs.in@gmail.com",
+      "role": "super_admin",
+      "createdAt": "2026-11-15T07:21:21.423Z",
+      "expiresAt": "2026-11-15T19:21:21.423Z"
+    },
+    {
+      "tokenHash": "1ef310edd1af06689874f4285aa4f5f4d90787d1f9b5fa4a88e234efb2c3bbfe",
+      "userId": "usr-super-admin-aegionlabs",
+      "email": "aegionlabs.in@gmail.com",
+      "role": "super_admin",
+      "createdAt": "2026-11-15T07:21:45.933Z",
+      "expiresAt": "2026-11-15T19:21:45.933Z"
+    },
+    {
+      "tokenHash": "2a02f09a1099ad453687035bfb641c84360cbc0b80e259ab3ceefbfbe9516c36",
+      "userId": "usr-super-admin-aegionlabs",
+      "email": "aegionlabs.in@gmail.com",
+      "role": "super_admin",
+      "createdAt": "2026-11-15T07:22:12.842Z",
+      "expiresAt": "2026-11-15T19:22:12.842Z"
+    },
+    {
+      "tokenHash": "23831d33fdc2d4d7abf41cedec1c3c41c20de5b8159c6ba6afddb7b319e8a8a1",
+      "userId": "usr-super-admin-aegionlabs",
+      "email": "aegionlabs.in@gmail.com",
+      "role": "super_admin",
+      "createdAt": "2026-11-15T07:22:44.752Z",
+      "expiresAt": "2026-11-15T19:22:44.752Z"
+    },
+    {
+      "tokenHash": "43d9b274124cbf88eb3ff3f6a6c7df9686382fb7211f9acf005ad04b5a1500f3",
+      "userId": "usr-super-admin-aegionlabs",
+      "email": "aegionlabs.in@gmail.com",
+      "role": "super_admin",
+      "createdAt": "2026-11-15T07:24:00.365Z",
+      "expiresAt": "2026-11-15T19:24:00.365Z"
+    },
+    {
+      "tokenHash": "0751f250a59dcdeca4caa1dce8d6b0d7d33a05aec99ba69657d3c74129a92afe",
+      "userId": "usr-super-admin-aegionlabs",
+      "email": "aegionlabs.in@gmail.com",
+      "role": "super_admin",
+      "createdAt": "2026-11-15T07:24:06.632Z",
+      "expiresAt": "2026-11-15T19:24:06.632Z"
+    },
+    {
+      "tokenHash": "5fe75485b041104c00896f56d6450ee695895c45b6c66e6a9203e8b343641191",
+      "userId": "usr-super-admin-aegionlabs",
+      "email": "aegionlabs.in@gmail.com",
+      "role": "super_admin",
+      "createdAt": "2026-11-15T07:24:38.535Z",
+      "expiresAt": "2026-11-15T19:24:38.535Z"
+    },
+    {
+      "tokenHash": "ec7e6f696f09cbfbf4b8c99d91ad7a207fa88efcc36cd0c78a423ad892586cb2",
+      "userId": "usr-super-admin-aegionlabs",
+      "email": "aegionlabs.in@gmail.com",
+      "role": "super_admin",
+      "createdAt": "2026-11-15T07:25:26.035Z",
+      "expiresAt": "2026-11-15T19:25:26.035Z"
     }
   ],
   "oneTimeTokens": [
@@ -85,9 +180,150 @@
       "registrationId": "REG-2026-4144",
       "purpose": "activation",
       "expiresAt": "2026-11-14T01:18:27.484Z"
+    },
+    {
+      "tokenHash": "8b9a3376630528715ede121bbb17c211739ed49fd8049e5fbf88bb41cc45f86b",
+      "userId": "usr-1794724158184",
+      "email": "e2e.theme.1794724157992@example.com",
+      "registrationId": "REG-2026-8726",
+      "purpose": "activation",
+      "expiresAt": "2026-11-16T06:29:18.184Z",
+      "usedAt": "2026-11-15T06:29:18.204Z"
     }
   ],
   "registrations": [
+    {
+      "id": "REG-2026-8726",
+      "submissionDate": "2026-11-15T06:29:18.001Z",
+      "authProvider": "email",
+      "fullName": "E2E Theme Tester",
+      "email": "e2e.theme.1794724157992@example.com",
+      "phone": "+1 555 010 9988",
+      "country": "United States",
+      "companyName": "Test Corp",
+      "companyWebsite": "https://example.com",
+      "jobTitle": "Architect",
+      "applicationTypes": [
+        "SaaS Applications"
+      ],
+      "projectName": "E2E Platform",
+      "projectDescription": "Testing approval workflow and theme isolation.",
+      "businessIndustry": "Software",
+      "expectedUsers": "50 - 150",
+      "requiredModules": [
+        "RBAC"
+      ],
+      "preferredBackendLanguage": "Python",
+      "preferredFrontendFramework": "React + TypeScript",
+      "preferredDatabase": "PostgreSQL",
+      "expectedComplexity": "Moderate",
+      "preferredDeployment": "Docker",
+      "themeOption": "Yes, use Aegion Glassmorphism themes",
+      "themeModePreference": "dark",
+      "selectedThemeId": "saas-nexus-dark",
+      "customAccentColor": "#7C3AED",
+      "typographyPreference": "Manrope + Plus Jakarta Sans",
+      "projectDeadline": "",
+      "additionalFeatures": "",
+      "integrationRequirements": "",
+      "additionalComments": "",
+      "acceptedTerms": true,
+      "acceptedPrivacy": true,
+      "consentRegistrationNotifications": true,
+      "consentMarketing": false,
+      "status": "Approved",
+      "accountStatus": "Active",
+      "sheetsSynced": false,
+      "approvalDate": "2026-11-15T06:29:18.184Z",
+      "approvedBy": "arigasaicharan@gmail.com",
+      "adminComments": "E2E approved"
+    },
+    {
+      "id": "REG-2026-1158",
+      "submissionDate": "2026-11-15T06:28:58.372Z",
+      "authProvider": "email",
+      "fullName": "E2E Theme Tester",
+      "email": "e2e.theme.1794724138367@example.com",
+      "phone": "+1 555 010 9988",
+      "country": "United States",
+      "companyName": "Test Corp",
+      "companyWebsite": "https://example.com",
+      "jobTitle": "Architect",
+      "applicationTypes": [
+        "SaaS Applications"
+      ],
+      "projectName": "E2E Platform",
+      "projectDescription": "Testing approval workflow and theme isolation.",
+      "businessIndustry": "Software",
+      "expectedUsers": "50 - 150",
+      "requiredModules": [
+        "RBAC"
+      ],
+      "preferredBackendLanguage": "Python",
+      "preferredFrontendFramework": "React + TypeScript",
+      "preferredDatabase": "PostgreSQL",
+      "expectedComplexity": "Moderate",
+      "preferredDeployment": "Docker",
+      "themeOption": "Yes, use Aegion Glassmorphism themes",
+      "themeModePreference": "dark",
+      "selectedThemeId": "saas-nexus-dark",
+      "customAccentColor": "#7C3AED",
+      "typographyPreference": "Manrope + Plus Jakarta Sans",
+      "projectDeadline": "",
+      "additionalFeatures": "",
+      "integrationRequirements": "",
+      "additionalComments": "",
+      "acceptedTerms": true,
+      "acceptedPrivacy": true,
+      "consentRegistrationNotifications": true,
+      "consentMarketing": false,
+      "status": "Pending Approval",
+      "accountStatus": "Pending Approval",
+      "sheetsSynced": false
+    },
+    {
+      "id": "REG-2026-4803",
+      "submissionDate": "2026-11-15T06:28:46.775Z",
+      "authProvider": "email",
+      "fullName": "E2E Theme Tester",
+      "email": "e2e.theme.1794724126768@example.com",
+      "phone": "+1 555 010 9988",
+      "country": "United States",
+      "companyName": "Test Corp",
+      "companyWebsite": "https://example.com",
+      "jobTitle": "Architect",
+      "applicationTypes": [
+        "SaaS Applications"
+      ],
+      "projectName": "E2E Platform",
+      "projectDescription": "Testing approval workflow and theme isolation.",
+      "businessIndustry": "Software",
+      "expectedUsers": "50 - 150",
+      "requiredModules": [
+        "RBAC"
+      ],
+      "preferredBackendLanguage": "Python",
+      "preferredFrontendFramework": "React + TypeScript",
+      "preferredDatabase": "PostgreSQL",
+      "expectedComplexity": "Moderate",
+      "preferredDeployment": "Docker",
+      "themeOption": "Yes, use Aegion Glassmorphism themes",
+      "themeModePreference": "dark",
+      "selectedThemeId": "saas-nexus-dark",
+      "customAccentColor": "#7C3AED",
+      "typographyPreference": "Manrope + Plus Jakarta Sans",
+      "projectDeadline": "",
+      "additionalFeatures": "",
+      "integrationRequirements": "",
+      "additionalComments": "",
+      "acceptedTerms": true,
+      "acceptedPrivacy": true,
+      "consentRegistrationNotifications": true,
+      "consentMarketing": false,
+      "status": "Pending Approval",
+      "accountStatus": "Pending Approval",
+      "sheetsSynced": false
+    },
     {
       "id": "REG-2026-4144",
       "submissionDate": "2026-11-13T01:18:27.448Z",
@@ -317,7 +553,109 @@
       "sheetsSynced": false
     }
   ],
+  "contactInquiries": [
+    {
+      "id": "INQ-2026-4401",
+      "submittedAt": "2026-11-15T05:31:20.730Z",
+      "fullName": "Kiran Patel",
+      "email": "prospect+1794720680712@example.com",
+      "company": "Patel Logistics",
+      "phone": "+91 99001 11223",
+      "subject": "Custom Business Application",
+      "category": "General Inquiry",
+      "message": "We want a shipment and warehouse dashboard for 12 hubs.",
+      "status": "New",
+      "adminNotes": "",
+      "emailNotificationStatus": "Skipped (Unconfigured)",
+      "sheetsSynced": false
+    },
+    {
+      "id": "INQ-2026-3001",
+      "submittedAt": "2026-11-12T10:15:00.000Z",
+      "fullName": "Ananya Deshmukh",
+      "email": "ananya@zenithretail.in",
+      "company": "Zenith Retail Group",
+      "phone": "+91 98201 44510",
+      "subject": "Multi-Store Operations & Storefront",
+      "category": "Product Information",
+      "message": "Looking to unify 18 retail stores, vendor billing, and customer portal under one branded workspace.",
+      "status": "New",
+      "adminNotes": "",
+      "emailNotificationStatus": "Sent",
+      "sheetsSynced": false
+    },
+    {
+      "id": "INQ-2026-3002",
+      "submittedAt": "2026-11-13T14:40:00.000Z",
+      "fullName": "Daniel Brooks",
+      "email": "dbrooks@harborclinic.org",
+      "company": "Harbor Health Network",
+      "phone": "+1 415 620 8831",
+      "subject": "Healthcare & Clinic Portal",
+      "category": "Product Information",
+      "message": "Interested in an enterprise demo for patient intake, pharmacy stock alerts, and role-based clinic approvals.",
+      "status": "New",
+      "adminNotes": "",
+      "emailNotificationStatus": "Skipped (Unconfigured)",
+      "sheetsSynced": false
+    }
+  ],
   "approvalHistory": [
+    {
+      "id": "APR-5610",
+      "registrationId": "REG-2026-8726",
+      "email": "e2e.theme.1794724157992@example.com",
+      "previousStatus": "Approved",
+      "newStatus": "Approved",
+      "action": "ACTIVATE",
+      "adminId": "e2e.theme.1794724157992@example.com",
+      "timestamp": "2026-11-15T06:29:18.204Z",
+      "comments": "Account activated and password set via single-use link."
+    },
+    {
+      "id": "APR-5763",
+      "registrationId": "REG-2026-8726",
+      "email": "e2e.theme.1794724157992@example.com",
+      "previousStatus": "Pending Approval",
+      "newStatus": "Approved",
+      "action": "APPROVE",
+      "adminId": "arigasaicharan@gmail.com",
+      "timestamp": "2026-11-15T06:29:18.184Z",
+      "comments": "E2E approved"
+    },
+    {
+      "id": "APR-6377",
+      "registrationId": "REG-2026-8726",
+      "email": "e2e.theme.1794724157992@example.com",
+      "previousStatus": "Submitted",
+      "newStatus": "Pending Approval",
+      "action": "SUBMIT",
+      "adminId": "system",
+      "timestamp": "2026-11-15T06:29:18.001Z",
+      "comments": "Customer registration submitted and queued for Super Admin review."
+    },
+    {
+      "id": "APR-4781",
+      "registrationId": "REG-2026-1158",
+      "email": "e2e.theme.1794724138367@example.com",
+      "previousStatus": "Submitted",
+      "newStatus": "Pending Approval",
+      "action": "SUBMIT",
+      "adminId": "system",
+      "timestamp": "2026-11-15T06:28:58.372Z",
+      "comments": "Customer registration submitted and queued for Super Admin review."
+    },
+    {
+      "id": "APR-3048",
+      "registrationId": "REG-2026-4803",
+      "email": "e2e.theme.1794724126768@example.com",
+      "previousStatus": "Submitted",
+      "newStatus": "Pending Approval",
+      "action": "SUBMIT",
+      "adminId": "system",
+      "timestamp": "2026-11-15T06:28:46.775Z",
+      "comments": "Customer registration submitted and queued for Super Admin review."
+    },
     {
       "id": "APR-3473",
       "registrationId": "REG-2026-4144",
@@ -397,6 +735,163 @@
     }
   ],
   "notificationLogs": [
+    {
+      "registrationId": "REG-2026-8726",
+      "channel": "Email",
+      "recipient": "e2e.theme.1794724157992@example.com",
+      "template": "Account Activated",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "Email delivery requires Google Workspace OAuth authorization or a configured Resend/SendGrid/SMTP provider.",
+      "id": "NTF-46793",
+      "sentTimestamp": "2026-11-15T06:29:18.280Z"
+    },
+    {
+      "registrationId": "REG-2026-8726",
+      "channel": "WhatsApp",
+      "recipient": "+1 555 010 9988",
+      "template": "Registration Approved",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "WhatsApp Business Cloud API credentials or phone number not configured.",
+      "id": "NTF-91296",
+      "sentTimestamp": "2026-11-15T06:29:18.189Z"
+    },
+    {
+      "registrationId": "REG-2026-8726",
+      "channel": "Email",
+      "recipient": "e2e.theme.1794724157992@example.com",
+      "template": "Registration Approved",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "Email delivery requires Google Workspace OAuth authorization or a configured Resend/SendGrid/SMTP provider.",
+      "id": "NTF-95592",
+      "sentTimestamp": "2026-11-15T06:29:18.187Z"
+    },
+    {
+      "registrationId": "REG-2026-8726",
+      "channel": "WhatsApp",
+      "recipient": "+1 555 010 9988",
+      "template": "Registration Received",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "WhatsApp Business Cloud API credentials or phone number not configured.",
+      "id": "NTF-47178",
+      "sentTimestamp": "2026-11-15T06:29:18.010Z"
+    },
+    {
+      "registrationId": "REG-2026-8726",
+      "channel": "Email",
+      "recipient": "e2e.theme.1794724157992@example.com",
+      "template": "Registration Received",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "Email delivery requires Google Workspace OAuth authorization or a configured Resend/SendGrid/SMTP provider.",
+      "id": "NTF-92178",
+      "sentTimestamp": "2026-11-15T06:29:18.009Z"
+    },
+    {
+      "registrationId": "REG-2026-8726",
+      "channel": "Email",
+      "recipient": "arigasaicharan@gmail.com",
+      "template": "New Registration Alert",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "Email delivery requires Google Workspace OAuth authorization or a configured Resend/SendGrid/SMTP provider.",
+      "id": "NTF-55618",
+      "sentTimestamp": "2026-11-15T06:29:18.006Z"
+    },
+    {
+      "registrationId": "REG-2026-8726",
+      "channel": "System",
+      "recipient": "arigasaicharan@gmail.com",
+      "template": "New Registration Alert",
+      "status": "Sent",
+      "id": "NTF-64753",
+      "sentTimestamp": "2026-11-15T06:29:18.004Z"
+    },
+    {
+      "registrationId": "REG-2026-1158",
+      "channel": "WhatsApp",
+      "recipient": "+1 555 010 9988",
+      "template": "Registration Received",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "WhatsApp Business Cloud API credentials or phone number not configured.",
+      "id": "NTF-50386",
+      "sentTimestamp": "2026-11-15T06:28:58.376Z"
+    },
+    {
+      "registrationId": "REG-2026-1158",
+      "channel": "Email",
+      "recipient": "e2e.theme.1794724138367@example.com",
+      "template": "Registration Received",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "Email delivery requires Google Workspace OAuth authorization or a configured Resend/SendGrid/SMTP provider.",
+      "id": "NTF-43331",
+      "sentTimestamp": "2026-11-15T06:28:58.375Z"
+    },
+    {
+      "registrationId": "REG-2026-1158",
+      "channel": "Email",
+      "recipient": "arigasaicharan@gmail.com",
+      "template": "New Registration Alert",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "Email delivery requires Google Workspace OAuth authorization or a configured Resend/SendGrid/SMTP provider.",
+      "id": "NTF-48018",
+      "sentTimestamp": "2026-11-15T06:28:58.374Z"
+    },
+    {
+      "registrationId": "REG-2026-1158",
+      "channel": "System",
+      "recipient": "arigasaicharan@gmail.com",
+      "template": "New Registration Alert",
+      "status": "Sent",
+      "id": "NTF-35060",
+      "sentTimestamp": "2026-11-15T06:28:58.373Z"
+    },
+    {
+      "registrationId": "REG-2026-4803",
+      "channel": "WhatsApp",
+      "recipient": "+1 555 010 9988",
+      "template": "Registration Received",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "WhatsApp Business Cloud API credentials or phone number not configured.",
+      "id": "NTF-97637",
+      "sentTimestamp": "2026-11-15T06:28:46.781Z"
+    },
+    {
+      "registrationId": "REG-2026-4803",
+      "channel": "Email",
+      "recipient": "e2e.theme.1794724126768@example.com",
+      "template": "Registration Received",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "Email delivery requires Google Workspace OAuth authorization or a configured Resend/SendGrid/SMTP provider.",
+      "id": "NTF-72550",
+      "sentTimestamp": "2026-11-15T06:28:46.780Z"
+    },
+    {
+      "registrationId": "REG-2026-4803",
+      "channel": "Email",
+      "recipient": "arigasaicharan@gmail.com",
+      "template": "New Registration Alert",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "Email delivery requires Google Workspace OAuth authorization or a configured Resend/SendGrid/SMTP provider.",
+      "id": "NTF-93792",
+      "sentTimestamp": "2026-11-15T06:28:46.777Z"
+    },
+    {
+      "registrationId": "REG-2026-4803",
+      "channel": "System",
+      "recipient": "arigasaicharan@gmail.com",
+      "template": "New Registration Alert",
+      "status": "Sent",
+      "id": "NTF-88237",
+      "sentTimestamp": "2026-11-15T06:28:46.776Z"
+    },
+    {
+      "registrationId": "INQ-2026-4401",
+      "channel": "Email",
+      "recipient": "aegionlabs.in@gmail.com",
+      "template": "Registration Received",
+      "status": "Skipped (Unconfigured)",
+      "failureReason": "Email optional in free dev mode (connect Google OAuth or configure SMTP/Resend in production).",
+      "id": "NTF-28036",
+      "sentTimestamp": "2026-11-15T05:31:20.740Z"
+    },
     {
       "registrationId": "REG-2026-4144",
       "channel": "WhatsApp",
@@ -544,7 +1039,7 @@
   ],
   "notificationConfig": {
     "emailProvider": "Gmail API",
-    "senderEmail": "arigasaicharan@gmail.com",
+    "senderEmail": "aegionlabs.in@gmail.com",
     "senderName": "Aegion AI Onboarding",
     "emailEnabled": true,
     "whatsappEnabled": false,
@@ -556,7 +1051,9 @@
     "notifyUserOnReceived": true,
     "notifyUserOnApproval": true,
     "sheetsSpreadsheetId": "",
-    "sheetsSpreadsheetUrl": ""
+    "sheetsSpreadsheetUrl": "",
+    "contactSpreadsheetId": "",
+    "contactSpreadsheetUrl": ""
   },
   "whatsappSecrets": {
     "accessToken": "",
@@ -572,6 +1069,591 @@
     "sendgridApiKey": ""
   },
   "auditLogs": [
+    {
+      "id": "AUD-4873",
+      "timestamp": "2026-11-15T07:25:51.679Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "LOGOUT",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-2097",
+      "timestamp": "2026-11-15T07:25:51.674Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "LOGOUT",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-4716",
+      "timestamp": "2026-11-15T07:25:51.667Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-8328",
+      "timestamp": "2026-11-15T07:25:51.606Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-1956",
+      "timestamp": "2026-11-15T07:25:51.551Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "Invalid Credentials",
+      "outcome": "Denied"
+    },
+    {
+      "id": "AUD-1325",
+      "timestamp": "2026-11-15T07:25:51.479Z",
+      "actorEmail": "other@example.com",
+      "actorRole": "guest",
+      "action": "SUPER_ADMIN_LOGIN_ATTEMPT",
+      "target": "Admin Portal",
+      "outcome": "Denied"
+    },
+    {
+      "id": "AUD-3976",
+      "timestamp": "2026-11-15T07:25:26.034Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-9021",
+      "timestamp": "2026-11-15T07:25:24.832Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "LOGOUT",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-6451",
+      "timestamp": "2026-11-15T07:25:10.642Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-7076",
+      "timestamp": "2026-11-15T07:25:10.457Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "Invalid Credentials",
+      "outcome": "Denied"
+    },
+    {
+      "id": "AUD-4434",
+      "timestamp": "2026-11-15T07:24:38.534Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-1006",
+      "timestamp": "2026-11-15T07:24:06.631Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-5016",
+      "timestamp": "2026-11-15T07:24:06.456Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "Invalid Credentials",
+      "outcome": "Denied"
+    },
+    {
+      "id": "AUD-3641",
+      "timestamp": "2026-11-15T07:24:00.364Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-6923",
+      "timestamp": "2026-11-15T07:22:44.751Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-6209",
+      "timestamp": "2026-11-15T07:22:12.841Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-6575",
+      "timestamp": "2026-11-15T07:21:45.932Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-7198",
+      "timestamp": "2026-11-15T07:21:21.421Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-2582",
+      "timestamp": "2026-11-15T07:21:11.097Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "LOGOUT",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-6702",
+      "timestamp": "2026-11-15T07:20:54.258Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-6418",
+      "timestamp": "2026-11-15T07:20:54.060Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "Invalid Credentials",
+      "outcome": "Denied"
+    },
+    {
+      "id": "AUD-5731",
+      "timestamp": "2026-11-15T07:20:28.103Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-3199",
+      "timestamp": "2026-11-15T07:20:27.917Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "Invalid Credentials",
+      "outcome": "Denied"
+    },
+    {
+      "id": "AUD-5862",
+      "timestamp": "2026-11-15T07:20:05.794Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_REPROVISIONED",
+      "target": "Password re-provisioned from environment configuration",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-5180",
+      "timestamp": "2026-11-15T07:18:31.142Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "Invalid Credentials",
+      "outcome": "Denied"
+    },
+    {
+      "id": "AUD-6946",
+      "timestamp": "2026-11-15T07:18:30.636Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "Invalid Credentials",
+      "outcome": "Denied"
+    },
+    {
+      "id": "AUD-1570",
+      "timestamp": "2026-11-15T07:14:49.955Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-3766",
+      "timestamp": "2026-11-15T07:14:20.097Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-9747",
+      "timestamp": "2026-11-15T06:59:22.172Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "LOGOUT",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-1332",
+      "timestamp": "2026-11-15T06:59:22.148Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-4465",
+      "timestamp": "2026-11-15T06:59:22.050Z",
+      "actorEmail": "arigasaicharan@gmail.com",
+      "actorRole": "guest",
+      "action": "SUPER_ADMIN_LOGIN_ATTEMPT",
+      "target": "Admin Portal",
+      "outcome": "Denied"
+    },
+    {
+      "id": "AUD-7288",
+      "timestamp": "2026-11-15T06:59:15.330Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "PROVISION_SUPER_ADMIN_IDENTITY",
+      "target": "Provisioned sole Super Admin account aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-3323",
+      "timestamp": "2026-11-15T06:31:31.592Z",
+      "actorEmail": "e2e.theme.1794724157992@example.com",
+      "actorRole": "builder",
+      "action": "BUILDER_LOGIN",
+      "target": "e2e.theme.1794724157992@example.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-5787",
+      "timestamp": "2026-11-15T06:29:18.318Z",
+      "actorEmail": "e2e.theme.1794724157992@example.com",
+      "actorRole": "builder",
+      "action": "UPDATE_PLATFORM_THEME",
+      "target": "min-swiss-precision (minimal, 3D:false)",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-5085",
+      "timestamp": "2026-11-15T06:29:18.310Z",
+      "actorEmail": "e2e.theme.1794724157992@example.com",
+      "actorRole": "builder",
+      "action": "UPDATE_PLATFORM_THEME",
+      "target": "ent-obsidian-command (balanced, 3D:true)",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-8508",
+      "timestamp": "2026-11-15T06:29:18.299Z",
+      "actorEmail": "e2e.theme.1794724157992@example.com",
+      "actorRole": "builder",
+      "action": "ADMIN_ACCESS_DENIED",
+      "target": "/api/v1/admin/contacts/export?format=csv",
+      "outcome": "Denied"
+    },
+    {
+      "id": "AUD-4729",
+      "timestamp": "2026-11-15T06:29:18.290Z",
+      "actorEmail": "e2e.theme.1794724157992@example.com",
+      "actorRole": "builder",
+      "action": "ADMIN_ACCESS_DENIED",
+      "target": "/api/v1/admin/platform-themes/config",
+      "outcome": "Denied"
+    },
+    {
+      "id": "AUD-1034",
+      "timestamp": "2026-11-15T06:29:18.278Z",
+      "actorEmail": "e2e.theme.1794724157992@example.com",
+      "actorRole": "builder",
+      "action": "ACTIVATE_ACCOUNT",
+      "target": "e2e.theme.1794724157992@example.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-9549",
+      "timestamp": "2026-11-15T06:29:18.184Z",
+      "actorEmail": "arigasaicharan@gmail.com",
+      "actorRole": "super_admin",
+      "action": "APPROVE_REGISTRATION",
+      "target": "REG-2026-8726 (e2e.theme.1794724157992@example.com)",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-7215",
+      "timestamp": "2026-11-15T06:29:18.173Z",
+      "actorEmail": "arigasaicharan@gmail.com",
+      "actorRole": "super_admin",
+      "action": "UPDATE_PLATFORM_THEME_GOVERNANCE",
+      "target": "Public:ent-obsidian-command, User:ent-obsidian-command, Disabled:1",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-3336",
+      "timestamp": "2026-11-15T06:29:18.139Z",
+      "actorEmail": "arigasaicharan@gmail.com",
+      "actorRole": "super_admin",
+      "action": "UPDATE_PLATFORM_THEME",
+      "target": "ai-neural-cosmos (full, 3D:true)",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-2273",
+      "timestamp": "2026-11-15T06:29:18.114Z",
+      "actorEmail": "arigasaicharan@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "arigasaicharan@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-7789",
+      "timestamp": "2026-11-15T06:29:18.001Z",
+      "actorEmail": "e2e.theme.1794724157992@example.com",
+      "actorRole": "guest",
+      "action": "SUBMIT_REGISTRATION",
+      "target": "REG-2026-8726 (E2E Platform)",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-3928",
+      "timestamp": "2026-11-15T06:28:58.482Z",
+      "actorEmail": "arigasaicharan@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "arigasaicharan@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-7147",
+      "timestamp": "2026-11-15T06:28:58.372Z",
+      "actorEmail": "e2e.theme.1794724138367@example.com",
+      "actorRole": "guest",
+      "action": "SUBMIT_REGISTRATION",
+      "target": "REG-2026-1158 (E2E Platform)",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-9001",
+      "timestamp": "2026-11-15T06:28:46.775Z",
+      "actorEmail": "e2e.theme.1794724126768@example.com",
+      "actorRole": "guest",
+      "action": "SUBMIT_REGISTRATION",
+      "target": "REG-2026-4803 (E2E Platform)",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-8799",
+      "timestamp": "2026-11-15T06:06:28.342Z",
+      "actorEmail": "arigasaicharan@gmail.com",
+      "actorRole": "super_admin",
+      "action": "RESTORE_SUPER_ADMIN_IDENTITY",
+      "target": "Restored sole Super Admin account to arigasaicharan@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-5467",
+      "timestamp": "2026-11-15T05:48:42.913Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-1310",
+      "timestamp": "2026-11-15T05:48:42.826Z",
+      "actorEmail": "arigasaicharan@gmail.com",
+      "actorRole": "guest",
+      "action": "SUPER_ADMIN_LOGIN_ATTEMPT",
+      "target": "Admin Portal",
+      "outcome": "Denied"
+    },
+    {
+      "id": "AUD-8239",
+      "timestamp": "2026-11-15T05:44:33.184Z",
+      "actorEmail": "meera.nair@vanguard.io",
+      "actorRole": "builder",
+      "action": "LOGOUT",
+      "target": "meera.nair@vanguard.io",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-4187",
+      "timestamp": "2026-11-15T05:44:24.609Z",
+      "actorEmail": "meera.nair@vanguard.io",
+      "actorRole": "builder",
+      "action": "DEV_PREVIEW_SESSION",
+      "target": "Free Dev Mode (builder)",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-4073",
+      "timestamp": "2026-11-15T05:31:20.881Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "EXPORT_CONTACTS_CSV",
+      "target": "3 contact records",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-9699",
+      "timestamp": "2026-11-15T05:31:20.866Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-8942",
+      "timestamp": "2026-11-15T05:31:20.769Z",
+      "actorEmail": "meera.nair@vanguard.io",
+      "actorRole": "builder",
+      "action": "ADMIN_ACCESS_DENIED",
+      "target": "/api/v1/admin/contacts/export",
+      "outcome": "Denied"
+    },
+    {
+      "id": "AUD-7936",
+      "timestamp": "2026-11-15T05:31:20.762Z",
+      "actorEmail": "meera.nair@vanguard.io",
+      "actorRole": "builder",
+      "action": "DEV_PREVIEW_SESSION",
+      "target": "Free Dev Mode (builder)",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-2712",
+      "timestamp": "2026-11-15T05:31:20.730Z",
+      "actorEmail": "prospect+1794720680712@example.com",
+      "actorRole": "guest",
+      "action": "SUBMIT_CONTACT_INQUIRY",
+      "target": "INQ-2026-4401 (Custom Business Application)",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-1649",
+      "timestamp": "2026-11-15T05:19:53.735Z",
+      "actorEmail": "meera.nair@vanguard.io",
+      "actorRole": "builder",
+      "action": "ADMIN_ACCESS_DENIED",
+      "target": "/api/v1/admin/overview",
+      "outcome": "Denied"
+    },
+    {
+      "id": "AUD-5519",
+      "timestamp": "2026-11-15T05:19:53.672Z",
+      "actorEmail": "meera.nair@vanguard.io",
+      "actorRole": "builder",
+      "action": "DEV_PREVIEW_SESSION",
+      "target": "Free Dev Mode (builder)",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-6399",
+      "timestamp": "2026-11-15T05:19:53.520Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "aegionlabs.in@gmail.com",
+      "outcome": "Allowed"
+    },
+    {
+      "id": "AUD-8123",
+      "timestamp": "2026-11-15T05:19:53.213Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "Invalid Credentials",
+      "outcome": "Denied"
+    },
+    {
+      "id": "AUD-1799",
+      "timestamp": "2026-11-15T05:19:53.120Z",
+      "actorEmail": "arigasaicharan@gmail.com",
+      "actorRole": "guest",
+      "action": "SUPER_ADMIN_LOGIN_ATTEMPT",
+      "target": "Admin Portal",
+      "outcome": "Denied"
+    },
+    {
+      "id": "AUD-9618",
+      "timestamp": "2026-11-15T05:18:51.825Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "Invalid Credentials",
+      "outcome": "Denied"
+    },
+    {
+      "id": "AUD-2345",
+      "timestamp": "2026-11-15T05:18:51.479Z",
+      "actorEmail": "aegionlabs.in@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "Invalid Credentials",
+      "outcome": "Denied"
+    },
+    {
+      "id": "AUD-2150",
+      "timestamp": "2026-11-15T05:18:51.396Z",
+      "actorEmail": "arigasaicharan@gmail.com",
+      "actorRole": "guest",
+      "action": "SUPER_ADMIN_LOGIN_ATTEMPT",
+      "target": "Admin Portal",
+      "outcome": "Denied"
+    },
+    {
+      "id": "AUD-6973",
+      "timestamp": "2026-11-13T02:18:57.475Z",
+      "actorEmail": "arigasaicharan@gmail.com",
+      "actorRole": "super_admin",
+      "action": "SUPER_ADMIN_LOGIN",
+      "target": "Invalid Credentials",
+      "outcome": "Denied"
+    },
     {
       "id": "AUD-7524",
       "timestamp": "2026-11-13T01:18:27.484Z",
@@ -681,5 +1763,17 @@
     "failedGenerations": 1,
     "tokensConsumed": 185400,
     "activeProjects": 6
+  },
+  "platformThemeConfig": {
+    "defaultPublicThemeId": "obsidian-glass",
+    "defaultUserThemeId": "obsidian-glass",
+    "defaultAdminThemeId": "graphite-executive",
+    "fallbackThemeId": "obsidian-glass",
+    "disabledThemeIds": [],
+    "disabledCategories": [],
+    "animationsGloballyAllowed": true,
+    "threeDGloballyAllowed": false,
+    "updatedAt": "2026-11-15T06:29:18.173Z",
+    "updatedBy": "arigasaicharan@gmail.com"
   }
 }
